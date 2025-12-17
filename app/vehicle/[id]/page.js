@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { use } from 'react';
 import Link from 'next/link';
-
+import Image from 'next/image';
 export default function VehiclePage({ params }) {
   const { id } = use(params);
 
@@ -82,26 +82,10 @@ export default function VehiclePage({ params }) {
     }
   };
 
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-
-//     // Send POST request to your API route
-//     const res = await fetch("/api/order", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify(orders), // send data
-//     });
-
-//     const data = await res.json();
-//     setResponse(data.message);
-//   };
-
-
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+
+        {/*Navbar for Vehicle page*/ }
       <nav className="bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -115,7 +99,7 @@ export default function VehiclePage({ params }) {
               </Link>
             </div>
             <div className="text-white">
-              <h2 className="text-xl font-semibold">Vehicle {id} Management</h2>
+              <h2 className="text-xl font-semibold"> {id}</h2>
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-white text-sm">
@@ -132,9 +116,10 @@ export default function VehiclePage({ params }) {
           <div className="bg-gradient-to-br from-white to-blue-50 shadow-xl rounded-xl p-6 border border-blue-200">
             <div className="flex items-center mb-6">
               <div className="bg-blue-500 text-white p-3 rounded-full mr-4">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {/* <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                </svg>
+                </svg> */}
+                <Image src="/rupees.png" alt="Fuel Icon" width={24} height={24} />
               </div>
               <h2 className="text-2xl font-bold text-gray-800">Expenses</h2>
             </div>
@@ -147,7 +132,7 @@ export default function VehiclePage({ params }) {
               <div className="flex gap-2 mb-4">
                 <input
                   type="number"
-                  placeholder="Amount ($)"
+                  placeholder="Amount (₹)"
                   value={fuelAmount}
                   onChange={(e) => setFuelAmount(e.target.value)}
                   className="flex-1 p-3 border-2 border-green-300 rounded-lg focus:border-green-500 focus:outline-none transition-colors placeholder-green-400 text-gray-800"
@@ -156,11 +141,14 @@ export default function VehiclePage({ params }) {
                   type="date"
                   value={fuelDate}
                   onChange={(e) => setFuelDate(e.target.value)}
-                  className="p-3 border-2 border-green-300 rounded-lg focus:border-green-500 focus:outline-none transition-colors placeholder-green-400 text-gray-800"
+                  className="p-3 border-2 border-green-300 rounded-lg focus:border-green-500 focus:outline-none transition-colors placeholder-green-400 text-green-700"
                 />
-                <button onClick={addFuelExpense} className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all transform hover:scale-105 shadow-md">
+                <div>
+
+                <button onClick={addFuelExpense} className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all transform hover:scale-105 shadow-md">
                   Add Fuel
                 </button>
+                </div>
               </div>
               <div className="space-y-2 max-h-40 overflow-y-auto">
                 {fuelExpenses.map((expense, index) => (
