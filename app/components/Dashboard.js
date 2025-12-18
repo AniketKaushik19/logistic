@@ -1,16 +1,28 @@
+"use client"
+import { useEffect, useState } from "react";
 import { Navbar } from "./Navbar";
 import VehicleCard from "./VehicleCard";
+import Link from "next/link";
 
-const vehicles = [
-  { id: "UP32AB4040", name: 'Truck 1' },
-  { id: "UP32AB4020", name: 'Truck 2' },
-  { id: "UP32AB4030", name: 'Van 1' },
-  { id: "UP32AB4050", name: 'Van 2' },
-  { id: "UP32AB4060", name: 'Pickup 1' },
-  { id: "UP32AB4070", name: 'Pickup 2' },
-];  
-    
+ 
 export default function Dashboard() {
+  const [vehicles, setVehicles] = useState([]);
+  const fetchVehicles = async () => {
+      try {
+        const response = await fetch('/api/vehicle');
+        const data = await response.json();
+        console.log(data);
+       setVehicles(data)
+        // Update state with fetched vehicles if implementing dynamic data
+      } catch (error) {
+        console.error('Error fetching vehicles:', error);
+      }
+ }
+  useEffect(() => {
+    // Fetch vehicle data from API if needed  
+    fetchVehicles()
+  }, []);
+  console.log(vehicles);
     return(
         <>
         <Navbar/>
@@ -19,9 +31,14 @@ export default function Dashboard() {
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Fleet Overview</h1>
           <p className="text-gray-600">Monitor and manage your logistic vehicles</p>
         </div>
+        <button className="bg-purple-500 rounded-2xl p-3 mb-5 font-semibold hover:bg-purple-600 hover:cursor-pointer">
+          <Link href={`/AddVehicle`}>
+             Add vehichle
+          </Link>
+        </button>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {vehicles.map((vehicle) => (
-            <VehicleCard key={vehicle.id} id={vehicle.id} name={vehicle.name} />
+            <VehicleCard key={vehicle.truckNumber}  name={vehicle.truckNumber}  capacity={vehicle.capacity} registrationYear={vehicle.registrationYear} driverName={vehicle.driverName}/>
           ))}
         </div>
       </main>

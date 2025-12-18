@@ -29,20 +29,75 @@ export default function VehiclePage({ params }) {
     }
   }, [response]);
 
-  const addFuelExpense = () => {
+  const addFuelExpense = async() => {
     if (fuelAmount && fuelDate) {
-      setFuelExpenses([...fuelExpenses, { amount: fuelAmount, date: fuelDate }]);
-      setFuelAmount('');
-      setFuelDate('');
+      const newExpense = {
+        fuelAmount: fuelAmount,
+        date: fuelDate,
+        vehicleId: id,
+        createdAt: new Date().toISOString()
+      };
+
+      try {
+        // Send POST request to your API route
+        const res = await fetch("/api/expense", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newExpense), // send the new order data
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          setResponse('Expense saved successfully!');
+          setFuelAmount('');
+          setFuelDate('');
+        } else {
+          setResponse(`Error: ${data.error}`);
+        }
+      } catch (error) {
+        console.error('Error saving fuel expense:', error);
+        setResponse('Error saving fuel expense. Please try again.');
+      }
     }
   };
 
-  const addOtherExpense = () => {
+  const addOtherExpense = async () => {
     if (otherAmount && otherDescription && otherDate) {
-      setOtherExpenses([...otherExpenses, { amount: otherAmount, description: otherDescription, date: otherDate }]);
-      setOtherAmount('');
-      setOtherDescription('');
-      setOtherDate('');
+      const newOtherExpense={
+        otherAmount:otherAmount,
+        description:otherDescription,
+        date:otherDate,
+        vehicleId:id,
+        createdAt:new Date().toISOString()
+      }
+      try {
+        // Send POST request to your API route
+        const res = await fetch("/api/expense", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newOtherExpense), // send the new other expense data
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          setOtherExpenses([...otherExpenses, newOtherExpense]);
+          setResponse('Other expense saved successfully!');
+          setOtherAmount('');
+          setOtherDescription('');
+          setOtherDate('');
+        } else {
+          setResponse(`Error: ${data.error}`);
+        }
+      } catch (error) {
+        console.error('Error saving other expense:', error);
+        setResponse('Error saving ot. Please try again.');
+      }
     }
   };
 
@@ -89,9 +144,9 @@ export default function VehiclePage({ params }) {
       <nav className="bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="text-white text-2xl font-bold">🚛 LogisticPro</div>
-              <Link href="/" className="text-white hover:text-blue-200 transition-colors flex items-center">
+            <div className="flex items-center space-x-3">
+              <div className="text-white text-xl font-bold">🚛 Aniket Logistic</div>
+              <Link href="/" className="text-white hover:text-orange-400 transition-colors flex items-center">
                 <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
@@ -154,7 +209,7 @@ export default function VehiclePage({ params }) {
                 {fuelExpenses.map((expense, index) => (
                   <div key={index} className="bg-white p-3 rounded-md shadow-sm border border-green-100">
                     <div className="flex justify-between items-center">
-                      <span className="font-medium text-green-700">${expense.amount}</span>
+                      <span className="font-medium text-green-700">₹{expense.amount}</span>
                       <span className="text-sm text-gray-500">{expense.date}</span>
                     </div>
                   </div>
@@ -196,7 +251,7 @@ export default function VehiclePage({ params }) {
                 {otherExpenses.map((expense, index) => (
                   <div key={index} className="bg-white p-3 rounded-md shadow-sm border border-orange-100">
                     <div className="flex justify-between items-center">
-                      <span className="font-medium text-orange-700">${expense.amount}</span>
+                      <span className="font-medium text-orange-700">${expense.otherExpenses}</span>
                       <span className="text-sm text-gray-500">{expense.description}</span>
                     </div>
                     <div className="text-xs text-gray-400 mt-1">{expense.date}</div>
