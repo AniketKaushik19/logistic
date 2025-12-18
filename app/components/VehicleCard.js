@@ -14,7 +14,7 @@ export default function VehicleCard({ id, name, capacity, registrationYear, driv
         <button className="bg-linear-to-r from-green-500 to-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-green-600 hover:to-blue-600 transition-all">
           Track Vehicle
         </button>
-        <Link href={`/vehicle/${id}`}>
+        <Link href={`/vehicle/${name}`}>
           <button className="bg-linear-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-all">
             Manage Vehicle
           </button>
