@@ -16,7 +16,7 @@ async function getBase64FromPublicImage(path) {
 
 /* ================= LOGO ================= */
 function addLogo(doc, base64) {
-  doc.addImage(base64, "JPEG", 12, 10, 18, 18);
+  doc.addImage(base64, "PNG", 12, 10, 18, 18);
 }
 
 /* ================= CHECKBOX ================= */
@@ -33,7 +33,7 @@ export async function generatePDF(cn, payload) {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
 
-  const logoBase64 = await getBase64FromPublicImage("/logo.jpeg");
+  const logoBase64 = await getBase64FromPublicImage("/logo.png");
 
   /* ================= HEADER ================= */
   addLogo(doc, logoBase64);
@@ -46,9 +46,10 @@ export async function generatePDF(cn, payload) {
   doc.setFontSize(9);
   doc.setTextColor(0);
 
-  doc.text("7A, Uddh Vihar Colony Phase-2 Kowal Road,", 15, 30);
-  doc.text("Chinhat, Lucknow - 227105", 15, 35);
+  doc.text("7A, Buddh Vihar Colony Kotwali Road,", 15, 30);
+  doc.text("Chinhat, Lucknow - 226028", 15, 35);
   doc.text("Mob.: 7388533786", 15, 40);
+  doc.text("Mob.: 7905093236", 15, 44);
 
   doc.text(`CONSIGNMENT NOTE No.: ${cn}`, pageWidth - 15, 30, { align: "right" });
   doc.text("PAN No.: CKTPK5713K", pageWidth - 15, 35, { align: "right" });
