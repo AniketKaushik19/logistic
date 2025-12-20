@@ -1,75 +1,104 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
+/* ================= PUBLIC IMAGE → BASE64 ================= */
+async function getBase64FromPublicImage(path) {
+  const res = await fetch(path);
+  const blob = await res.blob();
+
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onloadend = () =>
+      resolve(reader.result.split(",")[1]); // remove prefix
+    reader.readAsDataURL(blob);
+  });
+}
+
+/* ================= LOGO ================= */
+function addLogo(doc, base64) {
+  doc.addImage(base64, "JPEG", 12, 10, 18, 18);
+}
+
+/* ================= CHECKBOX ================= */
+function checkbox(doc, x, y, checked) {
+  doc.rect(x, y, 4, 4);
+  if (checked) {
+    doc.line(x + 0.8, y + 2, x + 1.8, y + 3);
+    doc.line(x + 1.8, y + 3, x + 3.5, y + 0.5);
+  }
+}
+
+/* ================= MAIN ================= */
 export async function generatePDF(cn, payload) {
   const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
 
-  // 🔴 Header
+  const logoBase64 = await getBase64FromPublicImage("/logo.jpeg");
+
+  /* ================= HEADER ================= */
+  addLogo(doc, logoBase64);
+
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
-  doc.setTextColor(255, 0, 0);
-  doc.text("ANIKET LOGISTIC", doc.internal.pageSize.getWidth() / 2, 20, { align: "center" });
+  doc.setTextColor(200, 0, 0);
+  doc.text("ANIKET LOGISTIC", pageWidth / 2 + 5, 20, { align: "center" });
 
-  doc.setTextColor(0);
   doc.setFontSize(9);
+  doc.setTextColor(0);
 
-  // Left side
-  doc.text("7A, Uddh Vihar Colony Phase-2 Kowal Road,", 15, 28);
-  doc.text("Chinhat Lucknow-270126", 15, 33);
-  doc.text("Mob.: 7388533786", 15, 38);
+  doc.text("7A, Uddh Vihar Colony Phase-2 Kowal Road,", 15, 30);
+  doc.text("Chinhat, Lucknow - 227105", 15, 35);
+  doc.text("Mob.: 7388533786", 15, 40);
 
-  // Right side
-  const rightX = doc.internal.pageSize.getWidth() - 15;
-  doc.text(`CONSIGNMENT NOTE No.: ${cn}`, rightX, 28, { align: "right" });
-  doc.text(`GST No.: ${payload.gstin}`, rightX, 33, { align: "right" });
-  doc.text(`${payload.routeCode}`, rightX, 38, { align: "right" });
-  doc.text(`Date: ${payload.consignmentDate}`, rightX, 43, { align: "right" });
-  doc.text("CONSIGNOR COPY", rightX, 48, { align: "right" });
+  doc.text(`CONSIGNMENT NOTE No.: ${cn}`, pageWidth - 15, 30, { align: "right" });
+  doc.text("PAN No.: CKTPK5713K", pageWidth - 15, 35, { align: "right" });
+  doc.text(`Date: ${payload.consignmentDate || ""}`, pageWidth - 15, 40, { align: "right" });
+  doc.text("CONSIGNOR COPY", pageWidth - 15, 45, { align: "right" });
 
-  // ⚠️ Risk Notice
+  /* ================= OPTIONS ================= */
   doc.setFont("helvetica", "bold");
-  doc.text("AT OWNER'S RISK", 15, 55);
+  doc.text("AT OWNER'S RISK", 15, 52);
 
-  // 📦 Consignee & Delivery
+  doc.setFont("helvetica", "normal");
+  doc.text("DOOR DELIVERY", pageWidth - 80, 52);
+  checkbox(doc, pageWidth - 45, 49, payload.doorDelivery === "YES");
+  doc.text("YES", pageWidth - 38, 52);
+  checkbox(doc, pageWidth - 25, 49, payload.doorDelivery === "NO");
+  doc.text("NO", pageWidth - 18, 52);
+
+  /* ================= CONSIGNEE ================= */
   autoTable(doc, {
     startY: 58,
     theme: "grid",
     styles: { fontSize: 9 },
-    body: [
-      [
-        `Consignee's Name & Address\n${payload.consigneeName}\n${payload.consigneeAddress}`,
-        `Delivery Address\n${payload.deliveryAddress}`
-      ]
-    ],
-    columnStyles: {
-      0: { cellWidth: 95 },
-      1: { cellWidth: 95 }
-    }
+    body: [[
+      `Consignee's Name & Address\n${payload.consigneeName || ""}\n${payload.consigneeAddress || ""}`,
+      `Delivery Address\n${payload.deliveryAddress || ""}`
+    ]],
+    columnStyles: { 0: { cellWidth: 95 }, 1: { cellWidth: 95 } }
   });
 
-  // 💳 Payment Responsibility
+  /* ================= PAYMENT CONTROL ================= */
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 2,
     theme: "grid",
     styles: { fontSize: 9 },
-    body: [[`CONTROL WILL BE PAID BY ${payload.paymentResponsibility}`]]
+    body: [[`CONTROL WILL BE PAID BY ${payload.paymentType || "CONSIGNOR"}`]]
   });
 
-  // 🧾 Tax & Declaration
+  /* ================= CONSIGNOR / TAX ================= */
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 2,
     theme: "grid",
     styles: { fontSize: 9 },
-    body: [
-      [
-        `Consignor's Name & Address\n${payload.consignorName}\n${payload.consignorAddress}`,
-        `Consignor C.S.T. No\n${payload.consignorCSTNo}`,
-        `Consignee C.S.T. No\n${payload.consigneeCSTNo}`,
-        `Sales Tax/Permit/Declaration\n${payload.salesTaxDeclaration}`,
-        `Valid up to\n${payload.validUpTo}`,
-        `Date\n${payload.taxDate}`
-      ]
-    ],
+    body: [[
+      `Consignor's Name & Address\n${payload.consignorName || ""}\n${payload.consignorAddress || ""}`,
+      "Consignor C.S.T. No\n—",
+      "Consignee C.S.T. No\n—",
+      "Sales Tax / Permit / Declaration\nApplicable as per rule",
+      "Valid up to\n—",
+      "Date\n—"
+    ]],
     columnStyles: {
       0: { cellWidth: 60 },
       1: { cellWidth: 30 },
@@ -80,37 +109,33 @@ export async function generatePDF(cn, payload) {
     }
   });
 
-  // 📋 Demurrage Notice
-  const demStart = doc.lastAutoTable.finalY + 6;
-  doc.setFontSize(9);
+  /* ================= DEMURRAGE ================= */
+  const demY = doc.lastAutoTable.finalY + 6;
   doc.setFont("helvetica", "bold");
-  doc.text("SCHEDULE OF DEMURRAGE CHARGES", doc.internal.pageSize.getWidth() / 2, demStart, { align: "center" });
+  doc.text("SCHEDULE OF DEMURRAGE CHARGES", pageWidth / 2, demY, { align: "center" });
 
   autoTable(doc, {
-    startY: demStart + 2,
+    startY: demY + 2,
     theme: "grid",
     styles: { fontSize: 9 },
     body: [
-      ["DOOR DELIVERY RATES", "UNLOADING WILL BE"],
-      ["Drum/Cartons/Packages", "Labor Charges Rs."],
-      ["Demurrage will be charged after days", "Oil on weight charges"]
+      ["DOOR DELIVERY RATES", "UNLOADING WILL BE EXTRA"],
+      ["Drum / Cartons / Packages", "Labour Charges As Applicable"],
+      ["Demurrage After Free Time", "Oil / Weight Charges Extra"]
     ],
-    columnStyles: {
-      0: { cellWidth: 95 },
-      1: { cellWidth: 95 }
-    }
+    columnStyles: { 0: { cellWidth: 95 }, 1: { cellWidth: 95 } }
   });
 
-  // 📞 Contact & Route
+  /* ================= ROUTE ================= */
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 4,
     theme: "grid",
     styles: { fontSize: 9 },
     body: [[
-      `Phone\n${payload.consignorPhone}`,
-      `Fax\n${payload.consignorFax}`,
-      `From\n${payload.fromLocation}`,
-      `To\n${payload.toLocation}`
+      `Phone\n${payload.consignorPhone || ""}`,
+      "Fax\n—",
+      `From\n${payload.fromLocation || ""}`,
+      `To\n${payload.toLocation || ""}`
     ]],
     columnStyles: {
       0: { cellWidth: 48 },
@@ -120,131 +145,87 @@ export async function generatePDF(cn, payload) {
     }
   });
 
-  // 📦 Package Details
+  /* ================= GOODS ================= */
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 2,
     theme: "grid",
-    styles: { fontSize: 9 },
     head: [["Packages", "Method", "Description (Said to Contain)"]],
-    body: [[payload.packageCount, payload.packageMethod, payload.goodsDescription]]
+    body: [[
+      payload.packageCount || "",
+      payload.packageMethod || "",
+      payload.goodsDescription || ""
+    ]]
   });
 
-  // 💰 Invoice & Charges
+  /* ================= INVOICE ================= */
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 2,
     theme: "grid",
     styles: { fontSize: 9 },
     body: [[
-      `Invoice No\n${payload.invoiceNo}`,
-      `Rate per Kg\n${payload.rateperkg}`,
-      `Measurement\n${payload.measurement}`,
-      `Paid at\n${payload.paidAt}`,
-      `Total Value\n${payload.invoiceValue}`
-    ]],
-    columnStyles: {
-      0: { cellWidth: 38 },
-      1: { cellWidth: 38 },
-      2: { cellWidth: 38 },
-      3: { cellWidth: 38 },
-      4: { cellWidth: 38 }
-    }
+      `Invoice No\n${payload.invoiceNo || ""}`,
+      `Rate / Kg\n${payload.rateperkg || ""}`,
+      "Measurement\n—",
+      "Paid at\n—",
+      `Invoice Value\n${payload.invoiceValue || ""}`
+    ]]
   });
 
-  // ⚖️ Weight & Freight
+  /* ================= WEIGHT ================= */
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 2,
     theme: "grid",
     styles: { fontSize: 9 },
     body: [[
-      `Weight (Actual)\n${payload.weightActual}`,
-      `Weight (Charged)\n${payload.weightCharged}`,
-      `Freight\n${payload.freight}`,
-      `Billed at\n${payload.billedAt}`,
-      `Paid at\n${payload.paidAt}`
-    ]],
-    columnStyles: {
-      0: { cellWidth: 38 },
-      1: { cellWidth: 38 },
-      2: { cellWidth: 38 },
-      3: { cellWidth: 38 },
-      4: { cellWidth: 38 }
-    }
+      `Weight (Actual)\n${payload.weightActual || ""}`,
+      `Weight (Charged)\n${payload.weightCharged || ""}`,
+      `Freight\n${payload.freight || ""}`,
+      "Billed at\n—",
+      "Paid at\n—"
+    ]]
   });
 
-  // 🚫 Cash Warning
+  /* ================= WARNING ================= */
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.text("DO NOT PAY CASH TO LORRY TOY", 15, doc.lastAutoTable.finalY + 10);
+  doc.text(
+    "DO NOT PAY CASH TO LORRY DRIVER",
+    15,
+    doc.lastAutoTable.finalY + 10
+  );
 
-  // 💸 Charges Breakdown
+  /* ================= CHARGES ================= */
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 14,
     theme: "grid",
     styles: { fontSize: 9 },
-    head: [["Freight", "Risk Ch.", "Sur. Ch.", "Hamali", "Driver", "Service Value", "TOTAL"]],
+    head: [["Freight", "Risk", "Surcharge", "Hamali", "Driver", "Service", "TOTAL"]],
     body: [[
-      payload.freight,
-      payload.riskCharge,
-      payload.surcharge,
-      payload.hamali,
-      payload.driverCharge || "",
-      payload.serviceValue,
-      payload.totalAmount
-    ]],
-    columnStyles: {
-      0: { cellWidth: 26 },
-      1: { cellWidth: 26 },
-      2: { cellWidth: 26 },
-      3: { cellWidth: 26 },
-      4: { cellWidth: 26 },
-      5: { cellWidth: 26 },
-      6: { cellWidth: 26 }
-    }
+      payload.freight || "",
+      "—",
+      "—",
+      "—",
+      payload.driverName || "",
+      "—",
+      payload.amount || ""
+    ]]
   });
 
-  // 🖋️ Stamp Instruction
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.text("Affix Stamp in Confirmation of Acceptance of Rate Mentioned above", 15, doc.lastAutoTable.finalY + 6);
-
-    // 🖋️ Delivery Acknowledgment
+  /* ================= DELIVERY ACK ================= */
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 10,
     theme: "grid",
-    styles: { fontSize: 9, minCellHeight: 20 },
-    head: [["Delivery Acknowledgment Remarks", "Stamp with Signature", "Date", "Lorry No."]],
-    body: [[
-      "",
-      "",
-      payload.deliveryDate,
-      payload.lorryNo
-    ]],
-    columnStyles: {
-      0: { cellWidth: 80 },
-      1: { cellWidth: 50 },
-      2: { cellWidth: 30 },
-      3: { cellWidth: 30 }
-    }
+    styles: { fontSize: 9 },
+    head: [["Delivery Remarks", "Stamp & Signature", "Date", "Lorry No"]],
+    body: [["", "", payload.deliveryDate || "", payload.lorryNo || ""]]
   });
 
-  // 🖋️ Signature Panel (AL / Name / Signature / Code)
+  /* ================= SIGNATURE ================= */
   const sigY = doc.lastAutoTable.finalY + 15;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-
   doc.text("AL", 15, sigY);
-  doc.text("Name", 50, sigY);
-  doc.text("Signature", 110, sigY);
-  doc.text("Code", 170, sigY);
+  doc.text("Name", 60, sigY);
+  doc.text("Signature", 120, sigY);
+  doc.text("Code", 175, sigY);
 
-  // Signature lines
-  doc.setDrawColor(150);
-  doc.setLineWidth(0.2);
-  doc.line(25, sigY + 2, 45, sigY + 2);   // AL line
-  doc.line(60, sigY + 2, 100, sigY + 2);  // Name line
-  doc.line(120, sigY + 2, 160, sigY + 2); // Signature line
-  doc.line(180, sigY + 2, 195, sigY + 2); // Code line
-
-  // Save PDF
   doc.save(`${cn}-Consignment-Note.pdf`);
 }
