@@ -7,7 +7,9 @@ import Link from "next/link";
  
 export default function Dashboard() {
   const [vehicles, setVehicles] = useState([]);
-  const fetchVehicles = async () => {
+  useEffect(() => {
+    // Fetch vehicle data from API if needed
+    const fetchVehicles = async () => {
       try {
         const response = await fetch('/api/vehicle');
         const data = await response.json();
@@ -17,9 +19,7 @@ export default function Dashboard() {
       } catch (error) {
         console.error('Error fetching vehicles:', error);
       }
- }
-  useEffect(() => {
-    // Fetch vehicle data from API if needed  
+    };
     fetchVehicles()
   }, []);
   console.log(vehicles);
@@ -31,7 +31,7 @@ export default function Dashboard() {
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Fleet Overview</h1>
           <p className="text-gray-600">Monitor and manage your logistic vehicles</p>
         </div>
-        <button className="bg-purple-500 rounded-2xl p-3 mb-5 font-semibold hover:bg-purple-600 hover:cursor-pointer">
+        <button className="bg-purple-500 rounded-2xl p-3 mb-5 font-semibold hover:bg-purple-600 hover:cursor-pointer text-white font-semibold">
           <Link href={`/AddVehicle`}>
              Add vehichle
           </Link>
