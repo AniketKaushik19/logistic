@@ -124,12 +124,12 @@ export default function ConsignmentList() {
   return (
     <>
       <Navbar />
-      <div className="pt-20 px-6 pb-20">
+      <div className="pt-25 px-6 pb-20">
         <Toaster />
 
         <div className="max-w-6xl mx-auto">
   {/* Header */}
-  <div className="flex items-center justify-between mb-8">
+  <div className="flex flex-col md:flex-row items-center justify-between mb-8">
     <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-2">
       <Truck className="w-7 h-7 text-indigo-600" />
       Consignments
@@ -139,7 +139,7 @@ export default function ConsignmentList() {
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2 rounded-lg shadow hover:bg-indigo-700"
+        className="flex items-center gap-2 bg-indigo-600 text-white mt-2 md:m-0 px-5 py-2 rounded-lg shadow hover:bg-indigo-700"
       >
         <Plus size={18} />
         New Consignment

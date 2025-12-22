@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { generateConsignmentNumber } from "@/utils/generateCN";
 import { motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
 import { generatePDF } from "@/utils/generatePDF";
@@ -23,7 +22,6 @@ export default function Page() {
   const search = useSearchParams();
   const router = useRouter();
   const editId = search.get("editId");
-  const [cn, setCn] = useState(generateConsignmentNumber());
   const [isEdit, setIsEdit] = useState(false);
 const [form, setForm] = useState({
   // Consignor
@@ -81,6 +79,9 @@ const [form, setForm] = useState({
 
   // Payment
   paymentType: "Paid",
+
+  //consignee form filler name
+  yourName:"Suresh Kumar"
 });
 
   /* ========= AUTO AMOUNT ========= */
@@ -102,7 +103,6 @@ const [form, setForm] = useState({
         const data = await res.json();
         if (!mounted) return;
         setForm((prev) => ({ ...prev, ...data }));
-        if (data.cn) setCn(data.cn);
         setIsEdit(true);
       } catch (err) {
         console.error(err);
@@ -121,50 +121,61 @@ const [form, setForm] = useState({
 
  const handleSubmit = async (e) => {
   e.preventDefault();
-  if (loading) return;   // prevent double submit
-
+  if (loading) return;
   setLoading(true);
-  const payload = { cn, ...form };
 
   try {
+    /* ================= EDIT ================= */
     if (isEdit && editId) {
       const res = await fetch(`/api/consignment/${editId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
       });
 
       if (!res.ok) {
-        toast.error('Failed to update consignment');
+        toast.error("Failed to update consignment");
         return;
       }
-      await generatePDF(cn, payload);
-      toast.success('Consignment updated & PDF generated');
-      router.push('/consignment/list');
+
+      const data = await res.json(); // 👈 get updated data
+      const cn = data?.data?.cn || form.cn;
+
+      await generatePDF(cn, { ...form, cn });
+      toast.success("Consignment updated & PDF generated");
+      router.push("/consignment/list");
       return;
     }
 
+    /* ================= CREATE ================= */
     const res = await fetch("/api/consignment", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(form),
     });
 
+    const data = await res.json(); // 👈 REQUIRED
+
     if (!res.ok) {
-      toast.error("Failed to save consignment");
+      toast.error(data?.error || "Failed to save consignment");
       return;
     }
+    const cn = data?.cn; // ✅ CN FROM SERVER
 
-    await generatePDF(cn, payload);
+    if (!cn) {
+      toast.error("CN not generated");
+      return;
+    }
+    await generatePDF(cn,{ ...form, cn });
     toast.success("Consignment saved & PDF generated");
-  } catch (error) {
-    console.error(error);
+    router.push("/consignment/list");
+  } catch (err) {
+    console.error(err);
     toast.error("Something went wrong");
   } finally {
-    setLoading(false);   // always reset
+    setLoading(false);
   }
- };
-;
+};
 
   return (
     <>
@@ -174,10 +185,7 @@ const [form, setForm] = useState({
         <h1 className="text-3xl font-bold text-center mb-2">
           Create Consignment Note
         </h1>
-        <p className="text-center text-gray-600 mb-6">
-          CN No: <span className="font-semibold text-red-600">{cn}</span>
-        </p>
-
+      
     <form
   onSubmit={handleSubmit}
   className="max-w-4xl mx-auto space-y-10 bg-white p-8 rounded-xl shadow-lg"
@@ -190,7 +198,7 @@ const [form, setForm] = useState({
   <div className="grid sm:grid-cols-2 gap-4">
     <input
       name="consignorName"
-      required
+      
       value={form.consignorName}
       onChange={handleChange}
       placeholder="Consignor Name"
@@ -202,7 +210,7 @@ const [form, setForm] = useState({
       type="tel"
       pattern="[0-9]{10}"
       maxLength={10}
-      required
+      
       value={form.consignorPhone}
       onChange={handleChange}
       placeholder="Phone (10 digits)"
@@ -212,7 +220,7 @@ const [form, setForm] = useState({
 
   <textarea
     name="consignorAddress"
-    required
+    
     value={form.consignorAddress}
     onChange={handleChange}
     placeholder="Consignor Address"
@@ -235,7 +243,7 @@ const [form, setForm] = useState({
   <div className="grid sm:grid-cols-2 gap-4">
     <input
       name="consigneeName"
-      required
+      
       value={form.consigneeName}
       onChange={handleChange}
       placeholder="Consignee Name"
@@ -256,7 +264,7 @@ const [form, setForm] = useState({
 
   <textarea
     name="consigneeAddress"
-    required
+    
     value={form.consigneeAddress}
     onChange={handleChange}
     placeholder="Consignee Address"
@@ -287,7 +295,7 @@ const [form, setForm] = useState({
   <div className="grid sm:grid-cols-3 gap-4">
     <input
       name="fromLocation"
-      required
+      
       value={form.fromLocation}
       onChange={handleChange}
       placeholder="From"
@@ -295,7 +303,7 @@ const [form, setForm] = useState({
     />
     <input
       name="toLocation"
-      required
+      
       value={form.toLocation}
       onChange={handleChange}
       placeholder="To"
@@ -304,7 +312,7 @@ const [form, setForm] = useState({
     <input
       name="consignmentDate"
       type="date"
-      required
+      
       value={form.consignmentDate?.split("T")[0] || ""}
       onChange={handleChange}
       className="input"
@@ -318,7 +326,7 @@ const [form, setForm] = useState({
 
   <input
     name="goodsDescription"
-    required
+    
     value={form.goodsDescription}
     onChange={handleChange}
     placeholder="Description (Said to contain)"
@@ -329,7 +337,7 @@ const [form, setForm] = useState({
     <input
       name="packageCount"
       type="number"
-      required
+      
       {...numberOnlyProps}
       value={form.packageCount}
       onChange={handleChange}
@@ -365,7 +373,7 @@ const [form, setForm] = useState({
       name="weightCharged"
       type="number"
       step="0.01"
-      required
+      
       {...numberOnlyProps}
       value={form.weightCharged}
       onChange={handleChange}
@@ -384,7 +392,7 @@ const [form, setForm] = useState({
       name="rateperkg"
       type="number"
       step="0.01"
-      required
+      
       {...numberOnlyProps}
       value={form.rateperkg}
       onChange={handleChange}
@@ -590,12 +598,13 @@ const [form, setForm] = useState({
   </div>
 </section>
 {/* ================= PAYMENT ================= */}
-<section>
+<section >
   <h2 className="font-semibold text-lg mb-3">Payment</h2>
+<div className="grid grid-cols-2 gap-5">
 
   <select
     name="paymentType"
-    required
+    
     value={form.paymentType}
     onChange={handleChange}
     className="input"
@@ -604,6 +613,16 @@ const [form, setForm] = useState({
     <option value="To Pay">To Pay</option>
     <option value="Billing">Billing</option>
   </select>
+      <input
+      type="text"
+      name="yourName"
+      placeholder="Enter Your Name"
+      value={form.yourName}
+      onChange={handleChange}
+      className="input"
+    />
+    
+</div>
 </section>
 
          <motion.button

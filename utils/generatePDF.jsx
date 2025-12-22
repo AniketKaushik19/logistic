@@ -29,15 +29,13 @@ function checkbox(doc, x, y, checked) {
 }
 
 /* ================= MAIN ================= */
-export async function generatePDF(cn, payload) {
+export async function generatePDF(cn,payload) {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
 
   const logoBase64 = await getBase64FromPublicImage("/logo.png");
-
   /* ================= HEADER ================= */
   addLogo(doc, logoBase64);
-
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
   doc.setTextColor(200, 0, 0);
@@ -51,7 +49,7 @@ export async function generatePDF(cn, payload) {
   doc.text("Mob.: 7388533786", 15, 40);
   doc.text("Mob.: 7905093236", 15, 44);
 
-  doc.text(`CONSIGNMENT NOTE No.: ${cn}`, pageWidth - 15, 30, { align: "right" });
+  doc.text(`CONSIGNMENT NOTE No.: ${payload.cn}`, pageWidth - 15, 30, { align: "right" });
   doc.text("PAN No.: CKTPK5713K", pageWidth - 15, 35, { align: "right" });
   doc.text(`Date: ${payload.consignmentDate || ""}`, pageWidth - 15, 40, { align: "right" });
   doc.text("CONSIGNOR COPY", pageWidth - 15, 45, { align: "right" });
@@ -199,13 +197,12 @@ export async function generatePDF(cn, payload) {
     startY: doc.lastAutoTable.finalY + 14,
     theme: "grid",
     styles: { fontSize: 9 ,fontStyle: "bold", },
-    head: [["Freight", "Risk", "Surcharge", "Hamali", "Driver", "Service", "TOTAL"]],
+    head: [["Freight", "Risk", "Surcharge", "Hamali","Service", "TOTAL"]],
     body: [[
       payload.freight || "",
       payload.riskCharge || "",
       payload.surcharge || "",
       payload.hamali || "",
-      payload.driverName || "",
       payload.serviceCharge || "",
       payload.amount || ""
     ]]
@@ -216,8 +213,9 @@ export async function generatePDF(cn, payload) {
     startY: doc.lastAutoTable.finalY + 10,
     theme: "grid",
     styles: { fontSize: 9 ,fontStyle: "bold", },
-    head: [["Delivery Remarks", "Stamp & Signature", "Date", "Lorry No"]],
-    body: [[payload.deliveryRemarks || "", "", payload.deliveryDate || "", payload.vehicleNo || ""]]
+    head: [["Delivery Remarks", "Stamp & Signature", "Date", "Lorry No","Driver"]],
+    body: [[payload.deliveryRemarks || "", "", payload.deliveryDate || "", payload.vehicleNo || "",payload.driverName || "",
+]]
   });
 
   /* ================= SIGNATURE ================= */
@@ -225,16 +223,12 @@ export async function generatePDF(cn, payload) {
 doc.setFont("helvetica", "bold");
 
 // Column headers
-doc.text("AL", 15, sigY);
 doc.text("Name", 60, sigY);
 doc.text("Signature", 120, sigY);
 doc.text("Code", 175, sigY);
 
 // Add underline for each column header
 doc.setLineWidth(0.5); // optional: thickness of line
-
-// Underline "AL"
-doc.line(15, sigY + 5, 35, sigY + 5);
 
 // Underline "Name"
 doc.line(60, sigY + 5, 110, sigY + 5);
@@ -245,5 +239,5 @@ doc.line(120, sigY + 5, 170, sigY + 5);
 // Underline "Code"
 doc.line(175, sigY + 5, 205, sigY + 5);
 
-  doc.save(`${cn}-Consignment-Note.pdf`);
+  doc.save(`${payload.cn}-Consignment-Note.pdf`);
 }
