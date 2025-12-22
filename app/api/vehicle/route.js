@@ -42,3 +42,36 @@ export async function GET(req, res ){
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
+
+export async function PUT(req, res){
+  try {
+     const { truckNumber, driverName , capacity }=await req.json()
+    const client=await clientPromise;
+    const db=client.db("logisticdb")
+    const collection=db.collection("vehicles")
+    const result=await collection.updateOne(
+      { truckNumber: truckNumber.toUpperCase() },
+      { $set: { driverName: driverName.toUpperCase(), capacity: parseFloat(capacity) } }
+    );
+    return NextResponse.json({message:"Vehicle updated successfully"},{status:200})
+
+  } catch (error) {
+      console.error("Error udpating vehicle:",error)
+      return NextResponse.json({error:"Internal server error"},{status:500})    
+  }
+}
+
+export async function DELETE(req, res){
+  try{
+    const {truckNumber}=await req.json()
+    const client=await clientPromise;
+    const db=client.db("logisticdb")
+    const collection=db.collection("vehicles")
+    const result=await collection.deleteOne({truckNumber:truckNumber.toUpperCase()})
+    return NextResponse.json({message:"Vehicle deleted successfully"},{status:200})
+  }
+  catch(error){
+    console.error("Error deleting vehicle:",error)
+    return NextResponse.json({error:"Internal server error"},{status:500})    
+  }
+}

@@ -17,18 +17,28 @@ function Navbar() {
         <ul className="flex gap-6 text-sm font-medium">
           {/* Apply links */}
           <li>
-            <Link href="/" className="cursor-pointer hover:text-red-600 transition">
+            <Link href="/" className="cursor-pointer  hover:text-red-600 transition">
               Home
             </Link>
           </li>
           <li>
-            <Link href="/consignment" className="cursor-pointer hover:text-red-600 transition">
+            <Link href="/consignment" className="cursor-pointer  hover:text-red-600 transition">
               Consignment
             </Link>
           </li>
           <li>
-            <Link href="/track" className="cursor-pointer hover:text-red-600 transition">
+            <Link href="/track" className="cursor-pointer  hover:text-red-600 transition">
               Track
+            </Link>
+          </li>
+          <li>
+            <Link href="/login" className="cursor-pointer  hover:text-red-600 transition">
+              login
+            </Link>
+          </li>
+          <li>
+            <Link href="/signup" className="cursor-pointer  hover:text-red-600 transition">
+              signup
             </Link>
           </li>
         </ul>

@@ -4,7 +4,26 @@ import { Navbar } from "./Navbar";
 import VehicleCard from "./VehicleCard";
 import Link from "next/link";
 
- 
+ const onDelete=async(truckNumber)=>{
+     try{
+       const response=await fetch('/api/vehicle',{
+         method:'DELETE',
+         headers:{
+           'Content-Type':'application/json',
+         },
+         body:JSON.stringify({truckNumber}),
+       });
+       const data=await response.json();
+       if(data.message){
+         console.log("Vehicle deleted successfully");
+         toast.success("Vehicle deleted successfully");
+       }
+     }
+     catch(error){
+        console.error("Error deleting vehicle:",error)
+     }
+   }
+   
 export default function Dashboard() {
   const [vehicles, setVehicles] = useState([]);
   useEffect(() => {
@@ -26,7 +45,7 @@ export default function Dashboard() {
     return(
         <>
         <Navbar/>
-      <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Fleet Overview</h1>
           <p className="text-gray-600">Monitor and manage your logistic vehicles</p>

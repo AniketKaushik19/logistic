@@ -1,10 +1,10 @@
 "use client"
 
-import Image from "next/image";
 import { motion } from "framer-motion";
 import Navbar from "./_components/Navbar.jsx"
 import Footer from "./_components/Footer.jsx"
 import Dashboard from "./components/Dashboard.js";
+import Link from "next/link.js";
 export default function Home() {
   return (
     <div className="w-full ">
@@ -35,8 +35,10 @@ export default function Home() {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               className="bg-red-600 text-white px-6 py-3 rounded-2xl shadow-lg"
-            >
-              Create Consignment
+            > 
+            <Link href="/track" className="no-underline">
+              Track Consignment
+            </Link>
             </motion.button>
           </motion.div>
         </div>
@@ -96,9 +98,6 @@ export default function Home() {
                   Safe, timely, and professional transportation services designed
                   to meet industrial logistics needs.
                 </p>
-                <span className="inline-block text-red-600 font-medium group-hover:underline">
-                  Learn More →
-                </span>
               </motion.div>
 
               {/* Hover Overlay */}
@@ -107,7 +106,7 @@ export default function Home() {
           ))}
         </div>
       </section>
-<Dashboard/>
+     <Dashboard/>
       {/* WHY CHOOSE US */}
       <section className="py-16 px-6 max-w-7xl mx-auto">
         <motion.h2
