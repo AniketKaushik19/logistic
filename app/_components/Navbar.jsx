@@ -22,7 +22,7 @@ function Navbar() {
             </Link>
           </li>
           <li>
-            <Link href="/consignment" className="cursor-pointer  hover:text-red-600 transition">
+            <Link href="/consignment/list" className="cursor-pointer hover:text-red-600 transition">
               Consignment
             </Link>
           </li>

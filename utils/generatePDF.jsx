@@ -29,15 +29,13 @@ function checkbox(doc, x, y, checked) {
 }
 
 /* ================= MAIN ================= */
-export async function generatePDF(cn, payload) {
+export async function generatePDF(cn,payload) {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
 
   const logoBase64 = await getBase64FromPublicImage("/logo.png");
-
   /* ================= HEADER ================= */
   addLogo(doc, logoBase64);
-
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
   doc.setTextColor(200, 0, 0);
@@ -51,7 +49,7 @@ export async function generatePDF(cn, payload) {
   doc.text("Mob.: 7388533786", 15, 40);
   doc.text("Mob.: 7905093236", 15, 44);
 
-  doc.text(`CONSIGNMENT NOTE No.: ${cn}`, pageWidth - 15, 30, { align: "right" });
+  doc.text(`CONSIGNMENT NOTE No.: ${payload.cn}`, pageWidth - 15, 30, { align: "right" });
   doc.text("PAN No.: CKTPK5713K", pageWidth - 15, 35, { align: "right" });
   doc.text(`Date: ${payload.consignmentDate || ""}`, pageWidth - 15, 40, { align: "right" });
   doc.text("CONSIGNOR COPY", pageWidth - 15, 45, { align: "right" });
@@ -71,7 +69,7 @@ export async function generatePDF(cn, payload) {
   autoTable(doc, {
     startY: 58,
     theme: "grid",
-    styles: { fontSize: 9 },
+    styles: { fontSize: 9 , fontStyle: "bold",},
     body: [[
       `Consignee's Name & Address\n${payload.consigneeName || ""}\n${payload.consigneeAddress || ""}`,
       `Delivery Address\n${payload.deliveryAddress || ""}`
@@ -83,22 +81,22 @@ export async function generatePDF(cn, payload) {
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 2,
     theme: "grid",
-    styles: { fontSize: 9 },
-    body: [[`CONTROL WILL BE PAID BY ${payload.paymentType || "CONSIGNOR"}`]]
+    styles: { fontSize: 9 ,fontStyle: "bold", },
+    body: [[`CONTROL WILL BE PAID BY CONSIGNOR CONSIGNEE`]]
   });
 
   /* ================= CONSIGNOR / TAX ================= */
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 2,
     theme: "grid",
-    styles: { fontSize: 9 },
+    styles: { fontSize: 9 ,fontStyle: "bold", },
     body: [[
       `Consignor's Name & Address\n${payload.consignorName || ""}\n${payload.consignorAddress || ""}`,
-      "Consignor C.S.T. No\n—",
-      "Consignee C.S.T. No\n—",
-      "Sales Tax / Permit / Declaration\nApplicable as per rule",
-      "Valid up to\n—",
-      "Date\n—"
+    `Consignor C.S.T. No\n ${payload.consignorCSTNo}`,
+    `Consignee C.S.T. No\n${payload.consigneeCSTNo}`,
+    `Sales Tax / Permit / Declaration\nApplicable as per rule`,
+    `Valid up to\n ${payload.validUpTo}`,
+    `Date\n ${payload.declarationDate}`
     ]],
     columnStyles: {
       0: { cellWidth: 60 },
@@ -118,7 +116,7 @@ export async function generatePDF(cn, payload) {
   autoTable(doc, {
     startY: demY + 2,
     theme: "grid",
-    styles: { fontSize: 9 },
+    styles: { fontSize: 9 ,fontStyle: "bold", },
     body: [
       ["DOOR DELIVERY RATES", "UNLOADING WILL BE EXTRA"],
       ["Drum / Cartons / Packages", "Labour Charges As Applicable"],
@@ -131,7 +129,7 @@ export async function generatePDF(cn, payload) {
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 4,
     theme: "grid",
-    styles: { fontSize: 9 },
+    styles: { fontSize: 9 ,fontStyle: "bold", },
     body: [[
       `Phone\n${payload.consignorPhone || ""}`,
       "Fax\n—",
@@ -162,12 +160,12 @@ export async function generatePDF(cn, payload) {
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 2,
     theme: "grid",
-    styles: { fontSize: 9 },
+    styles: { fontSize: 9 ,fontStyle: "bold", },
     body: [[
       `Invoice No\n${payload.invoiceNo || ""}`,
       `Rate / Kg\n${payload.rateperkg || ""}`,
-      "Measurement\n—",
-      "Paid at\n—",
+      `Measurement\n${payload.measurement || ""}`,
+      `Paid at\n${payload.paidAt || ""}`,
       `Invoice Value\n${payload.invoiceValue || ""}`
     ]]
   });
@@ -176,13 +174,13 @@ export async function generatePDF(cn, payload) {
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 2,
     theme: "grid",
-    styles: { fontSize: 9 },
+    styles: { fontSize: 9 ,fontStyle: "bold", },
     body: [[
       `Weight (Actual)\n${payload.weightActual || ""}`,
       `Weight (Charged)\n${payload.weightCharged || ""}`,
       `Freight\n${payload.freight || ""}`,
-      "Billed at\n—",
-      "Paid at\n—"
+      `Billed at\n${payload.billedAt || ""}`,
+      `Paid at\n${payload.paidAt || ""}`
     ]]
   });
 
@@ -198,15 +196,14 @@ export async function generatePDF(cn, payload) {
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 14,
     theme: "grid",
-    styles: { fontSize: 9 },
-    head: [["Freight", "Risk", "Surcharge", "Hamali", "Driver", "Service", "TOTAL"]],
+    styles: { fontSize: 9 ,fontStyle: "bold", },
+    head: [["Freight", "Risk", "Surcharge", "Hamali","Service", "TOTAL"]],
     body: [[
       payload.freight || "",
-      "—",
-      "—",
-      "—",
-      payload.driverName || "",
-      "—",
+      payload.riskCharge || "",
+      payload.surcharge || "",
+      payload.hamali || "",
+      payload.serviceCharge || "",
       payload.amount || ""
     ]]
   });
@@ -215,18 +212,32 @@ export async function generatePDF(cn, payload) {
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 10,
     theme: "grid",
-    styles: { fontSize: 9 },
-    head: [["Delivery Remarks", "Stamp & Signature", "Date", "Lorry No"]],
-    body: [["", "", payload.deliveryDate || "", payload.lorryNo || ""]]
+    styles: { fontSize: 9 ,fontStyle: "bold", },
+    head: [["Delivery Remarks", "Stamp & Signature", "Date", "Lorry No","Driver"]],
+    body: [[payload.deliveryRemarks || "", "", payload.deliveryDate || "", payload.vehicleNo || "",payload.driverName || "",
+]]
   });
 
   /* ================= SIGNATURE ================= */
   const sigY = doc.lastAutoTable.finalY + 15;
-  doc.setFont("helvetica", "bold");
-  doc.text("AL", 15, sigY);
-  doc.text("Name", 60, sigY);
-  doc.text("Signature", 120, sigY);
-  doc.text("Code", 175, sigY);
+doc.setFont("helvetica", "bold");
 
-  doc.save(`${cn}-Consignment-Note.pdf`);
+// Column headers
+doc.text("Name", 60, sigY);
+doc.text("Signature", 120, sigY);
+doc.text("Code", 175, sigY);
+
+// Add underline for each column header
+doc.setLineWidth(0.5); // optional: thickness of line
+
+// Underline "Name"
+doc.line(60, sigY + 5, 110, sigY + 5);
+
+// Underline "Signature"
+doc.line(120, sigY + 5, 170, sigY + 5);
+
+// Underline "Code"
+doc.line(175, sigY + 5, 205, sigY + 5);
+
+  doc.save(`${payload.cn}-Consignment-Note.pdf`);
 }
