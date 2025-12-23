@@ -1,10 +1,8 @@
 "use client"
 
-import Image from "next/image";
 import { motion } from "framer-motion";
 import Navbar from "./_components/Navbar.jsx"
 import Footer from "./_components/Footer.jsx"
-import Dashboard from "./components/Dashboard.js";
 export default function Home() {
   return (
     <div className="w-full ">
@@ -15,7 +13,7 @@ export default function Home() {
         className="h-screen flex items-center justify-center bg-fixed bg-center bg-cover"
         style={{
           backgroundImage:
-            "url('https://images.unsplash.com/photo-1601584115197-04ecc0da31d7')",
+            "url('/bg.jpeg')",
         }}
       >
         <div className="bg-black/60 w-full h-full flex items-center justify-center">
@@ -26,7 +24,7 @@ export default function Home() {
             className="text-center px-4"
           >
             <h1 className="text-white text-4xl md:text-6xl font-bold mb-4">
-              ANIKET LOGISTIC COMPANY
+              ANIKET LOGISTIC 
             </h1>
             <p className="text-gray-200 text-lg md:text-xl mb-6">
               Reliable Transportation Services for Tata Motors & Affiliated Organizations
@@ -36,7 +34,7 @@ export default function Home() {
               whileTap={{ scale: 0.95 }}
               className="bg-red-600 text-white px-6 py-3 rounded-2xl shadow-lg"
             >
-              Create Consignment
+              Track Consignment
             </motion.button>
           </motion.div>
         </div>
@@ -107,7 +105,6 @@ export default function Home() {
           ))}
         </div>
       </section>
-<Dashboard/>
       {/* WHY CHOOSE US */}
       <section className="py-16 px-6 max-w-7xl mx-auto">
         <motion.h2

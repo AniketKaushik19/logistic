@@ -12,9 +12,11 @@ import {
   Truck,
   User,
   Download,
+  Printer,
   Trash2,
   Pencil,
 } from "lucide-react";
+import { printPDF } from "@/utils/printPDF";
 
 export default function ConsignmentList() {
   const [items, setItems] = useState([]);
@@ -109,8 +111,8 @@ export default function ConsignmentList() {
     try {
       const cn =
         item.cn || item.cnNo || item.consignmentNo || item._id?.slice(-6);
+      await printPDF(cn,item)
 
-      await generatePDF(cn, item);
       toast.success("PDF generated");
     } catch (err) {
       console.error(err);
@@ -128,123 +130,122 @@ export default function ConsignmentList() {
         <Toaster />
 
         <div className="max-w-6xl mx-auto">
-  {/* Header */}
-  <div className="flex flex-col md:flex-row items-center justify-between mb-8">
-    <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-2">
-      <Truck className="w-7 h-7 text-indigo-600" />
-      Consignments
-    </h1>
+          {/* Header */}
+          <div className="flex flex-col md:flex-row items-center justify-between mb-8">
+            <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-2">
+              <Truck className="w-7 h-7 text-indigo-600" />
+              Consignments
+            </h1>
 
-    <Link href="/consignment">
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className="flex items-center gap-2 bg-indigo-600 text-white mt-2 md:m-0 px-5 py-2 rounded-lg shadow hover:bg-indigo-700"
-      >
-        <Plus size={18} />
-        New Consignment
-      </motion.button>
-    </Link>
-  </div>
+            <Link href="/consignment">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center gap-2 bg-indigo-600 text-white mt-2 md:m-0 px-5 py-2 rounded-lg shadow hover:bg-indigo-700"
+              >
+                <Plus size={18} />
+                New Consignment
+              </motion.button>
+            </Link>
+          </div>
 
-  {/* States */}
-  {pageLoading ? (
-    <p className="text-center text-gray-500 animate-pulse">
-      Loading consignments…
-    </p>
-  ) : items.length === 0 ? (
-    <p className="text-center text-gray-500">
-      No consignments found
-    </p>
-  ) : (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-      {items.map((c) => {
-        const cn =
-          c.cn || c.cnNo || c.consignmentNo || "—";
-
-        return (
-          <motion.div
-            key={String(c._id)}
-            whileHover={{ y: -4, scale: 1.02 }}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25 }}
-            className="rounded-xl bg-white border border-slate-200 shadow-sm hover:shadow-lg transition"
-          >
-            <div className="p-5">
-              {/* Top */}
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-bold text-lg text-slate-800">
-                    {cn}
-                  </h3>
-                  <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
-                    <Calendar size={12} />
-                    {c.consignmentDate ||
-                      (c.createdAt
-                        ? new Date(c.createdAt).toLocaleDateString()
-                        : "—")}
-                  </p>
-                </div>
-
-                <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-700">
-                  {c.status || "Booked"}
-                </span>
-              </div>
-
-              {/* Details */}
-              <div className="mt-4 text-sm text-slate-600 space-y-1">
-                <p className="flex items-center gap-2">
-                  <User size={14} />
-                  <strong>Consignee:</strong>{" "}
-                  {c.consigneeName || "—"}
-                </p>
-                <p className="flex items-center gap-2">
-                  <User size={14} />
-                  <strong>Consignor:</strong>{" "}
-                  {c.consignorName || "—"}
-                </p>
-              </div>
-
-              {/* Actions */}
-              <div className="mt-5 flex flex-wrap gap-2">
-                <Link href={`/consignment?editId=${c._id}`}>
-                  <button className="flex items-center gap-1 px-3 py-1.5 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">
-                    <Pencil size={14} />
-                    Edit
-                  </button>
-                </Link>
-
-                <button
-                  onClick={() => handleDelete(c._id)}
-                  disabled={actionLoadingId === c._id}
-                  className="flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
-                >
-                  <Trash2 size={14} />
-                  {actionLoadingId === c._id
-                    ? "Deleting…"
-                    : "Delete"}
-                </button>
-
-                <button
-                  onClick={() => handleDownload(c)}
-                  disabled={actionLoadingId === c._id}
-                  className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-                >
-                  <Download size={14} />
-                  {actionLoadingId === c._id
-                    ? "Generating…"
-                    : "PDF"}
-                </button>
+          {/* Quick summary cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div className="col-span-1 bg-white border rounded-lg p-4 shadow-sm flex flex-col justify-between">
+              <div>
+                <p className="text-sm text-slate-500">Total Consignments</p>
+                <h2 className="text-2xl font-bold text-slate-800">
+                  {items.length}
+                </h2>
               </div>
             </div>
-          </motion.div>
-        );
-      })}
-    </div>
-  )}
-</div>
-</div>
+          </div>
+
+          {/* States */}
+          {pageLoading ? (
+            <p className="text-center text-gray-500 animate-pulse">
+              Loading consignments…
+            </p>
+          ) : items.length === 0 ? (
+            <p className="text-center text-gray-500">No consignments found</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              {items.map((c) => {
+                const cn = c.cn || c.cnNo || c.consignmentNo || "—";
+
+                return (
+                  <motion.div
+                    key={String(c._id)}
+                    whileHover={{ y: -4, scale: 1.02 }}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="relative rounded-xl bg-white border border-slate-200 shadow-sm hover:shadow-lg transition"
+                  >
+                    <div className="p-5">
+                      {/* Edit icon (top-right) */}
+                      <Link href={`/consignment?editId=${c._id}`}>
+                        <button className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center bg-yellow-500 text-white rounded-full shadow hover:brightness-90">
+                          <Pencil size={14} />
+                        </button>
+                      </Link>
+
+                      {/* Top */}
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-bold text-lg text-slate-800">
+                            {cn}
+                          </h3>
+                          <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
+                            <Calendar size={12} />
+                            {c.consignmentDate ||
+                              (c.createdAt
+                                ? new Date(c.createdAt).toLocaleDateString()
+                                : "—")}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Details */}
+                      <div className="mt-4 text-sm text-slate-600 space-y-1">
+                        <p className="flex items-center gap-2">
+                          <User size={14} />
+                          <strong>Consignee:</strong> {c.consigneeName || "—"}
+                        </p>
+                        <p className="flex items-center gap-2">
+                          <User size={14} />
+                          <strong>Consignor:</strong> {c.consignorName || "—"}
+                        </p>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="mt-5 flex flex-wrap gap-2">
+                           <button
+                          onClick={() => handleDelete(c._id)}
+                          disabled={actionLoadingId === c._id}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                        >
+                          <Trash2 size={14} />
+                          {actionLoadingId === c._id ? "Deleting…" : "Delete"}
+                        </button>
+
+                        <button
+                          onClick={() => handleDownload(c)}
+                          disabled={actionLoadingId === c._id}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                        >
+                          <Printer size={14} />
+                          {actionLoadingId === c._id ? "Generating…" : "Print"}
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
     </>
   );
 }

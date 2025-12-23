@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
 import { generatePDF } from "@/utils/generatePDF";
 import Navbar from "../_components/Navbar";
+import { printPDF } from "@/utils/printPDF";
 
 /* ========= NUMBER VALIDATION PROPS ========= */
 const numberOnlyProps = {
@@ -83,7 +84,7 @@ const [form, setForm] = useState({
   //consignee form filler name
   yourName:"Suresh Kumar"
 });
-
+const [onlysave,setOnlySave]=useState(false)
   /* ========= AUTO AMOUNT ========= */
   useEffect(() => {
     const w = parseFloat(form.weightCharged) || 0;
@@ -140,9 +141,11 @@ const [form, setForm] = useState({
 
       const data = await res.json(); // 👈 get updated data
       const cn = data?.data?.cn || form.cn;
-
-      await generatePDF(cn, { ...form, cn });
-      toast.success("Consignment updated & PDF generated");
+     if(!onlysave){
+      await printPDF(cn,{ ...form, cn });
+      toast.success("Consignment saved & PDF generated");
+    }
+    else toast.success("Consignment saved");
       router.push("/consignment/list");
       return;
     }
@@ -166,8 +169,11 @@ const [form, setForm] = useState({
       toast.error("CN not generated");
       return;
     }
-    await generatePDF(cn,{ ...form, cn });
-    toast.success("Consignment saved & PDF generated");
+    if(!onlysave){
+      await printPDF(cn,{ ...form, cn });
+      toast.success("Consignment saved & PDF generated");
+    }
+    else toast.success("Consignment saved");
     router.push("/consignment/list");
   } catch (err) {
     console.error(err);
@@ -625,6 +631,20 @@ const [form, setForm] = useState({
 </div>
 </section>
 
+       <div className="flex gap-5">
+        <motion.button
+  whileHover={!loading ? { scale: 1.05 } : {}}
+  disabled={loading}
+  onClick={()=>{setOnlySave(true)}}
+  className={`w-full py-3 rounded-lg font-bold transition
+    ${loading
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-red-600 hover:bg-red-700 text-white"}
+  `}
+  type="submit"
+>
+  {loading ? "Processing..." : "Save"}
+</motion.button>
          <motion.button
   whileHover={!loading ? { scale: 1.05 } : {}}
   disabled={loading}
@@ -635,9 +655,9 @@ const [form, setForm] = useState({
   `}
   type="submit"
 >
-  {loading ? "Processing..." : "Save & Generate PDF"}
+  {loading ? "Processing..." : "Save & Print PDF"}
 </motion.button>
-
+  </div>
         </form>
       </div>
     </>

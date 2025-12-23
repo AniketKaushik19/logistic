@@ -6,6 +6,7 @@ import ConsignmentTable from "../_components/ConsignmentTable";
 import { generatePDF } from "@/utils/generatePDF";
 import { motion } from "framer-motion";
 import { Search, FileDown, PackageSearch } from "lucide-react";
+import { printPDF } from "@/utils/printPDF";
 
 export default function TrackClient() {
   const [cn, setCn] = useState("");
@@ -137,13 +138,13 @@ export default function TrackClient() {
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => generatePDF(cn, data.consignment)}
+        onClick={async() => await printPDF(cn, data.consignment)}
         className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-blue-600
                    text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg
                    hover:from-indigo-700 hover:to-blue-700"
       >
         <FileDown size={18} />
-        Download PDF
+        Print PDF
       </motion.button>
     </motion.div>
   )}
