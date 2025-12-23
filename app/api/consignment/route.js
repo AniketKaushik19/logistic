@@ -5,6 +5,8 @@ import { NextResponse } from "next/server";
  */
 export async function GET() {
   try {
+         requireAuth();
+
     const client = await clientPromise;
     const db = client.db("logisticdb");
     const collection = db.collection("consignments");
@@ -31,6 +33,8 @@ export async function GET() {
 /* ================= CREATE CONSIGNMENT ================= */
 export async function POST(req) {
   try {
+             requireAuth();
+
     const body = await req.json();
 
     if (!body || typeof body !== "object") {

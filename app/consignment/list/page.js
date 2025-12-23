@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
 import { motion } from "framer-motion";
-import { generatePDF } from "@/utils/generatePDF";
 import Navbar from "@/app/_components/Navbar";
 import {
   Plus,

@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req) {
   try {
+     requireAuth();
     const { truckNumber, model, capacity, registrationYear, driverName } = await req.json();
 
     if (!truckNumber || !model || !capacity || !registrationYear || !driverName) {
@@ -31,6 +32,8 @@ export async function POST(req) {
 
 export async function GET(req, res ){
     try{
+               requireAuth();
+
         const client =await clientPromise;
         const db =client.db('logisticdb')
         const collection =db.collection('vehicles');
@@ -45,6 +48,9 @@ export async function GET(req, res ){
 
 export async function PUT(req, res){
   try {
+             requireAuth();
+
+     const user = requireAuth();
      const { truckNumber, driverName , capacity }=await req.json()
     const client=await clientPromise;
     const db=client.db("logisticdb")
@@ -63,6 +69,8 @@ export async function PUT(req, res){
 
 export async function DELETE(req, res){
   try{
+             requireAuth();
+
     const {truckNumber}=await req.json()
     const client=await clientPromise;
     const db=client.db("logisticdb")

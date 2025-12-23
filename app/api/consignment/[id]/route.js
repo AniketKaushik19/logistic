@@ -5,6 +5,8 @@ import { ObjectId } from "mongodb";
 /* ================= GET ================= */
 export async function GET(req, { params }) {
   try {
+         requireAuth();
+
     const { id } = await params; // ✅ FIX
 
     if (!id || !ObjectId.isValid(id)) {
@@ -40,6 +42,8 @@ export async function GET(req, { params }) {
 
 export async function PUT(req, { params }) {
   try {
+             requireAuth();
+
     const { id } = await params;
     if (!id || !ObjectId.isValid(id)) {
       return NextResponse.json(
@@ -89,6 +93,8 @@ export async function PUT(req, { params }) {
 /* ================= DELETE ================= */
 export async function DELETE(req, { params }) {
   try {
+             requireAuth();
+
     const { id } = await params; // ✅ FIX
 
     if (!id || !ObjectId.isValid(id)) {

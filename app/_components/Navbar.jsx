@@ -1,50 +1,53 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/context/AuthContext";
 import { motion } from "framer-motion";
-import Link from "next/link"; // ✅ Import Link
 
-// NAVBAR COMPONENT
-function Navbar() {
+export default function Navbar() {
+  const { user, loading, refreshAuth } = useAuth();
+  const router = useRouter();
+console.log(user)
+  const logout = async () => {
+    await fetch("/api/auth/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+    await refreshAuth();
+    router.push("/login");
+  };
+
+  if (loading) return null; // ⛔ prevent flicker
+
   return (
     <motion.nav
-      initial={{ y: -80, opacity: 0 }}
+      initial={{ y: -40, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.8 }}
-      className="fixed top-0 left-0 w-full z-50 backdrop-blur shadow"
+      className="fixed top-0 w-full bg-white shadow z-50"
     >
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-red-600">Aniket Logistic</h1>
+      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between">
+        <h1 className="font-bold text-red-600">Aniket Logistic</h1>
+
         <ul className="flex gap-6 text-sm font-medium">
-          {/* Apply links */}
-          <li>
-            <Link href="/" className="cursor-pointer  hover:text-red-600 transition">
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link href="/consignment/list" className="cursor-pointer hover:text-red-600 transition">
-              Consignment
-            </Link>
-          </li>
-          <li>
-            <Link href="/track" className="cursor-pointer  hover:text-red-600 transition">
-              Track
-            </Link>
-          </li>
-          <li>
-            <Link href="/login" className="cursor-pointer  hover:text-red-600 transition">
-              login
-            </Link>
-          </li>
-          <li>
-            <Link href="/signup" className="cursor-pointer  hover:text-red-600 transition">
-              signup
-            </Link>
-          </li>
+          <li><Link href="/">Home</Link></li>
+
+          {user ? (
+            <><li><Link href="/track">Track</Link></li>
+
+              <li><Link href="/consignment/list">Consignment</Link></li>
+              <li
+                onClick={logout}
+                className="cursor-pointer text-red-600"
+              >
+                Logout
+              </li>
+            </>
+          ) : (
+            <li><Link href="/login">Login</Link></li>
+          )}
         </ul>
       </div>
     </motion.nav>
   );
 }
-
-export default Navbar;

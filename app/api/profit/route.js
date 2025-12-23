@@ -5,6 +5,8 @@ import clientPromise from "@/lib/mongodb";
  */
 export async function GET() {
   try {
+         requireAuth();
+
     const client = await clientPromise;
     const db = client.db("logisticdb");
     const collection = db.collection("consignments");
@@ -30,6 +32,8 @@ export async function GET() {
  */
 export async function POST(req) {
   try {
+             requireAuth();
+
     const body = await req.json();
 
     // Add server-side fields

@@ -3,6 +3,8 @@ import clientPromise from "@/lib/mongodb";
 
 export async function POST(req, res) {
     try{
+             requireAuth();
+
         const data=await req.json()
         const client=await clientPromise
         const db=client.db("logisticdb");
@@ -18,6 +20,8 @@ export async function POST(req, res) {
 
 export async function GET(req, res) {
     try {
+                 requireAuth();
+
         const { searchParams } = new URL(req.url);
         const limit = parseInt(searchParams.get('limit')) || 10; // default limit 10
         const skip = parseInt(searchParams.get('skip')) || 0; // default skip 0

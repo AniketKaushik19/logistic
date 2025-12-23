@@ -3,6 +3,8 @@ import clientPromise from "@/lib/mongodb";
 
 export async function GET(req, { params }) {
   try {
+         requireAuth();
+
       const pathname = new URL(req.url).pathname;
 
     const cn = pathname.split("/").pop();

@@ -7,12 +7,11 @@ export const Navbar = () => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleLogout = () => {  
-    // Clear user data from localStorage
-    localStorage.removeItem('user');  
-    // Redirect to login page
-    router.push('/login');
-  }
+  const handleLogout = async() =>{
+  await fetch("/api/auth/logout", { method: "POST" });
+  router.replace("/login");
+};
+
 
   return (
       <nav className="bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg">
