@@ -3,8 +3,32 @@ import { useEffect, useState } from "react";
 import { Navbar } from "./Navbar";
 import VehicleCard from "./VehicleCard";
 import Link from "next/link";
+import toast from "react-hot-toast"
+import ConfirmToast from "./ConfirmToast";
+import { Loader } from "lucide-react";
 
- const onDelete=async(truckNumber)=>{
+export default function Dashboard() {
+  const [vehicles, setVehicles] = useState([]);
+  const [loading, setLoading] = useState(false);  
+  // Fetch vehicle data from API if needed
+    const fetchVehicles = async () => {
+      setLoading(true)
+      try {
+        const response = await fetch('/api/vehicle');
+        const data = await response.json();
+        console.log(data);
+       setVehicles(data)
+        // Update state with fetched vehicles if implementing dynamic data
+      } catch (error) {
+        console.error('Error fetching vehicles:', error);
+      }
+      finally{
+        setLoading(false)
+      }
+    };
+ const onDelete=async(truckNumber)=>{   
+    const confirmed = await ConfirmToast({msg:"Delete this Vehicle?"});
+    if (!confirmed) return;
      try{
        const response=await fetch('/api/vehicle',{
          method:'DELETE',
@@ -18,27 +42,14 @@ import Link from "next/link";
          console.log("Vehicle deleted successfully");
          toast.success("Vehicle deleted successfully");
        }
+       fetchVehicles();
      }
      catch(error){
         console.error("Error deleting vehicle:",error)
      }
    }
-   
-export default function Dashboard() {
-  const [vehicles, setVehicles] = useState([]);
   useEffect(() => {
-    // Fetch vehicle data from API if needed
-    const fetchVehicles = async () => {
-      try {
-        const response = await fetch('/api/vehicle');
-        const data = await response.json();
-        console.log(data);
-       setVehicles(data)
-        // Update state with fetched vehicles if implementing dynamic data
-      } catch (error) {
-        console.error('Error fetching vehicles:', error);
-      }
-    };
+   
     fetchVehicles()
   }, []);
   console.log(vehicles);
@@ -55,9 +66,19 @@ export default function Dashboard() {
              Add vehichle
           </Link>
         </button>
+
+        {loading && (
+          <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
+         <Loader className="h-12 w-12 animate-spin text-blue-600 mb-4" />
+          <p className="text-lg font-semibold text-gray-700">
+            Loading Vehicles...
+          </p>
+        </div>
+)}
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {vehicles.map((vehicle) => (
-            <VehicleCard key={vehicle.truckNumber}  name={vehicle.truckNumber}  capacity={vehicle.capacity} registrationYear={vehicle.registrationYear} driverName={vehicle.driverName}/>
+            <VehicleCard key={vehicle.truckNumber}  name={vehicle.truckNumber}  capacity={vehicle.capacity} registrationYear={vehicle.registrationYear} driverName={vehicle.driverName} onDelete={onDelete}/>
           ))}
         </div>
       </main>
