@@ -118,7 +118,7 @@ export default function Vehicle({ params }) {
                 <div>
 
                 <button onClick={addExpense} className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all transform hover:scale-105 shadow-md">
-                  Add Fuel
+                  Add Expense
                 </button>
                 </div>
               </div>

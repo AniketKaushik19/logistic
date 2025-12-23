@@ -43,6 +43,7 @@ export async function POST(request) {
     const user = {
       name,
       email,
+      role:"viewer",
       password: hashedPassword,
       createdAt: new Date(),
     };

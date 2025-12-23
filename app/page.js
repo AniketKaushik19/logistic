@@ -50,7 +50,7 @@ export default function Home() {
         >
           <h2 className="text-3xl font-bold mb-4">About Us</h2>
           <p className="text-gray-600 leading-relaxed">
-            Aniket Logistic Company provides dependable and efficient transportation
+            Aniket Logistic  provides dependable and efficient transportation
             solutions. We specialize in industrial and commercial goods transport,
             serving Tata Motors and other affiliated organizations with a strong
             commitment to safety and on-time delivery.
@@ -94,9 +94,6 @@ export default function Home() {
                   Safe, timely, and professional transportation services designed
                   to meet industrial logistics needs.
                 </p>
-                <span className="inline-block text-red-600 font-medium group-hover:underline">
-                  Learn More →
-                </span>
               </motion.div>
 
               {/* Hover Overlay */}

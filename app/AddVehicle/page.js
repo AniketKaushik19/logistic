@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Truck, PlusCircle, Hash, Weight, Calendar, User, Car } from "lucide-react";
+import toast from 'react-hot-toast';
+import Router from 'next/router';
 
 export default function AddTruckVehicle() {
   const [formData, setFormData] = useState({
@@ -15,7 +17,6 @@ export default function AddTruckVehicle() {
     driverName: '',
   });
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,8 +25,6 @@ export default function AddTruckVehicle() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage('');
-
     try {
       const response = await fetch('/api/vehicle', {
         method: 'POST',
@@ -35,7 +34,7 @@ export default function AddTruckVehicle() {
 
       const data = await response.json();
       if (response.ok) {
-        setMessage('Truck added successfully!');
+        toast.success("Truck added successfully!")
         setFormData({
           truckNumber: '',
           model: '',
@@ -43,11 +42,14 @@ export default function AddTruckVehicle() {
           registrationYear: '',
           driverName: '',
         });
+        setTimeout(()=>{
+            Router.push('/Dashboard')
+        },3000)
       } else {
-        setMessage(data.error || 'Failed to add truck');
+        toast.error(data.message || "Failed to add truck")
       }
     } catch (error) {
-      setMessage('An error occurred. Please try again.');
+      toast.error('An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -152,11 +154,6 @@ export default function AddTruckVehicle() {
             </Button>
           </form>
 
-          {message && (
-            <div className={`text-center text-sm font-medium ${message.includes('successfully') ? 'text-green-600' : 'text-red-600'}`}>
-              {message}
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>

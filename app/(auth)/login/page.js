@@ -6,6 +6,7 @@ import { Mail, Lock, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Navbar from "@/app/_components/Navbar";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -45,7 +46,9 @@ export default function LoginPage() {
     };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 p-4">
+    <>
+        <Navbar/>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 p-4">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -124,5 +127,7 @@ export default function LoginPage() {
         </Card>
       </motion.div>
     </div>
+    </>
+
   );
 }
