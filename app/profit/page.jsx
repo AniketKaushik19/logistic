@@ -1,9 +1,10 @@
 "use client"
-import { AdminNav } from '@/app/components/AdminNav';
+import toast from 'react-hot-toast';
 import { useState, useEffect } from 'react';
+import Navbar from '../_components/Navbar';
 
 export default function Page({id}){
-    const [profit, setProfit]=useState([])
+    // const [profit, setProfit]=useState([])
     const [consign,setConsign]=useState("")
     const [netProfit,setNetProfit]=useState("")
     const [TotalCost,setTotalCost]=useState("")
@@ -47,7 +48,7 @@ export default function Page({id}){
 
     const addProfit=async()=>{
         if (!consign || !TotalCost || !Expenses || !netProfit || !eDate) {
-            alert('Please fill all fields')
+            toast.error('Please fill all fields')
             return
         }
 
@@ -67,7 +68,7 @@ export default function Page({id}){
             })
             const data = await res.json()
             if (data.success) {
-                alert('Profit added successfully')
+                toast.success('Profit added successfully')
                 // Reset form
                 setConsign("")
                 setTotalCost("")
@@ -75,19 +76,19 @@ export default function Page({id}){
                 setNetProfit("")
                 setEDate("")
             } else {
-                alert('Failed to add profit')
+                toast.error('Failed to add profit')
             }
         } catch (error) {
             console.error('Error adding profit:', error)
-            alert('Error adding profit')
+            toast.error('Error adding profit')
         }
     }
     return (
           <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
 
         {/*Navbar for Vehicle page*/ }
-        <AdminNav id={id} />
-      <main className="container px-4 py-8">
+        <Navbar/>
+      <main className="container px-4 py-8 mt-10">
         <div className="grid grid-cols-1 gap-8">
           {/* Profit Section */}
           <div className="bg-gradient-to-br from-white to-blue-50 shadow-xl rounded-xl p-6 border border-blue-200 lg:w-250 lg:mx-auto">

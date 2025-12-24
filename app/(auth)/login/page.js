@@ -47,38 +47,41 @@ export default function LoginPage() {
 
   return (
     <>
-        <Navbar/>
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="w-full max-w-md"
-      >
-        <Card className="rounded-2xl shadow-xl border">
-          <CardContent className="p-8 space-y-6">
-            {/* Header */}
-            <div className="text-center space-y-2">
-              <div className="mx-auto w-14 h-14 flex items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <ShieldCheck size={28} />
-              </div>
-              <h2 className="text-2xl font-bold">Welcome Back</h2>
-              <p className="text-sm text-muted-foreground">
-                Sign in to your account
-              </p>
-            </div>
-
-            {error && (
-                <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">
-                    {error}
+      <Navbar />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="w-full max-w-md"
+        >
+          <Card className="rounded-2xl shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
+            <CardContent className="p-6 sm:p-8 space-y-6">
+              {/* Header */}
+              <div className="text-center space-y-3">
+                <div className="mx-auto w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg">
+                  <ShieldCheck size={28} className="sm:w-8 sm:h-8" />
                 </div>
-            )}
+                <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  Welcome Back
+                </h2>
+                <p className="text-gray-600 text-sm sm:text-base">
+                  Sign in to your account
+                </p>
+              </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="text-red-600 text-sm text-center bg-red-50 border border-red-200 p-3 rounded-lg">
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Email */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium flex items-center gap-2">
-                    <Mail size={16} /> Email Address
+                  <label className="text-sm font-semibold flex items-center gap-2 text-gray-700">
+                    <Mail size={18} className="text-blue-500" />
+                    Email Address
                   </label>
                   <Input
                     type="email"
@@ -86,13 +89,15 @@ export default function LoginPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
+                    className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
                   />
                 </div>
 
                 {/* Password */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium flex items-center gap-2">
-                    <Lock size={16} /> Password
+                  <label className="text-sm font-semibold flex items-center gap-2 text-gray-700">
+                    <Lock size={18} className="text-blue-500" />
+                    Password
                   </label>
                   <Input
                     type="password"
@@ -100,34 +105,43 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
                   />
                 </div>
 
                 {/* Button */}
                 <Button
-                    type="submit"
-                    className="w-full rounded-xl text-base"
-                    disabled={loading}
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 h-12 text-base font-semibold rounded-xl"
+                  disabled={loading}
                 >
-                    {loading ? 'Signing In...' : 'Sign In'}
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Signing In...
+                    </div>
+                  ) : (
+                    'Sign In'
+                  )}
                 </Button>
-            </form>
+              </form>
 
-            {/* Footer */}
-            <p className="text-center text-sm text-muted-foreground">
-              Don&apos;t have an account?{" "}
-              <span
-                className="text-primary font-medium cursor-pointer hover:underline"
-                onClick={() => router.push('/signup')}
-              >
-                Sign up
-              </span>
-            </p>
-          </CardContent>
-        </Card>
-      </motion.div>
-    </div>
+              {/* Footer */}
+              <div className="text-center pt-4 border-t border-gray-100">
+                <p className="text-gray-600 text-sm">
+                  Don&apos;t have an account?{" "}
+                  <span
+                    className="text-blue-600 font-semibold cursor-pointer hover:text-indigo-600 hover:underline transition-colors duration-200"
+                    onClick={() => router.push('/signup')}
+                  >
+                    Sign up
+                  </span>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
     </>
-
   );
 }

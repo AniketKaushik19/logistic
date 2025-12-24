@@ -1,11 +1,11 @@
 "use client"
 import { useEffect, useState } from "react";
-import { Navbar } from "./Navbar";
-import VehicleCard from "./VehicleCard";
+import VehicleCard from "../components/VehicleCard";
 import Link from "next/link";
 import toast from "react-hot-toast"
-import ConfirmToast from "./ConfirmToast";
+import ConfirmToast from "../components/ConfirmToast";
 import { Loader } from "lucide-react";
+import Navbar from "../_components/Navbar";
 
 export default function Dashboard() {
   const [vehicles, setVehicles] = useState([]);
@@ -56,7 +56,7 @@ export default function Dashboard() {
     return(
         <>
         <Navbar/>
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 mt-9">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Fleet Overview</h1>
           <p className="text-gray-600">Monitor and manage your logistic vehicles</p>

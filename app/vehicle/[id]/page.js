@@ -5,6 +5,8 @@ import { use } from 'react';
 import Link from 'next/link';
 import Router from 'next/router';
 import { AdminNav } from '@/app/components/AdminNav';
+import Navbar from '@/app/_components/Navbar';
+import toast from 'react-hot-toast';
 
 export default function Vehicle({ params }) {
   const  id  = use(params).id;
@@ -41,6 +43,9 @@ export default function Vehicle({ params }) {
   }, [response]);
 
   const addExpense = async() => {
+    if(!Amount || !eDate || !title){
+       toast.error("Please fill all fields")
+    }
     if (Amount) {
       const newExpense = {
         Amount: Amount,
@@ -63,16 +68,16 @@ export default function Vehicle({ params }) {
         const data = await res.json();
 
         if (res.ok) {
-          setResponse('Expense saved successfully!');
+          toast.success('Expense saved successfully!');
           setAmount('');
           setEDate('');
           setTitle('')
         } else {
-          setResponse(`Error: ${data.error}`);
+          toast.error(`Error: ${data.error}`);
         }
       } catch (error) {
         console.error('Error saving fuel expense:', error);
-        setResponse('Error saving fuel expense. Please try again.');
+        toast.error('Error saving fuel expense. Please try again.');
       }
     }
   };
@@ -82,11 +87,12 @@ export default function Vehicle({ params }) {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
 
         {/*Navbar for Vehicle page*/ }
-        <AdminNav id={id} />
-      <main className="container px-4 py-8">
+        <Navbar/>
+      <main className="container px-4 py-8 mt-12">
         <div className="grid grid-cols-1 gap-8">
           {/* Expenses Section */}
           <div className="bg-gradient-to-br from-white to-blue-50 shadow-xl rounded-xl p-6 border border-blue-200 lg:w-250 lg:mx-auto">
+             <h2 className='text-center text-xl font-semibold p-1'>{id}</h2>
         
             {/*  Expenses */}
             <div className="mb-8 bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">

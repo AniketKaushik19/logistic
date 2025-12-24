@@ -1,17 +1,18 @@
+"use client"
 import { LogOut, Menu, X } from 'lucide-react'
 import React, { useState } from 'react'
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export const Navbar = () => {
-  const router = useRouter();
+  // const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLogout = () => {  
     // Clear user data from localStorage
     localStorage.removeItem('user');  
     // Redirect to login page
-    router.push('/login');
+    // router.push('/login');
   }
 
   return (

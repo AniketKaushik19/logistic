@@ -2,18 +2,50 @@
 
 import { motion } from "framer-motion";
 import Navbar from "./_components/Navbar.jsx"
+import {useState} from 'react'
 import Footer from "./_components/Footer.jsx"
+import Dashboard from "./dashboard/page.js";
+import GetInTouch from "./components/GetInTouch.js";
+import { ShieldCheck , Clock , PackageCheck , Truck } from "lucide-react";
+
+const features = [
+  {
+    title: "Trusted by Tata Motors",
+    desc: "Reliable logistics partner with proven industry trust.",
+    icon: ShieldCheck,
+    color: "from-blue-500 to-blue-600",
+  },
+  {
+    title: "On-Time Delivery",
+    desc: "We ensure timely delivery with real-time tracking.",
+    icon: Clock,
+    color: "from-green-500 to-green-600",
+  },
+  {
+    title: "Secure Handling",
+    desc: "Your consignments are handled with utmost care.",
+    icon: PackageCheck,
+    color: "from-purple-500 to-purple-600",
+  },
+];
+
 export default function Home() {
+  const [admin ,setAdmin]=useState(false)
   return (
     <div className="w-full ">
-      <Navbar/>
-
+      {admin && <>
+        <Navbar admin={admin}/>
+        <Dashboard/>
+        </> 
+      }
+      {!admin &&  <>
+       <Navbar/>
       {/* HERO SECTION WITH FIXED BACKGROUND */}
       <section
-        className="h-screen flex items-center justify-center bg-fixed bg-center bg-cover"
+        className="h-screen flex items-center justify-center bg-fixed bg-center bg-cover md:mt-15"
         style={{
           backgroundImage:
-            "url('/bg.jpeg')",
+            "url('/tata.png')",
         }}
       >
         <div className="bg-black/60 w-full h-full flex items-center justify-center">
@@ -48,15 +80,41 @@ export default function Home() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-3xl font-bold mb-4">About Us</h2>
-          <p className="text-gray-600 leading-relaxed">
-            Aniket Logistic  provides dependable and efficient transportation
-            solutions. We specialize in industrial and commercial goods transport,
-            serving Tata Motors and other affiliated organizations with a strong
-            commitment to safety and on-time delivery.
-          </p>
-        </motion.div>
-      </section>
+          <div className="max-w-3xl mx-auto bg-white/80 backdrop-blur border border-blue-100 rounded-2xl shadow-lg p-8">
+         {/* Heading */}
+         <div className="flex items-center gap-3 mb-4">
+           <div className="p-3 rounded-xl bg-blue-100 text-blue-600">
+             <Truck size={26} />
+           </div>
+           <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+             About Us
+           </h2>
+         </div>
+
+        {/* Description */}
+       <p className="text-gray-600 leading-relaxed text-lg">
+         <span className="font-semibold text-gray-800">
+           Aniket Logistic
+         </span>{" "}
+         provides dependable and efficient transportation solutions. We specialize in
+         industrial and commercial goods transport, serving{" "}
+         <span className="font-medium text-blue-600">
+           Tata Motors
+         </span>{" "}
+         and other affiliated organizations with a strong commitment to{" "}
+         <span className="inline-flex items-center gap-1 font-medium text-green-600">
+           <ShieldCheck size={16} />
+           safety
+         </span>{" "}
+         and{" "}
+         <span className="font-medium text-green-600">
+           on-time delivery
+         </span>
+           .
+           </p>
+            </div>
+         </motion.div>
+     </section>
 
       {/* SERVICES SECTION */}
       <section className="bg-gray-100 py-16 px-6">
@@ -103,37 +161,58 @@ export default function Home() {
         </div>
       </section>
       {/* WHY CHOOSE US */}
-      <section className="py-16 px-6 max-w-7xl mx-auto">
-        <motion.h2
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="text-3xl font-bold mb-8 text-center"
-        >
-          Why Choose Aniket Logistic?
-        </motion.h2>
+     <section className="py-20 px-6 max-w-7xl mx-auto">
+      {/* Heading */}
+      <motion.h2
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+        className="text-3xl md:text-4xl font-bold mb-12 text-center"
+      >
+        Why Choose <span className="text-blue-600">Aniket Logistic</span>?
+      </motion.h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {["Trusted by Tata Motors", "On-Time Delivery", "Secure Handling"].map(
-            (item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.2 }}
-                viewport={{ once: true }}
-                className="border p-6 rounded-2xl text-center"
+      {/* Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {features.map((item, index) => {
+          const Icon = item.icon;
+          return (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.2 }}
+              viewport={{ once: true }}
+              className="group relative bg-white rounded-2xl border shadow-md hover:shadow-xl transition-all p-8 text-center"
+            >
+              {/* Icon */}
+              <div
+                className={`mx-auto mb-6 w-14 h-14 flex items-center justify-center rounded-xl bg-gradient-to-br ${item.color} text-white group-hover:scale-110 transition`}
               >
-                <p className="font-semibold">{item}</p>
-              </motion.div>
-            )
-          )}
-        </div>
-      </section>
+                <Icon size={28} />
+              </div>
 
+              {/* Title */}
+              <h3 className="text-xl font-semibold mb-2">
+                {item.title}
+              </h3>
+
+              {/* Description */}
+              <p className="text-muted-foreground text-sm">
+                {item.desc}
+              </p>
+            </motion.div>
+          );
+        })}
+      </div>
+    </section>
+       
+       <section>
+           <GetInTouch/>
+       </section>
          <Footer/>
-
+       </>}
     </div>
   );
 }

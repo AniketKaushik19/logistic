@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Truck, PlusCircle, Hash, Weight, Calendar, User, Car } from "lucide-react";
 import toast from 'react-hot-toast';
 import Router from 'next/router';
+import Navbar from '../_components/Navbar';
 
 export default function AddTruckVehicle() {
   const [formData, setFormData] = useState({
@@ -57,7 +58,8 @@ export default function AddTruckVehicle() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg rounded-2xl shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+      <Navbar/>
+      <Card className="w-full max-w-lg rounded-2xl shadow-xl border-0 bg-white/80 backdrop-blur-sm mt-12">
         <CardHeader className="text-center pb-2">
           <div className="mx-auto mb-4 p-4 rounded-full bg-primary/10 text-primary w-fit">
             <Truck size={32} />
