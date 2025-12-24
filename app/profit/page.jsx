@@ -109,9 +109,9 @@ export default function Page({id}){
                   className="flex-1 p-3 border-2 border-green-300 rounded-lg focus:border-green-500 focus:outline-none transition-colors placeholder-green-400 text-gray-800"
                 />
                 <datalist id="consignment-list">
-                  {consignments.map((consignment) => (
+                  {consignments.length>0? consignments.map((consignment) => (
                     <option key={consignment.createdAt} value={consignment.cn} />
-                  ))}
+                  )) : null}
                 </datalist>
                 <input
                   type="number"
