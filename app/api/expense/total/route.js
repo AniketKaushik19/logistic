@@ -1,6 +1,13 @@
 import clientPromise from "@/lib/mongodb";
 
 export async function GET(req) {
+      const auth = await requireAuth(req);
+      if (!auth.authenticated) {
+        return NextResponse.json(
+          { error: auth.error || "Unauthorized" },
+          { status: 401 }
+        );
+      }
     try {
         const { searchParams } = new URL(req.url);
         const period = searchParams.get('period') || 'all'; // all, monthly, yearly, custom

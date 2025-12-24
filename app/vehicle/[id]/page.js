@@ -20,7 +20,6 @@ export default function Vehicle({ params }) {
     try{
      const response=await fetch(`/api/expense?vehicleId=${vehicleId}`);
      const data=await response.json();
-     console.log(data)
      if(data.status==="200"){
         setExpenses(data.expenses)
      }
@@ -82,7 +81,6 @@ export default function Vehicle({ params }) {
     }
   };
 
-  console.log(Expenses)
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
 

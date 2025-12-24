@@ -1,21 +1,31 @@
 import { NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import { jwtVerify } from "jose";
 
-export function middleware(req) {
-  const authHeader = req.headers.get("authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
+const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+
+export async function middleware(req) {
+  const { pathname } = req.nextUrl;
+
+  // 🚨 Skip API routes
+  if (pathname.startsWith("/api")) {
+    return NextResponse.next();
+  }
+
+  // Protect only app pages
+  if (!pathname.startsWith("/consignment") &&
+      !pathname.startsWith("/dashboard")) {
+    return NextResponse.next();
+  }
+
+  const token = req.cookies.get("token")?.value;
+  if (!token) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  const token = authHeader.split(" ")[1];
   try {
-    jwt.verify(token, process.env.JWT_SECRET);
+    await jwtVerify(token, secret);
     return NextResponse.next();
   } catch {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 }
-
-export const config = {
-  matcher: ["/nothing"],
-};

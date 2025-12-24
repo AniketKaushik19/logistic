@@ -7,11 +7,14 @@ import { requireAuth } from "@/lib/auth";
 export async function GET(req, { params }) {
   const auth = await requireAuth(req);
   if (!auth.authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: auth.error || "Unauthorized" },
+      { status: 401 }
+    );
   }
 
   try {
-    const { id } = params; // ✅ FIX
+    const { id } = params;
 
     if (!id || !ObjectId.isValid(id)) {
       return NextResponse.json(
@@ -23,7 +26,9 @@ export async function GET(req, { params }) {
     const client = await clientPromise;
     const db = client.db("logisticdb");
 
-    const doc = await db.collection("consignments").findOne({ _id: new ObjectId(id) });
+    const doc = await db
+      .collection("consignments")
+      .findOne({ _id: new ObjectId(id) });
 
     if (!doc) {
       return NextResponse.json(
@@ -44,13 +49,25 @@ export async function GET(req, { params }) {
 
 /* ================= PUT ================= */
 export async function PUT(req, { params }) {
+  const { id } = await params;
+
   const auth = await requireAuth(req);
   if (!auth.authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: auth.error || "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
+  if (!id || !ObjectId.isValid(id)) {
+    return NextResponse.json(
+      { error: "Invalid or missing consignment ID" },
+      { status: 400 }
+    );
   }
 
   try {
-    const { id } = params;
+
     if (!id || !ObjectId.isValid(id)) {
       return NextResponse.json(
         { error: "Invalid consignment ID" },
@@ -60,7 +77,7 @@ export async function PUT(req, { params }) {
 
     const body = await req.json();
 
-    // 🚫 REMOVE _id FROM UPDATE PAYLOAD
+    // 🚫 Do not allow _id to be updated
     const { _id, ...safeBody } = body;
 
     const client = await clientPromise;
@@ -68,12 +85,7 @@ export async function PUT(req, { params }) {
 
     const result = await db.collection("consignments").findOneAndUpdate(
       { _id: new ObjectId(id) },
-      {
-        $set: {
-          ...safeBody,
-          updatedAt: new Date(),
-        },
-      },
+      { $set: { ...safeBody, updatedAt: new Date() } },
       { returnDocument: "after" }
     );
 
@@ -97,27 +109,33 @@ export async function PUT(req, { params }) {
   }
 }
 
-/* ================= DELETE ================= */
-export async function DELETE(req, { params }) {
+
+
+export async function DELETE(req, {params}) {
+  const { id } = await params;
+
   const auth = await requireAuth(req);
   if (!auth.authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: auth.error || "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
+  if (!id || !ObjectId.isValid(id)) {
+    return NextResponse.json(
+      { error: "Invalid or missing consignment ID" },
+      { status: 400 }
+    );
   }
 
   try {
-    const { id } = params; // ✅ FIX
-
-    if (!id || !ObjectId.isValid(id)) {
-      return NextResponse.json(
-        { error: "Invalid or missing consignment ID" },
-        { status: 400 }
-      );
-    }
-
     const client = await clientPromise;
     const db = client.db("logisticdb");
 
-    const result = await db.collection("consignments").deleteOne({ _id: new ObjectId(id) });
+    const result = await db
+      .collection("consignments")
+      .deleteOne({ _id: new ObjectId(id) });
 
     if (result.deletedCount === 0) {
       return NextResponse.json(
@@ -138,3 +156,4 @@ export async function DELETE(req, { params }) {
     );
   }
 }
+

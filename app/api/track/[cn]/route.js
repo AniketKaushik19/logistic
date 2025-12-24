@@ -2,9 +2,13 @@ import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 
 export async function GET(req, { params }) {
-  // requireAuth();
-  try {
-
+  const auth = await requireAuth(req);
+  if (!auth.authenticated) {
+    return NextResponse.json(
+      { error: auth.error || "Unauthorized" },
+      { status: 401 }
+    );
+  }  try {
       const pathname = new URL(req.url).pathname;
 
     const cn = pathname.split("/").pop();

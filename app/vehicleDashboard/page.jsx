@@ -16,7 +16,6 @@ export default function Dashboard() {
       try {
         const response = await fetch('/api/vehicle');
         const data = await response.json();
-        console.log(data);
        setVehicles(data)
         // Update state with fetched vehicles if implementing dynamic data
       } catch (error) {
@@ -39,7 +38,6 @@ export default function Dashboard() {
        });
        const data=await response.json();
        if(data.message){
-         console.log("Vehicle deleted successfully");
          toast.success("Vehicle deleted successfully");
        }
        fetchVehicles();
@@ -52,7 +50,6 @@ export default function Dashboard() {
    
     fetchVehicles()
   }, []);
-  console.log(vehicles);
     return(
         <>
         <Navbar/>

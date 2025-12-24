@@ -7,7 +7,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { generatePDF } from "@/utils/generatePDF";
 import Navbar from "../_components/Navbar";
 import { printPDF } from "@/utils/printPDF";
-
+import { authFetch } from "@/lib/authFetch";
 /* ========= NUMBER VALIDATION PROPS ========= */
 const numberOnlyProps = {
   min: 0,
@@ -19,7 +19,8 @@ const numberOnlyProps = {
 };
 
 export default function Page() {
-  const [loading, setLoading] = useState(false);
+  const [loading1, setLoading1] = useState(false);
+  const [loading2, setLoading2] = useState(false);
   const search = useSearchParams();
   const router = useRouter();
   const editId = search.get("editId");
@@ -84,7 +85,8 @@ const [form, setForm] = useState({
   //consignee form filler name
   yourName:"Suresh Kumar"
 });
-const [onlysave,setOnlySave]=useState(false)
+const [onlysave, setOnlySave] = useState(false);
+
   /* ========= AUTO AMOUNT ========= */
   useEffect(() => {
     const w = parseFloat(form.weightCharged) || 0;
@@ -93,25 +95,32 @@ const [onlysave,setOnlySave]=useState(false)
     setForm((p) => ({ ...p, amount: amt > 0 ? amt : "" }));
   }, [form.weightCharged, form.rateperkg]);
 
-  /* populate when editing */
+  /* ========= POPULATE EDIT ========= */
   useEffect(() => {
     if (!editId) return;
+
     let mounted = true;
+
     (async () => {
+      const res = await authFetch(`/api/consignment/${editId}`);
+      if (!res || !mounted) return;
+
+      const text = await res.text();
+      let data;
       try {
-        const res = await fetch(`/api/consignment/${editId}`);
-        if (!res.ok) throw new Error('Failed to fetch');
-        const data = await res.json();
-        if (!mounted) return;
-        setForm((prev) => ({ ...prev, ...data }));
-        setIsEdit(true);
-      } catch (err) {
-        console.error(err);
-        toast.error('Failed to load consignment for edit');
+        data = JSON.parse(text);
+      } catch {
+        toast.error("Invalid server response");
+        return;
       }
+
+      setForm((prev) => ({ ...prev, ...data }));
+      setIsEdit(true);
     })();
-    return () => { mounted = false };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    return () => {
+      mounted = false;
+    };
   }, [editId]);
 
   const handleChange = (e) => {
@@ -120,68 +129,72 @@ const [onlysave,setOnlySave]=useState(false)
     setForm({ ...form, [e.target.name]: value });
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (loading) return;
-  setLoading(true);
+  /* ========= SUBMIT ========= */
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (loading1 || loading2) return;
+    if(onlysave) setLoading1(true)
+    else setLoading2(true)
 
-  try {
-    /* ================= EDIT ================= */
-    if (isEdit && editId) {
-      const res = await fetch(`/api/consignment/${editId}`, {
-        method: "PUT",
+    try {
+      if (isEdit && editId) {
+        const res = await authFetch(`/api/consignment/${editId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        });
+
+        if (!res) return;
+
+        const data = await res.json();
+        const cn = data?.data?.cn || form.cn;
+
+        if (!onlysave) {
+          await printPDF(cn, { ...form, cn });
+          toast.success("Consignment saved & PDF generated");
+        } else {
+          toast.success("Consignment saved");
+        }
+
+        router.push("/consignment/list");
+        return;
+      }
+
+      const res = await authFetch("/api/consignment", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
 
+      if (!res) return;
+
+      const data = await res.json();
       if (!res.ok) {
-        toast.error("Failed to update consignment");
+        toast.error(data?.error || "Failed to save consignment");
         return;
       }
 
-      const data = await res.json(); // 👈 get updated data
-      const cn = data?.data?.cn || form.cn;
-     if(!onlysave){
-      await printPDF(cn,{ ...form, cn });
-      toast.success("Consignment saved & PDF generated");
-    }
-    else toast.success("Consignment saved");
+      const cn = data?.cn;
+      if (!cn) {
+        toast.error("CN not generated");
+        return;
+      }
+
+      if (!onlysave) {
+        await printPDF(cn, { ...form, cn });
+        toast.success("Consignment saved & PDF generated");
+      } else {
+        toast.success("Consignment saved");
+      }
       router.push("/consignment/list");
-      return;
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong");
+    } finally {
+      setLoading1(false);
+      setLoading2(false);
     }
-
-    /* ================= CREATE ================= */
-    const res = await fetch("/api/consignment", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-
-    const data = await res.json(); // 👈 REQUIRED
-
-    if (!res.ok) {
-      toast.error(data?.error || "Failed to save consignment");
-      return;
-    }
-    const cn = data?.cn; // ✅ CN FROM SERVER
-
-    if (!cn) {
-      toast.error("CN not generated");
-      return;
-    }
-    if(!onlysave){
-      await printPDF(cn,{ ...form, cn });
-      toast.success("Consignment saved & PDF generated");
-    }
-    else toast.success("Consignment saved");
-    router.push("/consignment/list");
-  } catch (err) {
-    console.error(err);
-    toast.error("Something went wrong");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <>
@@ -633,29 +646,29 @@ const [onlysave,setOnlySave]=useState(false)
 
        <div className="flex gap-5">
         <motion.button
-  whileHover={!loading ? { scale: 1.05 } : {}}
-  disabled={loading}
+  whileHover={!loading1 ? { scale: 1.05 } : {}}
+  disabled={loading1}
   onClick={()=>{setOnlySave(true)}}
   className={`w-full py-3 rounded-lg font-bold transition
-    ${loading
+    ${loading1
       ? "bg-gray-400 cursor-not-allowed"
       : "bg-red-600 hover:bg-red-700 text-white"}
   `}
   type="submit"
 >
-  {loading ? "Processing..." : "Save"}
+  {loading1 ? "Processing..." : "Save"}
 </motion.button>
          <motion.button
-  whileHover={!loading ? { scale: 1.05 } : {}}
-  disabled={loading}
+  whileHover={!loading2 ? { scale: 1.05 } : {}}
+  disabled={loading2}
   className={`w-full py-3 rounded-lg font-bold transition
-    ${loading
+    ${loading2
       ? "bg-gray-400 cursor-not-allowed"
       : "bg-red-600 hover:bg-red-700 text-white"}
   `}
   type="submit"
 >
-  {loading ? "Processing..." : "Save & Print PDF"}
+  {loading2 ? "Processing..." : "Save & Print PDF"}
 </motion.button>
   </div>
         </form>

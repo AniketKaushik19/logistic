@@ -25,7 +25,6 @@ export default function ConsignmentList() {
 const { user, loading } = useAuth();
 const router = useRouter();
 
-  console.log(user + loading)
 // useEffect(() => {
 //   if (!loading && !user) {
 //     router.replace("/login");
@@ -105,20 +104,20 @@ const router = useRouter();
     setActionLoadingId(id);
     try {
     const token = localStorage.getItem("auth_token");
+
 const res = await fetch(`/api/consignment/${id}`, {
   method: "DELETE",
   headers: {
     Authorization: `Bearer ${token}`,
   },
 });
-
-
+      
       if (!res.ok) throw new Error("Delete failed");
 
       setItems((prev) => prev.filter((i) => String(i._id) !== String(id)));
       toast.success("Consignment deleted");
     } catch (err) {
-      console.error(err);
+      console.log(err);
       toast.error("Delete failed");
     } finally {
       setActionLoadingId(null);

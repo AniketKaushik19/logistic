@@ -2,8 +2,13 @@ import clientPromise from "@/lib/mongodb";
 import { requireAuth } from "@/lib/auth";
 
 export async function GET(req) {
-  // requireAuth();
-  try {
+  const auth = await requireAuth(req);
+  if (!auth.authenticated) {
+    return NextResponse.json(
+      { error: auth.error || "Unauthorized" },
+      { status: 401 }
+    );
+  }  try {
 
     const { searchParams } = new URL(req.url);
     const type = searchParams.get('type');

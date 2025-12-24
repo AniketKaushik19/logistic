@@ -5,7 +5,13 @@ import { NextResponse } from "next/server";
  * GET → Fetch latest 5 consignments for profit calculation
  */
 export async function GET(req) {
-
+  const auth = await requireAuth(req);
+  if (!auth.authenticated) {
+    return NextResponse.json(
+      { error: auth.error || "Unauthorized" },
+      { status: 401 }
+    );
+  }
   try {
     const client = await clientPromise;
     const db = client.db("logisticdb");
@@ -31,6 +37,13 @@ export async function GET(req) {
  * POST → Save profit data
  */
 export async function POST(req) {
+    const auth = await requireAuth(req);
+    if (!auth.authenticated) {
+      return NextResponse.json(
+        { error: auth.error || "Unauthorized" },
+        { status: 401 }
+      );
+    }
   try {
     const body = await req.json();
 

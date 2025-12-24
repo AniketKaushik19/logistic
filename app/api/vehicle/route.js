@@ -3,8 +3,13 @@ import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 
 export async function POST(req) {
-  // requireAuth();
-  try {
+  const auth = await requireAuth(req);
+  if (!auth.authenticated) {
+    return NextResponse.json(
+      { error: auth.error || "Unauthorized" },
+      { status: 401 }
+    );
+  }  try {
     const { truckNumber, model, capacity, registrationYear, driverName } = await req.json();
 
     if (!truckNumber || !model || !capacity || !registrationYear || !driverName) {
@@ -32,8 +37,13 @@ export async function POST(req) {
 }
 
 export async function GET(req, res ){
-  // requireAuth();
-  try{
+  const auth = await requireAuth(req);
+  if (!auth.authenticated) {
+    return NextResponse.json(
+      { error: auth.error || "Unauthorized" },
+      { status: 401 }
+    );
+  }  try{
 
         const client =await clientPromise;
         const db =client.db('logisticdb')
@@ -48,10 +58,13 @@ export async function GET(req, res ){
 }
 
 export async function PUT(req, res){
-  // requireAuth();
-  try {
-
-    //  const user = requireAuth();
+  const auth = await requireAuth(req);
+  if (!auth.authenticated) {
+    return NextResponse.json(
+      { error: auth.error || "Unauthorized" },
+      { status: 401 }
+    );
+  }  try {
      const { truckNumber, driverName , capacity }=await req.json()
     const client=await clientPromise;
     const db=client.db("logisticdb")
@@ -69,8 +82,13 @@ export async function PUT(req, res){
 }
 
 export async function DELETE(req, res){
-  // requireAuth();
-  try{
+  const auth = await requireAuth(req);
+  if (!auth.authenticated) {
+    return NextResponse.json(
+      { error: auth.error || "Unauthorized" },
+      { status: 401 }
+    );
+  }  try{
 
     const {truckNumber}=await req.json()
     const client=await clientPromise;

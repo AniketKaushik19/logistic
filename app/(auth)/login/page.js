@@ -27,30 +27,20 @@ export default function LoginPage() {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include", // important so httpOnly cookie is stored by browser
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
-      console.log(data)
-
-      if (!response.ok) {
-        setError(data.error || "Login failed");
-        setLoading(false);
-        return;
-      }
-
-      // ✅ Save token in localStorage
-      localStorage.setItem("auth_token", data.token);
-
-      // ✅ Refresh auth context BEFORE navigating
+    
+      // Server sets httpOnly cookie; refresh auth state from /api/auth/me
       await refreshAuth();
       setLoading(false);
 
       // Small delay to ensure auth state is updated
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-router.replace("/consignment/list");
-      toast.success("done")
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      router.replace("/consignment/list");
+      toast.success("Logged in");
     } catch (err) {
       console.error(err);
       setError("Something went wrong. Please try again.");
@@ -80,12 +70,8 @@ router.replace("/consignment/list");
                 <div className="mx-auto w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg">
                   <ShieldCheck size={32} className="drop-shadow-lg" />
                 </div>
-                <h2 className="text-3xl font-bold text-slate-900">
-                  Welcome Back
-                </h2>
-                <p className="text-sm text-slate-600">
-                  Sign in to your logistic account
-                </p>
+                <h2 className="text-3xl font-bold text-slate-900">Welcome Back</h2>
+                <p className="text-sm text-slate-600">Sign in to your logistic account</p>
               </motion.div>
 
               {error && (
@@ -135,21 +121,16 @@ router.replace("/consignment/list");
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-    
                     required
                     className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
                   />
                 </motion.div>
 
                 {/* Button */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                >
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
                   <Button
                     type="submit"
-                    className="w-full rounded-lg text-base font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl text-white"
+                    className="w-full rounded-lg text-base font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg"
                     disabled={loading}
                   >
                     {loading ? (
@@ -165,18 +146,9 @@ router.replace("/consignment/list");
               </form>
 
               {/* Footer */}
-              <motion.p
-                className="text-center text-sm text-slate-600"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-              >
+              <motion.p className="text-center text-sm text-slate-600" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
                 Don&apos;t have an account?{" "}
-                <button
-                  type="button"
-                  className="text-blue-600  font-semibold cursor-pointer hover:text-blue-700 hover:underline transition-colors"
-                  onClick={() => router.push("/signup")}
-                >
+                <button type="button" className="text-blue-600  font-semibold cursor-pointer hover:text-blue-700 hover:underline transition-colors" onClick={() => router.push("/signup")}>
                   Sign up
                 </button>
               </motion.p>
