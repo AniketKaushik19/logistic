@@ -3,7 +3,7 @@ import clientPromise from "@/lib/mongodb";
 import { requireAuth } from "@/lib/auth";
 
 export async function GET(req, { params }) {
-  requireAuth();
+  // requireAuth();
   try {
 
       const pathname = new URL(req.url).pathname;

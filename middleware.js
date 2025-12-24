@@ -17,5 +17,5 @@ export function middleware(req) {
 }
 
 export const config = {
-  matcher: ["/nothing"],
+  matcher: ["/consignment/list"],
 };

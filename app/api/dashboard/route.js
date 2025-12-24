@@ -2,7 +2,7 @@ import clientPromise from "@/lib/mongodb";
 import { requireAuth } from "@/lib/auth";
 
 export async function GET() {
-  requireAuth();
+  // requireAuth();
   try {
 
     const client = await clientPromise;
