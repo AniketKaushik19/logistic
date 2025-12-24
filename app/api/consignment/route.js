@@ -3,20 +3,26 @@ import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 
 /**
- * GET → Fetch all consignments (Admin / Dashboard)
+ * GET → Fetch all consignments
  */
 export async function GET(req) {
-  // const auth = await requireAuth(req);
-  // if (!auth.authenticated) {
-  //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  // }
+  const auth = await requireAuth(req);
+  if (!auth.authenticated) {
+    return NextResponse.json(
+      { error: auth.error || "Unauthorized" },
+      { status: 401 }
+    );
+  }
 
   try {
     const client = await clientPromise;
     const db = client.db("logisticdb");
-    const collection = db.collection("consignments");
 
-    const data = await collection.find({}).sort({ createdAt: -1 }).toArray();
+    const data = await db
+      .collection("consignments")
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray();
 
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
@@ -32,74 +38,59 @@ export async function GET(req) {
  * POST → Save new consignment
  */
 export async function POST(req) {
-  // const auth = await requireAuth(req);
-  // if (!auth.authenticated) {
-  //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  // }
+  const auth = await requireAuth(req);
+  if (!auth.authenticated) {
+    return NextResponse.json({ error: auth.error || "Unauthorized" }, { status: 401 });
+  }
 
   try {
     const body = await req.json();
-
     if (!body || typeof body !== "object") {
-      return NextResponse.json(
-        { error: "Invalid request body" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
     }
 
     const client = await clientPromise;
     const db = client.db("logisticdb");
     const counters = db.collection("counters");
 
-    // Ensure counter exists
     await counters.updateOne(
       { _id: "consignment" },
-      { $setOnInsert: { seq: 1000 } },
+      { $setOnInsert: { seq: 0 } },
       { upsert: true }
     );
 
-    // Atomic increment
-    const counter = await counters.findOneAndUpdate(
+    const counterResult = await counters.findOneAndUpdate(
       { _id: "consignment" },
       { $inc: { seq: 1 } },
-      { returnDocument: "after" }
+      { returnDocument: "after", upsert: true }
     );
 
-    if (!counter.value || typeof counter.value.seq !== "number") {
-      return NextResponse.json(
-        { error: "Failed to generate consignment number" },
-        { status: 500 }
-      );
+    const seq = counterResult?.seq;
+    if (seq === undefined) {
+      return NextResponse.json({ error: "Failed to generate consignment number" }, { status: 500 });
     }
 
-    const cn = `ALC-${counter.value.seq}`;
-
-    // Build consignment
+    const cn = `ALC-${seq}`;
     const consignment = {
       ...body,
       cn,
       status: "Booked",
       createdAt: new Date(),
       updatedAt: new Date(),
+      createdBy: auth.user.email,
     };
 
-    // Save
     const result = await db.collection("consignments").insertOne(consignment);
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Consignment created successfully",
-        cn,
-        insertedId: result.insertedId,
-      },
-      { status: 201 }
-    );
+    return NextResponse.json({
+      success: true,
+      message: "Consignment created successfully",
+      cn,
+      insertedId: result.insertedId,
+    }, { status: 201 });
+
   } catch (error) {
     console.error("POST consignment error:", error);
-    return NextResponse.json(
-      { error: "Failed to save consignment" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to save consignment" }, { status: 500 });
   }
 }

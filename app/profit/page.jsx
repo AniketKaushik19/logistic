@@ -28,7 +28,6 @@ export default function Page({id}){
             const res = await fetch('/api/profit')
             const data = await res.json()
             setConsignments(data)
-            console.log(data)
         } catch (error) {
             console.error('Failed to fetch consignments:', error)
         }

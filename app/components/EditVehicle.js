@@ -25,7 +25,6 @@ export function EditVehicle({ name, driverName, capacity }) {
   const [error, setError] = useState("")
 
   const handleSubmit = async (e) => {
-    console.log("working")
     e.preventDefault()
     setError("")
     setLoading(true)
@@ -44,7 +43,6 @@ export function EditVehicle({ name, driverName, capacity }) {
       })
     toast.success("Vehicle updated successfully")
       const data = await response.json()
-      console.log(data)
       if (data.message) {
         toast.success("Vehicle updated successfully")
       } else {
