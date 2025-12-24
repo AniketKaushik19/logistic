@@ -1,9 +1,20 @@
 import clientPromise from "@/lib/mongodb";
+import { requireAuth } from "@/lib/auth";
+import { NextResponse } from "next/server";
 
 /**
  * GET → Fetch latest 5 consignments for profit calculation
  */
-export async function GET() {
+export async function GET(req) {
+  // ✅ Ensure auth check runs with request
+  const authResult = await requireAuth(req);
+  if (!authResult.authenticated) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   try {
     const client = await clientPromise;
     const db = client.db("logisticdb");
@@ -15,10 +26,10 @@ export async function GET() {
       .limit(5)
       .toArray();
 
-    return Response.json(data);
+    return NextResponse.json(data);
   } catch (error) {
     console.error("Database error:", error);
-    return Response.json(
+    return NextResponse.json(
       { error: "Failed to fetch consignments for profit" },
       { status: 500 }
     );
@@ -29,6 +40,14 @@ export async function GET() {
  * POST → Save profit data
  */
 export async function POST(req) {
+  const authResult = await requireAuth(req);
+  if (!authResult.authenticated) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
   try {
     const body = await req.json();
 
@@ -45,14 +64,14 @@ export async function POST(req) {
 
     const result = await collection.insertOne(profitData);
 
-    return Response.json({
+    return NextResponse.json({
       success: true,
       message: "Profit saved successfully",
       insertedId: result.insertedId,
     });
   } catch (error) {
     console.error("Database error:", error);
-    return Response.json(
+    return NextResponse.json(
       { error: "Failed to save profit" },
       { status: 500 }
     );

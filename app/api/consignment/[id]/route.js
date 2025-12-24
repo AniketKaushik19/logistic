@@ -1,11 +1,17 @@
 import clientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
+import { requireAuth } from "@/lib/auth";
 
 /* ================= GET ================= */
 export async function GET(req, { params }) {
+  const auth = await requireAuth(req);
+  if (!auth.authenticated) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
-    const { id } = await params; // ✅ FIX
+    const { id } = params; // ✅ FIX
 
     if (!id || !ObjectId.isValid(id)) {
       return NextResponse.json(
@@ -17,9 +23,7 @@ export async function GET(req, { params }) {
     const client = await clientPromise;
     const db = client.db("logisticdb");
 
-    const doc = await db
-      .collection("consignments")
-      .findOne({ _id: new ObjectId(id) });
+    const doc = await db.collection("consignments").findOne({ _id: new ObjectId(id) });
 
     if (!doc) {
       return NextResponse.json(
@@ -38,9 +42,15 @@ export async function GET(req, { params }) {
   }
 }
 
+/* ================= PUT ================= */
 export async function PUT(req, { params }) {
+  const auth = await requireAuth(req);
+  if (!auth.authenticated) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
-    const { id } = await params;
+    const { id } = params;
     if (!id || !ObjectId.isValid(id)) {
       return NextResponse.json(
         { error: "Invalid consignment ID" },
@@ -55,6 +65,7 @@ export async function PUT(req, { params }) {
 
     const client = await clientPromise;
     const db = client.db("logisticdb");
+
     const result = await db.collection("consignments").findOneAndUpdate(
       { _id: new ObjectId(id) },
       {
@@ -65,7 +76,8 @@ export async function PUT(req, { params }) {
       },
       { returnDocument: "after" }
     );
-    if (!result) {
+
+    if (!result.value) {
       return NextResponse.json(
         { error: "Consignment not found" },
         { status: 404 }
@@ -85,11 +97,15 @@ export async function PUT(req, { params }) {
   }
 }
 
-
 /* ================= DELETE ================= */
 export async function DELETE(req, { params }) {
+  const auth = await requireAuth(req);
+  if (!auth.authenticated) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
-    const { id } = await params; // ✅ FIX
+    const { id } = params; // ✅ FIX
 
     if (!id || !ObjectId.isValid(id)) {
       return NextResponse.json(
@@ -101,9 +117,7 @@ export async function DELETE(req, { params }) {
     const client = await clientPromise;
     const db = client.db("logisticdb");
 
-    const result = await db
-      .collection("consignments")
-      .deleteOne({ _id: new ObjectId(id) });
+    const result = await db.collection("consignments").deleteOne({ _id: new ObjectId(id) });
 
     if (result.deletedCount === 0) {
       return NextResponse.json(

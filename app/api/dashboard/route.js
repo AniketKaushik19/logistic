@@ -1,7 +1,10 @@
 import clientPromise from "@/lib/mongodb";
+import { requireAuth } from "@/lib/auth";
 
 export async function GET() {
+  requireAuth();
   try {
+
     const client = await clientPromise;
     const db = client.db("logisticdb");
 

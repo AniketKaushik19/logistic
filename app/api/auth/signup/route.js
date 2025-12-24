@@ -59,10 +59,20 @@ export async function POST(request) {
       expiresIn: '1d'
     });
 
-    return NextResponse.json(
-      { message: 'User created successfully', user: userWithoutPassword, token },
+    const res = NextResponse.json(
+      { message: 'User created successfully', user: userWithoutPassword },
       { status: 201 }
     );
+
+    res.cookies.set('auth_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 60 * 60 * 24 // 1 day
+    });
+
+    return res;
   } catch (error) {
     console.error('Signup error:', error);
     return NextResponse.json(

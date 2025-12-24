@@ -1,10 +1,9 @@
 "use client";
-
+import { useAuth } from "@/app/context/AuthContext";
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
 import { motion } from "framer-motion";
-import { generatePDF } from "@/utils/generatePDF";
 import Navbar from "@/app/_components/Navbar";
 import {
   Plus,
@@ -17,17 +16,35 @@ import {
   Pencil,
 } from "lucide-react";
 import { printPDF } from "@/utils/printPDF";
+import { useRouter } from "next/navigation";
 
 export default function ConsignmentList() {
   const [items, setItems] = useState([]);
   const [pageLoading, setPageLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState(null);
+const { user, loading } = useAuth();
+const router = useRouter();
+
+  console.log(user + loading)
+// useEffect(() => {
+//   if (!loading && !user) {
+//     router.replace("/login");
+//   }
+// }, [user, loading]);
+
+// if (loading || !user) return null;
 
   /* ================= FETCH ================= */
   const fetchItems = useCallback(async () => {
     setPageLoading(true);
     try {
-      const res = await fetch("/api/consignment", { cache: "no-store" });
+      const token = localStorage.getItem("auth_token");
+ const res = await fetch("/api/consignment", {
+   cache: "no-store",
+   headers: {
+     Authorization: `Bearer ${token}`,
+   },
+ });
 
       if (!res.ok) {
         throw new Error("API error");
@@ -87,9 +104,14 @@ export default function ConsignmentList() {
 
     setActionLoadingId(id);
     try {
-      const res = await fetch(`/api/consignment/${id}`, {
-        method: "DELETE",
-      });
+    const token = localStorage.getItem("auth_token");
+const res = await fetch(`/api/consignment/${id}`, {
+  method: "DELETE",
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
+
 
       if (!res.ok) throw new Error("Delete failed");
 
