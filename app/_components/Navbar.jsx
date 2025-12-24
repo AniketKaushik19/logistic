@@ -8,17 +8,19 @@ import { motion } from "framer-motion";
 export default function Navbar() {
   const { user, loading, refreshAuth } = useAuth();
   const router = useRouter();
-console.log(user)
+
   const logout = async () => {
-    await fetch("/api/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    });
+    // ✅ Remove token from localStorage
+    localStorage.removeItem("auth_token");
+
+    // ✅ Refresh auth context
     await refreshAuth();
+
+    // ✅ Redirect to login
     router.push("/login");
   };
 
-  if (loading) return null; // ⛔ prevent flicker
+  if (loading) return null;
 
   return (
     <motion.nav
@@ -33,8 +35,8 @@ console.log(user)
           <li><Link href="/">Home</Link></li>
 
           {user ? (
-            <><li><Link href="/track">Track</Link></li>
-
+            <>
+              <li><Link href="/track">Track</Link></li>
               <li><Link href="/consignment/list">Consignment</Link></li>
               <li
                 onClick={logout}

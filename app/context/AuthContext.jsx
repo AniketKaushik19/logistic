@@ -1,36 +1,44 @@
-"use client";
+"use client"
+import React, { createContext, useContext, useState, useEffect } from "react";
 
-import { createContext, useContext, useEffect, useState } from "react";
-
-const AuthContext = createContext(null);
+const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchAuth = async () => {
+  const refreshAuth = async () => {
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch("/api/auth/me", {
-        credentials: "include", // ✅ REQUIRED - include cookies in request
-        cache: "no-store", // ✅ Don't cache to ensure fresh auth state
+        headers: { Authorization: `Bearer ${token}` },
       });
+
+      if (!res.ok) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
       const data = await res.json();
-      setUser(data.authenticated ? data.user : null);
-      return data.authenticated;
-    } catch (error) {
-      console.error("Auth fetch failed:", error);
+      setUser(data.user);
+    } catch (err) {
+      console.error("Auth refresh failed:", err);
       setUser(null);
-      return false;
+    } finally {
+      setLoading(false);
     }
   };
 
-  const refreshAuth = async () => {
-    return await fetchAuth();
-  };
-
+  // ✅ Run once when the app mounts
   useEffect(() => {
-    setLoading(true);
-    fetchAuth().finally(() => setLoading(false));
+    refreshAuth();
   }, []);
 
   return (
@@ -40,10 +48,4 @@ export function AuthProvider({ children }) {
   );
 }
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);

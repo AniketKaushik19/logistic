@@ -1,8 +1,9 @@
 import clientPromise from "@/lib/mongodb";
+import { requireAuth } from "@/lib/auth";
 
 export async function GET(req) {
+  requireAuth();
   try {
-         requireAuth();
 
     const { searchParams } = new URL(req.url);
     const type = searchParams.get('type');

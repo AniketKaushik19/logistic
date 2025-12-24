@@ -4,24 +4,16 @@ import jwt from "jsonwebtoken";
 export async function POST(req) {
   const { email, password } = await req.json();
 
-  // TODO: validate user from DB
-  if (email !== process.env.ADMIN_EMAIL || password !== process.env.ADMIN_PASSWORD) {
-    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+  // Replace with DB lookup
+  if (email === "test@example.com" && password === "password123") {
+    const token = jwt.sign(
+      { id: "123", email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    return NextResponse.json({ token }); // client stores this
   }
 
-  const token = jwt.sign(
-    { email },
-    process.env.JWT_SECRET,
-    { expiresIn: "1d" }
-  );
-
-  const res = NextResponse.json({ success: true });
-
-  res.cookies.set("auth_token", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-  });
-  return res;
+  return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
 }

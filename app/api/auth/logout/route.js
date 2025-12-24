@@ -4,9 +4,9 @@ export async function POST() {
   const res = NextResponse.json({ success: true });
 
   res.cookies.set("auth_token", "", {
-    httpOnly: true,
-    expires: new Date(0),
     path: "/",
+    maxAge: 0,
   });
+
   return res;
 }

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,93 +8,100 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/app/_components/Navbar";
 import { useAuth } from "@/app/context/AuthContext";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
-    const router = useRouter();
-    const { refreshAuth } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const router = useRouter();
+  const { refreshAuth } = useAuth();
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
-  setLoading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
-  try {
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include", // ✅ REQUIRED
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
+      console.log(data)
 
-    if (!response.ok) {
-      setError(data.error || "Login failed");
+      if (!response.ok) {
+        setError(data.error || "Login failed");
+        setLoading(false);
+        return;
+      }
+
+      // ✅ Save token in localStorage
+      localStorage.setItem("auth_token", data.token);
+
+      // ✅ Refresh auth context BEFORE navigating
+      await refreshAuth();
       setLoading(false);
-      return;
+
+      // Small delay to ensure auth state is updated
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+router.replace("/consignment/list");
+      toast.success("done")
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong. Please try again.");
+      setLoading(false);
     }
-
-    // ✅ Refresh auth context BEFORE navigating
-    await refreshAuth();
-    setLoading(false);
-    // Small delay to ensure auth state is updated
-    await new Promise(resolve => setTimeout(resolve, 300));
-    router.replace("/track");
-router.refresh(); // 🔥 REQUIRED
-  } catch (err) {
-    console.error(err);
-    setError("Something went wrong. Please try again.");
-    setLoading(false);
-  }
-};
-
+  };
 
   return (
     <>
-        <Navbar/>
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-slate-50 to-indigo-50 p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="w-full max-w-md"
-      >
-        <Card className="rounded-2xl shadow-2xl border border-slate-200 backdrop-blur">
-          <CardContent className="p-8 space-y-6">
-            {/* Header */}
-            <motion.div 
-              className="text-center space-y-3"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.1, duration: 0.4 }}
-            >
-              <div className="mx-auto w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg">
-                <ShieldCheck size={32} className="drop-shadow-lg" />
-              </div>
-              <h2 className="text-3xl font-bold text-slate-900">Welcome Back</h2>
-              <p className="text-sm text-slate-600">
-                Sign in to your logistic account
-              </p>
-            </motion.div>
+      <Navbar />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-slate-50 to-indigo-50 p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="w-full max-w-md"
+        >
+          <Card className="rounded-2xl shadow-2xl border border-slate-200 backdrop-blur">
+            <CardContent className="p-8 space-y-6">
+              {/* Header */}
+              <motion.div
+                className="text-center space-y-3"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.1, duration: 0.4 }}
+              >
+                <div className="mx-auto w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg">
+                  <ShieldCheck size={32} className="drop-shadow-lg" />
+                </div>
+                <h2 className="text-3xl font-bold text-slate-900">
+                  Welcome Back
+                </h2>
+                <p className="text-sm text-slate-600">
+                  Sign in to your logistic account
+                </p>
+              </motion.div>
 
-            {error && (
-                <motion.div 
+              {error && (
+                <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className="flex gap-3 bg-red-50 border border-red-200 text-red-700 text-sm p-4 rounded-xl"
                 >
-                    <AlertCircle size={18} className="flex-shrink-0 mt-0.5" />
-                    <span>{error}</span>
+                  <AlertCircle size={18} className="flex-shrink-0 mt-0.5" />
+                  <span>{error}</span>
                 </motion.div>
-            )}
+              )}
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Email */}
-                <motion.div 
+                <motion.div
                   className="space-y-2"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -114,7 +121,7 @@ router.refresh(); // 🔥 REQUIRED
                 </motion.div>
 
                 {/* Password */}
-                <motion.div 
+                <motion.div
                   className="space-y-2"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -140,41 +147,42 @@ router.refresh(); // 🔥 REQUIRED
                   transition={{ delay: 0.4 }}
                 >
                   <Button
-                      type="submit"
-                      className="w-full rounded-lg text-base font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
-                      disabled={loading}
+                    type="submit"
+                    className="w-full rounded-lg text-base font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                    disabled={loading}
                   >
-                      {loading ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          Signing In...
-                        </div>
-                      ) : 'Sign In'}
+                    {loading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Signing In...
+                      </div>
+                    ) : (
+                      "Sign In"
+                    )}
                   </Button>
                 </motion.div>
-            </form>
+              </form>
 
-            {/* Footer */}
-            <motion.p 
-              className="text-center text-sm text-slate-600"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              Don&apos;t have an account?{" "}
-              <button
-                type="button"
-                className="text-blue-600 font-semibold cursor-pointer hover:text-blue-700 hover:underline transition-colors"
-                onClick={() => router.push('/signup')}
+              {/* Footer */}
+              <motion.p
+                className="text-center text-sm text-slate-600"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
               >
-                Sign up
-              </button>
-            </motion.p>
-          </CardContent>
-        </Card>
-      </motion.div>
-    </div>
+                Don&apos;t have an account?{" "}
+                <button
+                  type="button"
+                  className="text-blue-600 font-semibold cursor-pointer hover:text-blue-700 hover:underline transition-colors"
+                  onClick={() => router.push("/signup")}
+                >
+                  Sign up
+                </button>
+              </motion.p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
     </>
-
   );
 }

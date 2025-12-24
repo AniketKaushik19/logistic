@@ -1,9 +1,9 @@
 import clientPromise from "@/lib/mongodb";
-
+import { requireAuth } from "@/lib/auth";
 
 export async function POST(req, res) {
+    requireAuth();
     try{
-             requireAuth();
 
         const data=await req.json()
         const client=await clientPromise
@@ -19,8 +19,8 @@ export async function POST(req, res) {
 }
 
 export async function GET(req, res) {
+    requireAuth();
     try {
-                 requireAuth();
 
         const { searchParams } = new URL(req.url);
         const limit = parseInt(searchParams.get('limit')) || 10; // default limit 10
