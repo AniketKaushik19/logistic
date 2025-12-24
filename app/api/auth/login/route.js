@@ -5,7 +5,7 @@ export async function POST(req) {
   const { email, password } = await req.json();
 
   // Replace with DB lookup
-  if (email === "test@example.com" && password === "password123") {
+  if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
     const token = jwt.sign(
       { id: "123", email },
       process.env.JWT_SECRET,
