@@ -5,10 +5,10 @@ import { requireAuth } from "@/lib/auth";
 
 /* ================= GET ================= */
 export async function GET(req, { params }) {
-  const auth = await requireAuth(req);
-  if (!auth.authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  // const auth = await requireAuth(req);
+  // if (!auth.authenticated) {
+  //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // }
 
   try {
     const { id } = params; // ✅ FIX
@@ -44,10 +44,10 @@ export async function GET(req, { params }) {
 
 /* ================= PUT ================= */
 export async function PUT(req, { params }) {
-  const auth = await requireAuth(req);
-  if (!auth.authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  // const auth = await requireAuth(req);
+  // if (!auth.authenticated) {
+  //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // }
 
   try {
     const { id } = params;
@@ -99,10 +99,10 @@ export async function PUT(req, { params }) {
 
 /* ================= DELETE ================= */
 export async function DELETE(req, { params }) {
-  const auth = await requireAuth(req);
-  if (!auth.authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  // const auth = await requireAuth(req);
+  // if (!auth.authenticated) {
+  //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // }
 
   try {
     const { id } = params; // ✅ FIX

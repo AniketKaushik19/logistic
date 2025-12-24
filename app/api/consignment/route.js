@@ -6,10 +6,10 @@ import { requireAuth } from "@/lib/auth";
  * GET → Fetch all consignments (Admin / Dashboard)
  */
 export async function GET(req) {
-  const auth = await requireAuth(req);
-  if (!auth.authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  // const auth = await requireAuth(req);
+  // if (!auth.authenticated) {
+  //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // }
 
   try {
     const client = await clientPromise;
@@ -32,10 +32,10 @@ export async function GET(req) {
  * POST → Save new consignment
  */
 export async function POST(req) {
-  const auth = await requireAuth(req);
-  if (!auth.authenticated) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  // const auth = await requireAuth(req);
+  // if (!auth.authenticated) {
+  //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // }
 
   try {
     const body = await req.json();
