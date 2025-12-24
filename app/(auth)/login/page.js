@@ -61,34 +61,6 @@ router.replace("/consignment/list");
   return (
     <>
       <Navbar />
-<<<<<<< HEAD
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="w-full max-w-md"
-        >
-          <Card className="rounded-2xl shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
-            <CardContent className="p-6 sm:p-8 space-y-6">
-              {/* Header */}
-              <div className="text-center space-y-3">
-                <div className="mx-auto w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg">
-                  <ShieldCheck size={28} className="sm:w-8 sm:h-8" />
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Welcome Back
-                </h2>
-                <p className="text-gray-600 text-sm sm:text-base">
-                  Sign in to your account
-                </p>
-              </div>
-
-              {error && (
-                <div className="text-red-600 text-sm text-center bg-red-50 border border-red-200 p-3 rounded-lg">
-                  {error}
-                </div>
-=======
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-slate-50 to-indigo-50 p-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -125,17 +97,10 @@ router.replace("/consignment/list");
                   <AlertCircle size={18} className="flex-shrink-0 mt-0.5" />
                   <span>{error}</span>
                 </motion.div>
->>>>>>> 9c0a7788a7c9d26fcd1ff1eb34825bcfbdbe4f38
               )}
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Email */}
-<<<<<<< HEAD
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold flex items-center gap-2 text-gray-700">
-                    <Mail size={18} className="text-blue-500" />
-                    Email Address
-=======
                 <motion.div
                   className="space-y-2"
                   initial={{ opacity: 0, x: -20 }}
@@ -144,26 +109,18 @@ router.replace("/consignment/list");
                 >
                   <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                     <Mail size={16} className="text-blue-600" /> Email Address
->>>>>>> 9c0a7788a7c9d26fcd1ff1eb34825bcfbdbe4f38
                   </label>
                   <Input
                     type="email"
                     placeholder="you@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500"
                     required
                     className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
                   />
                 </motion.div>
 
                 {/* Password */}
-<<<<<<< HEAD
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold flex items-center gap-2 text-gray-700">
-                    <Lock size={18} className="text-blue-500" />
-                    Password
-=======
                 <motion.div
                   className="space-y-2"
                   initial={{ opacity: 0, x: -20 }}
@@ -172,50 +129,19 @@ router.replace("/consignment/list");
                 >
                   <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                     <Lock size={16} className="text-blue-600" /> Password
->>>>>>> 9c0a7788a7c9d26fcd1ff1eb34825bcfbdbe4f38
                   </label>
                   <Input
                     type="password"
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500"
+    
                     required
                     className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
                   />
                 </motion.div>
 
                 {/* Button */}
-<<<<<<< HEAD
-                <Button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 h-12 text-base font-semibold rounded-xl"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Signing In...
-                    </div>
-                  ) : (
-                    'Sign In'
-                  )}
-                </Button>
-              </form>
-
-              {/* Footer */}
-              <div className="text-center pt-4 border-t border-gray-100">
-                <p className="text-gray-600 text-sm">
-                  Don&apos;t have an account?{" "}
-                  <span
-                    className="text-blue-600 font-semibold cursor-pointer hover:text-indigo-600 hover:underline transition-colors duration-200"
-                    onClick={() => router.push('/signup')}
-                  >
-                    Sign up
-                  </span>
-                </p>
-              </div>
-=======
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -223,7 +149,7 @@ router.replace("/consignment/list");
                 >
                   <Button
                     type="submit"
-                    className="w-full rounded-lg text-base font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                    className="w-full rounded-lg text-base font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl text-white"
                     disabled={loading}
                   >
                     {loading ? (
@@ -248,13 +174,12 @@ router.replace("/consignment/list");
                 Don&apos;t have an account?{" "}
                 <button
                   type="button"
-                  className="text-blue-600 font-semibold cursor-pointer hover:text-blue-700 hover:underline transition-colors"
+                  className="text-blue-600  font-semibold cursor-pointer hover:text-blue-700 hover:underline transition-colors"
                   onClick={() => router.push("/signup")}
                 >
                   Sign up
                 </button>
               </motion.p>
->>>>>>> 9c0a7788a7c9d26fcd1ff1eb34825bcfbdbe4f38
             </CardContent>
           </Card>
         </motion.div>

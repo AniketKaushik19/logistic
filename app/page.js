@@ -6,8 +6,8 @@ import {useState} from 'react'
 import Footer from "./_components/Footer.jsx"
 import Dashboard from "./dashboard/page.js";
 import GetInTouch from "./components/GetInTouch.js";
-import { ShieldCheck , Clock , PackageCheck , Truck } from "lucide-react";
-
+import { ShieldCheck , Clock , PackageCheck , Truck, ArrowDown } from "lucide-react";
+import { useRouter } from "next/navigation.js";
 const features = [
   {
     title: "Trusted by Tata Motors",
@@ -30,6 +30,7 @@ const features = [
 ];
 
 export default function Home() {
+  const router=useRouter()
   const [admin ,setAdmin]=useState(false)
   return (
     <div className="w-full ">
@@ -65,15 +66,16 @@ export default function Home() {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               className="bg-red-600 text-white px-6 py-3 rounded-2xl shadow-lg"
+              onClick={()=>{router.push("/#about")}}
             >
-              Track Consignment
+              <ArrowDown className="animate-bounce"/>
             </motion.button>
           </motion.div>
         </div>
       </section>
 
       {/* ABOUT SECTION */}
-      <section className="py-16 px-6 max-w-7xl mx-auto">
+      <section className="py-16 px-6 max-w-7xl mx-auto" id="about">
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           whileInView={{ opacity: 1, x: 0 }}

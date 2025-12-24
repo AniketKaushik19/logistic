@@ -63,30 +63,6 @@ export default function SignupPage() {
 
   return (
     <>
-<<<<<<< HEAD
-      <Navbar />
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="w-full max-w-md"
-        >
-          <Card className="rounded-2xl shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
-            <CardContent className="p-6 sm:p-8 space-y-6">
-              {/* Header */}
-              <div className="text-center space-y-3">
-                <div className="mx-auto w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg">
-                  <ShieldCheck size={28} className="sm:w-8 sm:h-8" />
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Create Account
-                </h2>
-                <p className="text-gray-600 text-sm sm:text-base">
-                  Sign up to get started
-                </p>
-              </div>
-=======
     <Navbar/>
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-slate-50 to-indigo-50 p-4">
       <motion.div
@@ -123,7 +99,6 @@ export default function SignupPage() {
                     <span>{error}</span>
                 </motion.div>
             )}
->>>>>>> 9c0a7788a7c9d26fcd1ff1eb34825bcfbdbe4f38
 
               {error && (
                 <div className="text-red-600 text-sm text-center bg-red-50 border border-red-200 p-3 rounded-lg">
@@ -133,12 +108,6 @@ export default function SignupPage() {
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Name */}
-<<<<<<< HEAD
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold flex items-center gap-2 text-gray-700">
-                    <User size={18} className="text-blue-500" />
-                    Full Name
-=======
                 <motion.div 
                   className="space-y-2"
                   initial={{ opacity: 0, x: -20 }}
@@ -147,25 +116,17 @@ export default function SignupPage() {
                 >
                   <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                     <User size={16} className="text-emerald-600" /> Full Name
->>>>>>> 9c0a7788a7c9d26fcd1ff1eb34825bcfbdbe4f38
                   </label>
                   <Input
                     placeholder="Your Full Name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
                     required
                     className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
                   />
                 </motion.div>
 
                 {/* Email */}
-<<<<<<< HEAD
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold flex items-center gap-2 text-gray-700">
-                    <Mail size={18} className="text-blue-500" />
-                    Email Address
-=======
                 <motion.div 
                   className="space-y-2"
                   initial={{ opacity: 0, x: -20 }}
@@ -174,26 +135,18 @@ export default function SignupPage() {
                 >
                   <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                     <Mail size={16} className="text-emerald-600" /> Email Address
->>>>>>> 9c0a7788a7c9d26fcd1ff1eb34825bcfbdbe4f38
                   </label>
                   <Input
                     type="email"
                     placeholder="you@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
                     required
                     className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
                   />
                 </motion.div>
 
                 {/* Password */}
-<<<<<<< HEAD
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold flex items-center gap-2 text-gray-700">
-                    <Lock size={18} className="text-blue-500" />
-                    Password
-=======
                 <motion.div 
                   className="space-y-2"
                   initial={{ opacity: 0, x: -20 }}
@@ -202,14 +155,12 @@ export default function SignupPage() {
                 >
                   <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                     <Lock size={16} className="text-emerald-600" /> Password
->>>>>>> 9c0a7788a7c9d26fcd1ff1eb34825bcfbdbe4f38
                   </label>
                   <Input
                     type="password"
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
                     required
                     className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
                   />
@@ -217,12 +168,6 @@ export default function SignupPage() {
                 </motion.div>
 
                 {/* Confirm Password */}
-<<<<<<< HEAD
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold flex items-center gap-2 text-gray-700">
-                    <ShieldCheck size={18} className="text-blue-500" />
-                    Confirm Password
-=======
                 <motion.div 
                   className="space-y-2"
                   initial={{ opacity: 0, x: -20 }}
@@ -231,55 +176,18 @@ export default function SignupPage() {
                 >
                   <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                     <ShieldCheck size={16} className="text-emerald-600" /> Confirm Password
->>>>>>> 9c0a7788a7c9d26fcd1ff1eb34825bcfbdbe4f38
                   </label>
                   <Input
                     type="password"
                     placeholder="••••••••"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
                     required
                     className="h-12 border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
                   />
                 </motion.div>
 
                 {/* Button */}
-<<<<<<< HEAD
-                <Button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 h-12 text-base font-semibold rounded-xl"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Creating Account...
-                    </div>
-                  ) : (
-                    'Create Account'
-                  )}
-                </Button>
-              </form>
-
-              {/* Footer */}
-              <div className="text-center pt-4 border-t border-gray-100">
-                <p className="text-gray-600 text-sm">
-                  Already have an account?{" "}
-                  <span
-                    className="text-blue-600 font-semibold cursor-pointer hover:text-indigo-600 hover:underline transition-colors duration-200"
-                    onClick={() => router.push('/login')}
-                  >
-                    Sign in
-                  </span>
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
-    </>
-=======
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -321,6 +229,5 @@ export default function SignupPage() {
       </motion.div>
     </div>
   </> 
->>>>>>> 9c0a7788a7c9d26fcd1ff1eb34825bcfbdbe4f38
   );
 }
