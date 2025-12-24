@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 
 export async function POST(req) {
-  requireAuth();
+  // requireAuth();
   try {
     const { truckNumber, model, capacity, registrationYear, driverName } = await req.json();
 
@@ -32,7 +32,7 @@ export async function POST(req) {
 }
 
 export async function GET(req, res ){
-  requireAuth();
+  // requireAuth();
   try{
 
         const client =await clientPromise;
@@ -48,10 +48,10 @@ export async function GET(req, res ){
 }
 
 export async function PUT(req, res){
-  requireAuth();
+  // requireAuth();
   try {
 
-     const user = requireAuth();
+    //  const user = requireAuth();
      const { truckNumber, driverName , capacity }=await req.json()
     const client=await clientPromise;
     const db=client.db("logisticdb")
@@ -69,7 +69,7 @@ export async function PUT(req, res){
 }
 
 export async function DELETE(req, res){
-  requireAuth();
+  // requireAuth();
   try{
 
     const {truckNumber}=await req.json()

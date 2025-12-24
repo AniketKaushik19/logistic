@@ -2,7 +2,7 @@ import clientPromise from "@/lib/mongodb";
 import { requireAuth } from "@/lib/auth";
 
 export async function POST(req, res) {
-    requireAuth();
+    // requireAuth();
     try{
 
         const data=await req.json()
@@ -19,7 +19,7 @@ export async function POST(req, res) {
 }
 
 export async function GET(req, res) {
-    requireAuth();
+    // requireAuth();
     try {
 
         const { searchParams } = new URL(req.url);
