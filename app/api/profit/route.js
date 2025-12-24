@@ -1,19 +1,10 @@
 import clientPromise from "@/lib/mongodb";
-import { requireAuth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 /**
  * GET → Fetch latest 5 consignments for profit calculation
  */
 export async function GET(req) {
-  // ✅ Ensure auth check runs with request
-  const authResult = await requireAuth(req);
-  if (!authResult.authenticated) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
-  }
 
   try {
     const client = await clientPromise;
@@ -40,14 +31,6 @@ export async function GET(req) {
  * POST → Save profit data
  */
 export async function POST(req) {
-  const authResult = await requireAuth(req);
-  if (!authResult.authenticated) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
-  }
-
   try {
     const body = await req.json();
 
