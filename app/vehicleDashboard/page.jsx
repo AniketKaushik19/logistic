@@ -63,7 +63,7 @@ export default function Dashboard() {
     return(
         <>
         <Navbar/>
-        <main className="container mx-auto px-4 py-8 mt-9">
+        <main className="container mx-auto px-4 py-8 mt-10">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Fleet Overview</h1>
           <p className="text-gray-600">Monitor and manage your logistic vehicles</p>
