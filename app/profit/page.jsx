@@ -25,7 +25,12 @@ export default function Page({id}){
 
     const fetchConsignments = async () => {
         try {
-            const res = await fetch('/api/profit')
+           const token = localStorage.getItem("auth_token");
+            const res = await fetch('/api/profit', {
+   cache: "no-store",
+   headers: {
+     Authorization: `Bearer ${token}`,
+   }})
             const data = await res.json()
             setConsignments(data)
         } catch (error) {
@@ -60,9 +65,14 @@ export default function Page({id}){
         }
 
         try {
+             const token = localStorage.getItem("auth_token");
             const res = await fetch('/api/profit', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                 cache: "no-store",
+                headers: { 'Content-Type': 'application/json'
+                  ,     Authorization: `Bearer ${token}`,
+
+                 },
                 body: JSON.stringify(profitData)
             })
             const data = await res.json()

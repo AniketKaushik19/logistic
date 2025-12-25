@@ -31,6 +31,7 @@ export default function GetInTouch() {
             })
         })
         const data=await response.json()
+        console.log(data)
         if(data.message){
             toast.success("Message sent successfully")
             setEmail('')
@@ -38,7 +39,7 @@ export default function GetInTouch() {
             setMessage('')
         }
         else {
-            toast.error("Failed to send message . Please try again Later.")
+            toast.error("Failed to send message.Please try again Later.")
         }
          }catch(error){
                console.log("Error sending message:",error)
@@ -108,7 +109,7 @@ export default function GetInTouch() {
             <Textarea placeholder="Your Message" rows={4} onChange={(e)=>setMessage(e.target.value)}
             value={message} />
 
-            <Button className="w-full rounded-xl flex items-center gap-2 border  hover:bg-purple-600 bg-purple-500 text-white " disabled={isLoading} onClick={handleSubmit}>
+            <Button className="w-full rounded-xl flex items-center gap-2 border  hover:bg-purple-600 bg-purple-500 text-white  hover:cursor-pointer" disabled={isLoading} onClick={handleSubmit}>
                 {isLoading ?
               (<>
                  <Loader className="animate-spin" size={18} />

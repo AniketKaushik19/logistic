@@ -2,16 +2,9 @@ import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb"; // <-- Make sure this path is correct
 
 export async function POST(req) {
-    const auth = await requireAuth(req);
-    if (!auth.authenticated) {
-      return NextResponse.json(
-        { error: auth.error || "Unauthorized" },
-        { status: 401 }
-      );
-    }
+
   try {
     const { name, email, message } = await req.json();
-
     // Validate input
     if (!email || !name || !message) {
       return NextResponse.json(

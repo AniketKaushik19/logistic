@@ -25,15 +25,6 @@ export default function ConsignmentList() {
 const { user, loading } = useAuth();
 const router = useRouter();
 
-// useEffect(() => {
-//   if (!loading && !user) {
-//     router.replace("/login");
-//   }
-// }, [user, loading]);
-
-// if (loading || !user) return null;
-
-  /* ================= FETCH ================= */
   const fetchItems = useCallback(async () => {
     setPageLoading(true);
     try {

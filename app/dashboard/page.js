@@ -21,7 +21,13 @@ export default function Dashboard() {
 
     const fetchTotals = async () => {
         try {
-            const res = await fetch('/api/dashboard');
+                  const token = localStorage.getItem("auth_token");
+
+            const res = await fetch('/api/dashboard', {
+   cache: "no-store",
+   headers: {
+     Authorization: `Bearer ${token}`,
+   }});
             const data = await res.json();
             setTotals(data);
         } catch (error) {
@@ -31,10 +37,17 @@ export default function Dashboard() {
 
     const fetchAnalysis = async (type, start = '', end = '') => {
         try {
+                  const token = localStorage.getItem("auth_token");
+
             const params = new URLSearchParams({ type });
             if (start) params.append('start', start);
             if (end) params.append('end', end);
-            const res = await fetch(`/api/dashboard/analysis?${params}`);
+            const res = await fetch(`/api/dashboard/analysis?${params}`, {
+   cache: "no-store",
+   headers: {
+     Authorization: `Bearer ${token}`,
+   },
+ });
             const data = await res.json();
             setAnalysisData(data);
         } catch (error) {

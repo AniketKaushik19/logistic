@@ -1,105 +1,127 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, IndianRupee, TrendingUp, Filter, Loader2 } from "lucide-react";
+import {
+  Calendar,
+  IndianRupee,
+  TrendingUp,
+  Filter,
+  Loader2,
+} from "lucide-react";
 import { useParams } from "next/navigation";
 import Navbar from "@/app/_components/Navbar";
 
 export default function ExpensesPage() {
-    const { id } = useParams();
-    const [totalAmount, setTotalAmount] = useState(0);
-    const [expenses, setExpenses] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [totalLoading, setTotalLoading] = useState(false);
-    const [skip, setSkip] = useState(0);
-    const [hasMore, setHasMore] = useState(true);
-    const [latestOnly, setLatestOnly] = useState(false);
-    const [period, setPeriod] = useState('all');
-    const [customStartDate, setCustomStartDate] = useState('');
-    const [customEndDate, setCustomEndDate] = useState('');
+  const { id } = useParams();
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [expenses, setExpenses] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [totalLoading, setTotalLoading] = useState(false);
+  const [skip, setSkip] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [latestOnly, setLatestOnly] = useState(false);
+  const [period, setPeriod] = useState("all");
+  const [customStartDate, setCustomStartDate] = useState("");
+  const [customEndDate, setCustomEndDate] = useState("");
 
-    const limit = 10;
+  const limit = 10;
 
-    const fetchTotalExpenses = useCallback(async () => {
-        setTotalLoading(true);
-        try {
-            const params = new URLSearchParams({
-                vehicleId: id,
-                period: period
-            });
+  const fetchTotalExpenses = useCallback(async () => {
+    setTotalLoading(true);
+    try {
+            const token = localStorage.getItem("auth_token");
 
-            if (period === 'custom' && customStartDate && customEndDate) {
-                params.append('startDate', customStartDate);
-                params.append('endDate', customEndDate);
-            }
+      const params = new URLSearchParams({
+        vehicleId: id,
+        period: period,
+      });
 
-            const response = await fetch(`/api/expense/total?${params}`);
-            const data = await response.json();
+      if (period === "custom" && customStartDate && customEndDate) {
+        params.append("startDate", customStartDate);
+        params.append("endDate", customEndDate);
+      }
 
-            if (data.success) {
-                setTotalAmount(data.totalAmount);
-            }
-        } catch (error) {
-            console.error("Error fetching total expenses:", error);
-        } finally {
-            setTotalLoading(false);
+      const response = await fetch(`/api/expense/total?${params}`, {
+        cache: "no-store",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        setTotalAmount(data.totalAmount);
+      }
+    } catch (error) {
+      console.error("Error fetching total expenses:", error);
+    } finally {
+      setTotalLoading(false);
+    }
+  }, [id, period, customStartDate, customEndDate]);
+
+  const fetchExpenses = useCallback(
+    async (reset = false) => {
+      setLoading(true);
+      try {
+                const token = localStorage.getItem("auth_token");
+
+        const params = new URLSearchParams({
+          vehicleId:id,
+          limit: latestOnly ? 5 : limit,
+          skip: reset ? 0 : skip,
+          latest: latestOnly.toString(),
+          period
+        
+        });
+
+        const response = await fetch(`/api/expense?${params}`, {
+          cache: "no-store",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+
+        if (data.status === "200") {
+          setExpenses((prev) =>
+            reset ? data.expenses : [...prev, ...data.expenses]
+          );
+          setHasMore(data.hasMore);
+          if (!reset) setSkip((prev) => prev + limit);
         }
-    }, [id, period, customStartDate, customEndDate]);
+      } catch (error) {
+        console.error("Error fetching expenses:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [latestOnly, skip, limit]
+  );
 
-    const fetchExpenses = useCallback(async (reset = false) => {
-        setLoading(true);
-        try {
-            const params = new URLSearchParams({
-                limit: latestOnly ? 5 : limit,
-                skip: reset ? 0 : skip,
-                latest: latestOnly.toString(),
-            });
+  useEffect(() => {
+    fetchTotalExpenses();
+  }, [fetchTotalExpenses]);
 
-            const response = await fetch(`/api/expense?${params}`);
-            const data = await response.json();
+  useEffect(() => {
+    setSkip(0);
+    fetchExpenses(true);
+  }, [latestOnly, fetchExpenses]);
 
-            if (data.status === "200") {
-                setExpenses(prev => reset ? data.expenses : [...prev, ...data.expenses]);
-                setHasMore(data.hasMore);
-                if (!reset) setSkip(prev => prev + limit);
-            }
-        } catch (error) {
-            console.error("Error fetching expenses:", error);
-        } finally {
-            setLoading(false);
-        }
-    }, [latestOnly, skip, limit]);
+  const loadMore = () => {
+    if (!latestOnly && hasMore && !loading) {
+      fetchExpenses();
+    }
+  };
 
-    useEffect(() => {
-        fetchTotalExpenses();
-    }, [fetchTotalExpenses]);
-
-    useEffect(() => {
-        setSkip(0);
-        fetchExpenses(true);
-    }, [latestOnly, fetchExpenses]);
-
-    const loadMore = () => {
-        if (!latestOnly && hasMore && !loading) {
-            fetchExpenses();
-        }
-    };
-
-    const handlePeriodChange = (newPeriod) => {
-        setPeriod(newPeriod);
-        if (newPeriod !== 'custom') {
-            setCustomStartDate('');
-            setCustomEndDate('');
-        }
-    };
-
+  const handlePeriodChange = (newPeriod) => {
+    setPeriod(newPeriod);
+    if (newPeriod !== "custom") {
+      setCustomStartDate("");
+      setCustomEndDate("");
+    }
+  };
 
   return (
     <>
@@ -126,12 +148,14 @@ export default function ExpensesPage() {
                       <IndianRupee size={20} className="text-white" />
                     </div>
                     <div>
-                      <p className="text-white/80 text-sm font-medium">Total Expenses</p>
+                      <p className="text-white/80 text-sm font-medium">
+                        Total Expenses
+                      </p>
                       <p className="text-white text-xl sm:text-2xl font-bold">
                         {totalLoading ? (
                           <Loader2 size={20} className="animate-spin" />
                         ) : (
-                          `₹${totalAmount.toLocaleString('en-IN')}`
+                          `₹${totalAmount.toLocaleString("en-IN")}`
                         )}
                       </p>
                     </div>
@@ -153,10 +177,26 @@ export default function ExpensesPage() {
               {/* Period Buttons */}
               <div className="flex flex-wrap gap-2 sm:gap-3">
                 {[
-                  { key: 'all', label: 'All Time', color: 'bg-gray-100 hover:bg-gray-200 text-gray-700' },
-                  { key: 'monthly', label: 'This Month', color: 'bg-blue-100 hover:bg-blue-200 text-blue-700' },
-                  { key: 'yearly', label: 'This Year', color: 'bg-green-100 hover:bg-green-200 text-green-700' },
-                  { key: 'custom', label: 'Custom Range', color: 'bg-purple-100 hover:bg-purple-200 text-purple-700' }
+                  {
+                    key: "all",
+                    label: "All Time",
+                    color: "bg-gray-100 hover:bg-gray-200 text-gray-700",
+                  },
+                  {
+                    key: "monthly",
+                    label: "This Month",
+                    color: "bg-blue-100 hover:bg-blue-200 text-blue-700",
+                  },
+                  {
+                    key: "yearly",
+                    label: "This Year",
+                    color: "bg-green-100 hover:bg-green-200 text-green-700",
+                  },
+                  {
+                    key: "custom",
+                    label: "Custom Range",
+                    color: "bg-purple-100 hover:bg-purple-200 text-purple-700",
+                  },
                 ].map((p) => (
                   <Button
                     key={p.key}
@@ -165,7 +205,7 @@ export default function ExpensesPage() {
                     size="sm"
                     className={`transition-all duration-200 ${
                       period === p.key
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md'
+                        ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md"
                         : `${p.color} border-0`
                     }`}
                   >
@@ -175,10 +215,12 @@ export default function ExpensesPage() {
               </div>
 
               {/* Custom Date Range */}
-              {period === 'custom' && (
+              {period === "custom" && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Start Date</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Start Date
+                    </label>
                     <input
                       type="date"
                       value={customStartDate}
@@ -187,7 +229,9 @@ export default function ExpensesPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">End Date</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      End Date
+                    </label>
                     <input
                       type="date"
                       value={customEndDate}
@@ -205,8 +249,8 @@ export default function ExpensesPage() {
                   variant={latestOnly ? "default" : "outline"}
                   className={`flex items-center gap-2 transition-all duration-200 ${
                     latestOnly
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                      : 'border-gray-300 hover:bg-gray-50'
+                      ? "bg-blue-600 hover:bg-blue-700 text-white"
+                      : "border-gray-300 hover:bg-gray-50"
                   }`}
                 >
                   <TrendingUp size={18} />
@@ -235,17 +279,19 @@ export default function ExpensesPage() {
                       <IndianRupee size={16} className="text-green-600" />
                     </div>
                     <span className="text-lg sm:text-xl font-bold text-gray-900">
-                      ₹{parseFloat(expense.Amount || 0).toLocaleString('en-IN')}
+                      ₹{parseFloat(expense.Amount || 0).toLocaleString("en-IN")}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <Calendar size={14} />
-                    <span>{new Date(expense.createdAt).toLocaleDateString('en-IN', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric'
-                    })}</span>
+                    <span>
+                      {new Date(expense.createdAt).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </span>
                   </div>
                 </CardContent>
               </Card>
@@ -265,8 +311,12 @@ export default function ExpensesPage() {
             {!loading && expenses.length === 0 && (
               <div className="col-span-full text-center py-12">
                 <div className="text-5xl sm:text-6xl mb-4">📊</div>
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-700 mb-2">No expenses found</h3>
-                <p className="text-gray-500 text-sm sm:text-base">Add some expenses to see them here</p>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-700 mb-2">
+                  No expenses found
+                </h3>
+                <p className="text-gray-500 text-sm sm:text-base">
+                  Add some expenses to see them here
+                </p>
               </div>
             )}
           </div>
@@ -296,5 +346,4 @@ export default function ExpensesPage() {
       </div>
     </>
   );
-
 }

@@ -30,7 +30,14 @@ export default function TrackClient() {
     setData(null);
 
     try {
-      const res = await fetch(`/api/track/${encodeURIComponent(query)}`);
+            const token = localStorage.getItem("auth_token");
+
+      const res = await fetch(`/api/track/${encodeURIComponent(query)}`, {
+   cache: "no-store",
+   headers: {
+     Authorization: `Bearer ${token}`,
+   },
+ });
       const json = await res.json();
 
       if (!res.ok || json?.success === false) {
