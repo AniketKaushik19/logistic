@@ -2,7 +2,7 @@
 
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import BillPDF from "./BillPDF";
-import { useState } from "react";
+import { useState ,useEffect } from "react";
 
 export default function DownloadBill() {
   const billData = {
