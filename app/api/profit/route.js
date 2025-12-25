@@ -1,6 +1,6 @@
 import clientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
-
+import { requireAuth } from "@/lib/auth";
 /**
  * GET → Fetch latest 5 consignments for profit calculation
  */

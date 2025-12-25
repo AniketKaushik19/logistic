@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { use } from 'react';
 import Link from 'next/link';
 import Router from 'next/router';
-import { AdminNav } from '@/app/components/AdminNav';
 import Navbar from '@/app/_components/Navbar';
 import toast from 'react-hot-toast';
 

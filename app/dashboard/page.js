@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Package, TrendingUp, Wallet } from "lucide-react";
+import Navbar from '../_components/Navbar';
 
 export default function Dashboard() {
     const [totals, setTotals] = useState({
@@ -59,6 +60,7 @@ export default function Dashboard() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+            <Navbar/>
             <main className="container px-4 py-8 mt-8">
                 <h1 className="text-3xl font-bold text-center mt-7 mb-8 text-gray-800">Dashboard</h1>
                 {/* Totals Cards */}

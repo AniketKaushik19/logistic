@@ -39,7 +39,7 @@ export default function LoginPage() {
 
       // Small delay to ensure auth state is updated
       await new Promise((resolve) => setTimeout(resolve, 200));
-      router.replace("/consignment/list");
+      router.replace("/dashboard");
       toast.success("Logged in");
     } catch (err) {
       console.error(err);

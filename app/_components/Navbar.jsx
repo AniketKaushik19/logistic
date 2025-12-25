@@ -6,6 +6,7 @@ import { LogOut } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
+import Image from "next/image";
 // NAVBAR COMPONENT
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -41,42 +42,54 @@ function Navbar() {
         transition={{ duration: 0.8 }}
         className="fixed top-0 left-0 w-full z-50 backdrop-blur shadow"
       >
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold text-red-600">
-            {/* <Link className="flex gap-2 cursor-pointer  hover:text-red-600 transition" href="/"> */}
-            {/* <Image src={"/logo.png"}  width={43} height={43} alt="logo"/>
-           </Link> */}
+        <div className="max-w-[100vw] mx-auto px-6 py-4 flex justify-between items-center">  
+             
+           <div className=" md:hidden">        
+            <Link className="flex gap-2 lg:gap-0 cursor-pointer  hover:text-red-600 transition" href="/"> 
+             <Image src={"/logo.png"}  width={45} height={40} alt="logo"/>
+           </Link> 
+           </div>
+            <h2 className="font-bold text-red-500 hidden md:flex">
             <Link
               href="/"
               className="cursor-pointer  hover:text-red-600 transition"
-            >
-              Aniket Logistic
-            </Link>
-          </h1>
-          {/* Navbar links */}
-          <ul className="flex gap-6 text-sm font-medium">
-            <li>
-              <Link
-                href="/profit"
-                className="cursor-pointer  hover:text-red-600 transition"
               >
-                Profit Add
+              Aniket Logistic
               </Link>
-            </li>
-            <li>
+              </h2>
+          
+          {/* Navbar links */}
+          <ul className="flex gap-6 text-sm font-medium  ">
+            <li className="mt-2 ">
               <Link
                 href="/vehicleDashboard"
-                className="cursor-pointer  hover:text-red-600 transition"
+                className="cursor-pointer hover:text-red-600 transition"
               >
                 Vehicle
               </Link>
             </li>
-            <li>
+            <li className="mt-2 ">
               <Link
                 href="/consignment/list"
                 className="cursor-pointer hover:text-red-600 transition"
               >
                 Consignment
+              </Link>
+            </li>
+            <li className="mt-2 ">
+              <Link
+                href="/e-bill"
+                className="cursor-pointer hover:text-red-600 transition"
+              >
+                E-bill
+              </Link>
+            </li>
+            <li className="mt-2 ">
+              <Link
+                href="/profit"
+                className="cursor-pointer  hover:text-red-600 transition"
+              >
+                Profit Add
               </Link>
             </li>
             <button

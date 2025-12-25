@@ -11,12 +11,12 @@ export default function Dashboard() {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(false);  
   // Fetch vehicle data from API if needed
-    const fetchVehicles = async () => {
+    const  fetchVehicles = async () => {
       setLoading(true)
       try {
         const response = await fetch('/api/vehicle');
         const data = await response.json();
-       setVehicles(data)
+        setVehicles(data)
         // Update state with fetched vehicles if implementing dynamic data
       } catch (error) {
         console.error('Error fetching vehicles:', error);
@@ -47,7 +47,6 @@ export default function Dashboard() {
      }
    }
   useEffect(() => {
-   
     fetchVehicles()
   }, []);
     return(
@@ -75,7 +74,7 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {vehicles.map((vehicle) => (
-            <VehicleCard key={vehicle.truckNumber}  name={vehicle.truckNumber}  capacity={vehicle.capacity} registrationYear={vehicle.registrationYear} driverName={vehicle.driverName} onDelete={onDelete}/>
+            <VehicleCard key={vehicle.truckNumber}  name={vehicle.truckNumber}  capacity={vehicle.capacity} registrationYear={vehicle.registrationYear} driverName={vehicle.driverName} onDelete={onDelete} fetchVehicles={fetchVehicles} />
           ))}
         </div>
       </main>

@@ -1,5 +1,5 @@
 import clientPromise from "@/lib/mongodb";
-
+import { requireAuth } from "@/lib/auth";
 export async function GET(req) {
       const auth = await requireAuth(req);
       if (!auth.authenticated) {

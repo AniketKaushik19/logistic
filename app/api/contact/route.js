@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb"; // <-- Make sure this path is correct
-
+import { requireAuth } from "@/lib/auth";
 export async function POST(req) {
     const auth = await requireAuth(req);
     if (!auth.authenticated) {
