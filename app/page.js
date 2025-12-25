@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Navbar from "./_components/Navbar.jsx"
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
 import Footer from "./_components/Footer.jsx"
 import Dashboard from "./dashboard/page.js";
 import GetInTouch from "./components/GetInTouch.js";
@@ -32,6 +32,29 @@ const features = [
 export default function Home() {
   const router=useRouter()
   const [admin ,setAdmin]=useState(false)
+    const [loading, setLoading] = useState(true);
+
+   useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("/api/auth/me", {
+          credentials: "include",
+        });
+
+        if (!res.ok) throw new Error("Unauthorized");
+
+        const data = await res.json();
+        setAdmin(data.admin);
+      } catch {
+        setAdmin(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+  if (loading) return null; // or loader
   return (
     <div className="w-full ">
       {admin && <>

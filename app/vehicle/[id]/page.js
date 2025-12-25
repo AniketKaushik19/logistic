@@ -17,7 +17,14 @@ export default function Vehicle({ params }) {
 
   const getLatestExpenses=async(vehicleId)=>{
     try{
-     const response=await fetch(`/api/expense?vehicleId=${vehicleId}`);
+            const token = localStorage.getItem("auth_token");
+
+     const response=await fetch(`/api/expense?vehicleId=${vehicleId}`, {
+   cache: "no-store",
+   headers: {
+     Authorization: `Bearer ${token}`,
+   },
+ });
      const data=await response.json();
      if(data.status==="200"){
         setExpenses(data.expenses)
@@ -55,11 +62,15 @@ export default function Vehicle({ params }) {
 
       try {
         // Send POST request to your API route
+              const token = localStorage.getItem("auth_token");
+
         const res = await fetch("/api/expense", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+   cache: "no-store",
+   method: "POST",
+   headers: {
+     "Content-Type": "application/json",
+     Authorization: `Bearer ${token}`,
+    },
           body: JSON.stringify(newExpense), // send the new order data
         });
 

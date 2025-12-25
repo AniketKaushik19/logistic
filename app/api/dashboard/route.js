@@ -1,34 +1,34 @@
 import clientPromise from "@/lib/mongodb";
 import { requireAuth } from "@/lib/auth";
+import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req) {
   const auth = await requireAuth(req);
   if (!auth.authenticated) {
     return NextResponse.json(
       { error: auth.error || "Unauthorized" },
       { status: 401 }
     );
-  }  try {
+  }
 
+  try {
     const client = await clientPromise;
     const db = client.db("logisticdb");
 
-    // Get total consignments
-    const totalConsignments = await db.collection("consignments").countDocuments();
+    const totalConsignments = await db
+      .collection("consignments")
+      .countDocuments();
 
-    // Get total profit and cost from profits collection
     const profits = await db.collection("profits").find({}).toArray();
-    const totalProfit = profits.reduce((sum, p) => sum + (p.netProfit || 0), 0);
-    const totalCost = profits.reduce((sum, p) => sum + (p.totalCost || 0), 0);
 
-    return Response.json({
+    return NextResponse.json({
       totalConsignments,
-      totalProfit,
-      totalCost
+      totalProfit: profits.reduce((s, p) => s + (p.netProfit || 0), 0),
+      totalCost: profits.reduce((s, p) => s + (p.totalCost || 0), 0),
     });
   } catch (error) {
-    console.error("Database error:", error);
-    return Response.json(
+    console.error("Dashboard error:", error);
+    return NextResponse.json(
       { error: "Failed to fetch dashboard data" },
       { status: 500 }
     );

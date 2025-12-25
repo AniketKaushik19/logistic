@@ -1,5 +1,6 @@
 import clientPromise from "@/lib/mongodb";
 import { requireAuth } from "@/lib/auth";
+import { NextResponse } from "next/server";
 
 export async function GET(req) {
   const auth = await requireAuth(req);
@@ -8,101 +9,106 @@ export async function GET(req) {
       { error: auth.error || "Unauthorized" },
       { status: 401 }
     );
-  }  try {
+  }
 
+  try {
     const { searchParams } = new URL(req.url);
-    const type = searchParams.get('type');
-    const start = searchParams.get('start');
-    const end = searchParams.get('end');
+    const type = searchParams.get("type");
+    const start = searchParams.get("start");
+    const end = searchParams.get("end");
 
     const client = await clientPromise;
     const db = client.db("logisticdb");
 
-    let matchCondition = {};
-
-    if (type === 'monthly') {
-      // Group by month
+    /* ================= MONTHLY ================= */
+    if (type === "monthly") {
       const pipeline = [
         {
           $group: {
             _id: {
-              year: { $year: "$date" },
-              month: { $month: "$date" }
+              year: { $year: { date: "$createdAt", timezone: "UTC" } },
+              month: { $month: { date: "$createdAt", timezone: "UTC" } },
             },
             consignments: { $sum: 1 },
             totalCost: { $sum: "$totalCost" },
-            totalProfit: { $sum: "$netProfit" }
-          }
+            totalProfit: { $sum: "$netProfit" },
+          },
         },
-        {
-          $sort: { "_id.year": -1, "_id.month": -1 }
-        }
+        { $sort: { "_id.year": -1, "_id.month": -1 } },
       ];
 
-      const results = await db.collection("profits").aggregate(pipeline).toArray();
+      const results = await db
+        .collection("profits")
+        .aggregate(pipeline)
+        .toArray();
 
-      const data = results.map(item => ({
-        period: `${item._id.year}-${String(item._id.month).padStart(2, '0')}`,
-        consignments: item.consignments,
-        totalCost: item.totalCost,
-        totalProfit: item.totalProfit
-      }));
+      return NextResponse.json(
+        results.map((r) => ({
+          period: `${r._id.year}-${String(r._id.month).padStart(2, "0")}`,
+          consignments: r.consignments,
+          totalCost: r.totalCost,
+          totalProfit: r.totalProfit,
+        }))
+      );
+    }
 
-      return Response.json(data);
-    } else if (type === 'yearly') {
-      // Group by year
+    /* ================= YEARLY ================= */
+    if (type === "yearly") {
       const pipeline = [
         {
           $group: {
-            _id: { $year: "$date" },
+            _id: { $year: { date: "$createdAt", timezone: "UTC" } },
             consignments: { $sum: 1 },
             totalCost: { $sum: "$totalCost" },
-            totalProfit: { $sum: "$netProfit" }
-          }
+            totalProfit: { $sum: "$netProfit" },
+          },
         },
-        {
-          $sort: { "_id": -1 }
-        }
+        { $sort: { _id: -1 } },
       ];
 
-      const results = await db.collection("profits").aggregate(pipeline).toArray();
+      const results = await db
+        .collection("profits")
+        .aggregate(pipeline)
+        .toArray();
 
-      const data = results.map(item => ({
-        period: `${item._id}`,
-        consignments: item.consignments,
-        totalCost: item.totalCost,
-        totalProfit: item.totalProfit
-      }));
-
-      return Response.json(data);
-    } else if (type === 'custom' && start && end) {
-      // Custom date range
-      matchCondition = {
-        date: {
-          $gte: new Date(start),
-          $lte: new Date(end)
-        }
-      };
-
-      const profits = await db.collection("profits").find(matchCondition).toArray();
-
-      const totalCost = profits.reduce((sum, p) => sum + (p.totalCost || 0), 0);
-      const totalProfit = profits.reduce((sum, p) => sum + (p.netProfit || 0), 0);
-
-      const data = [{
-        period: `${start} to ${end}`,
-        consignments: profits.length,
-        totalCost,
-        totalProfit
-      }];
-
-      return Response.json(data);
+      return NextResponse.json(
+        results.map((r) => ({
+          period: `${r._id}`,
+          consignments: r.consignments,
+          totalCost: r.totalCost,
+          totalProfit: r.totalProfit,
+        }))
+      );
     }
 
-    return Response.json([]);
+    /* ================= CUSTOM ================= */
+    if (type === "custom" && start && end) {
+      const match = {
+        createdAt: {
+          $gte: new Date(`${start}T00:00:00.000Z`),
+          $lte: new Date(`${end}T23:59:59.999Z`),
+        },
+      };
+
+      const profits = await db
+        .collection("profits")
+        .find(match)
+        .toArray();
+
+      return NextResponse.json([
+        {
+          period: `${start} → ${end}`,
+          consignments: profits.length,
+          totalCost: profits.reduce((s, p) => s + (p.totalCost || 0), 0),
+          totalProfit: profits.reduce((s, p) => s + (p.netProfit || 0), 0),
+        },
+      ]);
+    }
+
+    return NextResponse.json([]);
   } catch (error) {
-    console.error("Database error:", error);
-    return Response.json(
+    console.error("Analysis error:", error);
+    return NextResponse.json(
       { error: "Failed to fetch analysis data" },
       { status: 500 }
     );

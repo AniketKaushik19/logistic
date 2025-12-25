@@ -1,3 +1,4 @@
+import { requireAuth } from "@/lib/auth";
 import clientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";

@@ -18,35 +18,38 @@ export default function LoginPage() {
   const router = useRouter();
   const { refreshAuth } = useAuth();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+  setLoading(true);
 
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // important so httpOnly cookie is stored by browser
-        body: JSON.stringify({ email, password }),
-      });
+  try {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email, password }),
+    });
 
-      const data = await response.json();
-    
-      // Server sets httpOnly cookie; refresh auth state from /api/auth/me
-      await refreshAuth();
-      setLoading(false);
-
-      // Small delay to ensure auth state is updated
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      router.replace("/dashboard");
-      toast.success("Logged in");
-    } catch (err) {
-      console.error(err);
-      setError("Something went wrong. Please try again.");
-      setLoading(false);
+    if (!response.ok) {
+      throw new Error("Invalid credentials");
     }
-  };
+
+    // 🔥 Refresh auth immediately
+    await refreshAuth();
+
+    toast.success("Logged in");
+
+    // 🚀 Instant redirect
+    router.replace("/dashboard");
+  } catch (err) {
+    console.error(err);
+    setError("Invalid Credentials.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <>
@@ -130,12 +133,12 @@ export default function LoginPage() {
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
                   <Button
                     type="submit"
-                    className="w-full rounded-lg text-base font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg"
+                    className="w-full rounded-lg text-base font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg text-white"
                     disabled={loading}
                   >
                     {loading ? (
                       <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin " />
                         Signing In...
                       </div>
                     ) : (
@@ -147,10 +150,7 @@ export default function LoginPage() {
 
               {/* Footer */}
               <motion.p className="text-center text-sm text-slate-600" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
-                Don&apos;t have an account?{" "}
-                <button type="button" className="text-blue-600  font-semibold cursor-pointer hover:text-blue-700 hover:underline transition-colors" onClick={() => router.push("/signup")}>
-                  Sign up
-                </button>
+                  Only Admin can Access
               </motion.p>
             </CardContent>
           </Card>
