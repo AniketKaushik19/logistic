@@ -45,13 +45,13 @@ function Navbar() {
         <div className="max-w-[100vw] mx-auto px-6 py-4 flex justify-between items-center">  
              
            <div className=" md:hidden">        
-            <Link className="flex gap-2 lg:gap-0 cursor-pointer  hover:text-red-600 transition" href="/"> 
+            <Link className="flex gap-2 lg:gap-0 cursor-pointer  hover:text-red-600 transition"  href={user? "/dashboard" : "/"}> 
              <Image src={"/logo.png"}  width={45} height={40} alt="logo"/>
            </Link> 
            </div>
             <h2 className="font-bold text-red-500 hidden md:flex">
             <Link
-              href="/"
+              href={user? "/dashboard" : "/"}
               className="cursor-pointer  hover:text-red-600 transition"
               >
               Aniket Logistic
@@ -129,7 +129,7 @@ function Navbar() {
               href="/login"
               className="cursor-pointer  hover:text-red-600 transition"
             >
-              login
+              Login
             </Link>
           </li>
         </ul>

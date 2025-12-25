@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import DownloadBill from "../components/DownoladBill";
+import Navbar from '../_components/Navbar';
 export default function InvoiceForm() {
   const [form, setForm] = useState({
     customer: 'M/s. MOTORFAB SALES PVT LTD, LUCKNOW-19',
@@ -19,6 +20,7 @@ export default function InvoiceForm() {
   };
   return (
     <main className="p-6 max-w-xl mx-auto space-y-4">
+      <Navbar/>
       <h1 className="text-xl font-bold">Transport Invoice Form</h1>
 
       {/* Text Inputs */}
