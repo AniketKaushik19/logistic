@@ -16,8 +16,16 @@ export default function DownloadBill() {
     pan: "CPTPK5713K",
   };
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+
   return (
-    <PDFDownloadLink
+    <>
+   {mounted && ( <PDFDownloadLink
       document={<BillPDF bill={billData} />}
       fileName="transport-bill.pdf"
       className="px-4 py-2 bg-blue-600 text-white rounded-lg"
@@ -25,6 +33,8 @@ export default function DownloadBill() {
       {({ loading }) =>
         loading ? "Generating PDF..." : "Download Bill PDF"
       }
-    </PDFDownloadLink>
+    </PDFDownloadLink> )
+  } 
+  </>
   );
 }
