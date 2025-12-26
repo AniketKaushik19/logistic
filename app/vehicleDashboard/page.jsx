@@ -65,7 +65,7 @@ export default function Dashboard() {
         <Navbar/>
         <main className="container mx-auto px-4 py-8 mt-10">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Fleet Overview</h1>
+          <h1 className="text-4xl font-bold text-gray-800 mb-2 mt-2">Fleet Overview</h1>
           <p className="text-gray-600">Monitor and manage your logistic vehicles</p>
         </div>
         <button className="bg-purple-500 rounded-2xl p-3 mb-5 font-semibold hover:bg-purple-600 hover:cursor-pointer text-white font-semibold">
