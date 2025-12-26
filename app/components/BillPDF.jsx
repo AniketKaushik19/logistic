@@ -5,8 +5,8 @@ import {
   View,
   Document,
   StyleSheet,
+  Image
 } from "@react-pdf/renderer";
-
 
 const styles = StyleSheet.create({
   page: {
@@ -81,19 +81,25 @@ const styles = StyleSheet.create({
   },
 });
 
-export const BillPDF= ({bill}) => (
+export const BillPDF = ({ bill }) => (
   <Document>
     <Page size="A4" style={styles.page} orientation="landscape">
 
       {/* HEADER */}
       <View style={styles.header}>
-        <Text style={styles.title}>ANIKET LOGISTIC</Text>
-        <Text style={styles.subtitle}>
-          Fleet Owners & Transport Contractors
-        </Text>
+        <View style={styles.companyInfo}>
+          <Text style={styles.title}>ANIKET LOGISTIC</Text>
+          <Text style={styles.subtitle}>
+            7/A Buddh Vihar Colony, Phase-2 Kotwali Road, Chinhat,
+            Lucknow – 227105
+          </Text>
+          <Text style={styles.subtitle}>
+            Fleet Owners & Transport Contractors
+          </Text>
+        </View>
       </View>
 
-      {/* META ROW */}
+      {/* META */}
       <View style={[styles.row, styles.border]}>
         <View style={[styles.cell, { width: "25%" }]}>
           <Text style={styles.label}>Bill No</Text>
@@ -115,18 +121,9 @@ export const BillPDF= ({bill}) => (
 
       {/* PARTY DETAILS */}
       <View style={[styles.border, { padding: 6, marginTop: 6 }]}>
-        <Text>
-          <Text style={styles.label}>To: </Text>
-          {bill.customer}
-        </Text>
-        <Text>
-          <Text style={styles.label}>Address: </Text>
-          {bill.customerAddress}
-        </Text>
-        <Text>
-          <Text style={styles.label}>GSTIN: </Text>
-          {bill.customerGstin}
-        </Text>
+        <Text><Text style={styles.label}>To: </Text>{bill.customer}</Text>
+        <Text><Text style={styles.label}>Address: </Text>{bill.customerAddress}</Text>
+        <Text><Text style={styles.label}>GSTIN: </Text>{bill.customerGstin}</Text>
       </View>
 
       {/* CONSIGNMENT TABLE */}
@@ -137,59 +134,56 @@ export const BillPDF= ({bill}) => (
           <Text style={[styles.cell, { width: "10%" }]}>Date</Text>
           <Text style={[styles.cell, { width: "12%" }]}>From</Text>
           <Text style={[styles.cell, { width: "12%" }]}>To</Text>
-          <Text style={[styles.cell, { width: "10%" }]}>Rate</Text>
           <Text style={[styles.cell, { width: "10%" }]}>Freight</Text>
           <Text style={[styles.cell, { width: "10%" }]}>Labour</Text>
+          <Text style={[styles.cell, { width: "10%" }]}>Detention</Text>
           <Text style={[styles.cell, { width: "10%" }]}>Bonus</Text>
           <Text style={{ width: "9%", padding: 4 }}>Total</Text>
         </View>
 
-        <View style={styles.tableRow}>
-          <Text style={[styles.cell, { width: "5%" }]}>1</Text>
-          <Text style={[styles.cell, { width: "12%" }]}>{bill.billDate}</Text>
-          <Text style={[styles.cell, { width: "10%" }]}>{bill.cnDate}</Text>
-          <Text style={[styles.cell, { width: "12%" }]}>{bill.from}</Text>
-          <Text style={[styles.cell, { width: "12%" }]}>{bill.to}</Text>
-          <Text style={[styles.cell, { width: "10%" }]}>Fixed</Text>
-          <Text style={[styles.cell, { width: "10%" }]}>{bill.freight}</Text>
-          <Text style={[styles.cell, { width: "10%" }]}>{bill.labour}</Text>
-          <Text style={[styles.cell, { width: "10%" }]}>{bill.detention}</Text>
-          <Text style={[styles.cell, { width: "10%" }]}>{bill.bonus}</Text>
-          <Text style={{ width: "9%", padding: 4 }}>{bill.total}</Text>
-        </View>
+        {bill.consignments.map((c, index) => (
+          <View style={styles.tableRow} key={index}>
+            <Text style={[styles.cell, { width: "5%" }]}>{index + 1}</Text>
+            <Text style={[styles.cell, { width: "12%" }]}>{c.cnNo}</Text>
+            <Text style={[styles.cell, { width: "10%" }]}>{c.cnDate}</Text>
+            <Text style={[styles.cell, { width: "12%" }]}>{c.from}</Text>
+            <Text style={[styles.cell, { width: "12%" }]}>{c.to}</Text>
+            <Text style={[styles.cell, { width: "10%" }]}>{c.freight}</Text>
+            <Text style={[styles.cell, { width: "10%" }]}>{c.labour}</Text>
+            <Text style={[styles.cell, { width: "10%" }]}>{c.detention}</Text>
+            <Text style={[styles.cell, { width: "10%" }]}>{c.bonus}</Text>
+            <Text style={{ width: "9%", padding: 4 }}>{c.total}</Text>
+          </View>
+        ))}
       </View>
 
-      {/* AMOUNT & PAN */}
+      {/* TOTAL */}
       <View style={[styles.row, { marginTop: 6 }]}>
         <View style={[styles.footerBox, { width: "70%" }]}>
           <Text>
             <Text style={styles.label}>Amount in Words: </Text>
-            {""}
+            {bill.amountInWord}
           </Text>
         </View>
         <View style={[styles.footerBox, { width: "30%" }]}>
           <Text>
-            <Text style={styles.label}>PAN No: </Text>
-            CPTPK5713K
+            <Text style={styles.label}>Grand Total: </Text>
+            ₹ {bill.grandTotal}
           </Text>
         </View>
       </View>
 
-      {/* ENCLOSED */}
+      {/* FOOTER */}
       <View style={styles.footerBox}>
-        <Text>
-          Enclosed: 01 Page | No Acknowledgement for S.N 1
-        </Text>
-        <Text style={{ marginTop: 4 }}>
-          Copy: <Text style={{ fontWeight: "bold" }}>Consignee Copy</Text>
-        </Text>
+        <Text>Copy: <Text style={{ fontWeight: "bold" }}>Customer Copy</Text></Text>
       </View>
 
-      {/* SIGN */}
       <View style={styles.sign}>
-        <Text>For ANIKET KAUSHIK</Text>
+        <Text>For ANIKET LOGISTIC</Text>
         <Text style={{ marginTop: 20 }}>Bill Incharge</Text>
       </View>
+
     </Page>
   </Document>
 );
+
