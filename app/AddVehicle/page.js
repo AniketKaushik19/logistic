@@ -43,9 +43,9 @@ export default function AddTruckVehicle() {
           registrationYear: '',
           driverName: '',
         });
-        setTimeout(()=>{
-            Router.push('/Dashboard')
-        },3000)
+        setTimeout(() => {
+          Router.push('/Dashboard')
+        }, 3000)
       } else {
         toast.error(data.message || "Failed to add truck")
       }
@@ -57,107 +57,133 @@ export default function AddTruckVehicle() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <Navbar/>
-      <Card className="w-full max-w-lg rounded-2xl shadow-xl border-0 bg-white/80 backdrop-blur-sm mt-12">
-        <CardHeader className="text-center pb-2">
-          <div className="mx-auto mb-4 p-4 rounded-full bg-primary/10 text-primary w-fit">
-            <Truck size={32} />
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 flex items-center justify-center px-4 py-24">
+      <Navbar />
+
+      <Card className="w-full max-w-xl rounded-3xl shadow-2xl border border-white/30 bg-white/70 backdrop-blur-xl">
+
+        {/* Header */}
+        <CardHeader className="text-center space-y-3 pb-4">
+          <div className="mx-auto p-4 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg w-fit">
+            <Truck size={34} />
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-800">Add New Truck</CardTitle>
-          <p className="text-sm text-gray-600">Fill in the details to register a new vehicle</p>
+
+          <CardTitle className="text-3xl font-extrabold text-gray-800">
+            Add New Truck
+          </CardTitle>
+
+          <p className="text-sm text-gray-600">
+            Register a new vehicle to your logistics fleet
+          </p>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
+
+        {/* Content */}
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-5">
+
             {/* Truck Number */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2 text-gray-700">
-                <Hash size={16} /> Truck Number
+            <div>
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-1">
+                <Hash size={16} className="text-indigo-500" />
+                Truck Number
               </label>
               <Input
                 name="truckNumber"
                 value={formData.truckNumber}
                 onChange={handleChange}
-                placeholder="e.g., UP32 AB 1234"
+                placeholder="UP32 AB 1234"
                 required
-                className="rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
+                className="h-11 rounded-xl border-gray-300 focus:ring-2 focus:ring-indigo-500"
               />
             </div>
 
             {/* Model */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2 text-gray-700">
-                <Car size={16} /> Model
+            <div>
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-1">
+                <Car size={16} className="text-indigo-500" />
+                Model
               </label>
               <Input
                 name="model"
                 value={formData.model}
                 onChange={handleChange}
-                placeholder="e.g., Tata Ace"
+                placeholder="Tata Ace"
                 required
-                className="rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
+                className="h-11 rounded-xl border-gray-300 focus:ring-2 focus:ring-indigo-500"
               />
             </div>
 
             {/* Capacity */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2 text-gray-700">
-                <Weight size={16} /> Load Capacity (tons)
+            <div>
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-1">
+                <Weight size={16} className="text-indigo-500" />
+                Load Capacity (tons)
               </label>
               <Input
                 name="capacity"
                 value={formData.capacity}
                 onChange={handleChange}
                 type="number"
-                placeholder="e.g., 10"
+                placeholder="10"
                 required
-                className="rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
+                className="h-11 rounded-xl border-gray-300 focus:ring-2 focus:ring-indigo-500"
               />
             </div>
 
             {/* Registration Year */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2 text-gray-700">
-                <Calendar size={16} /> Registration Year
+            <div>
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-1">
+                <Calendar size={16} className="text-indigo-500" />
+                Registration Year
               </label>
               <Input
                 name="registrationYear"
                 value={formData.registrationYear}
                 onChange={handleChange}
                 type="number"
-                placeholder="e.g., 2020"
+                placeholder="2020"
                 required
-                className="rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
+                className="h-11 rounded-xl border-gray-300 focus:ring-2 focus:ring-indigo-500"
               />
             </div>
 
             {/* Driver Name */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2 text-gray-700">
-                <User size={16} /> Driver Name
+            <div>
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-1">
+                <User size={16} className="text-indigo-500" />
+                Driver Name
               </label>
               <Input
                 name="driverName"
                 value={formData.driverName}
                 onChange={handleChange}
-                placeholder="e.g., John Doe"
+                placeholder="John Doe"
                 required
-                className="rounded-lg border-gray-300 focus:border-primary focus:ring-primary"
+                className="h-11 rounded-xl border-gray-300 focus:ring-2 focus:ring-indigo-500"
               />
             </div>
 
-            {/* Submit Button */}
+            {/* Submit */}
             <Button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl py-3 text-lg font-semibold flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 transition-colors"
+              className="w-full h-12 rounded-2xl text-lg font-bold flex items-center justify-center gap-2
+                     bg-gradient-to-r from-indigo-500 to-purple-600
+                     hover:from-indigo-600 hover:to-purple-700
+                     shadow-lg transition-all"
             >
-              {loading ? 'Adding...' : <><PlusCircle size={20} /> Add Truck</>}
+              {loading ? "Adding..." : (
+                <>
+                  <PlusCircle size={20} />
+                  Add Truck
+                </>
+              )}
             </Button>
-          </form>
 
+          </form>
         </CardContent>
       </Card>
     </div>
+
   );
 }
