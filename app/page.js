@@ -213,7 +213,7 @@ export default function Home() {
             >
               {/* Icon */}
               <div
-                className={`mx-auto mb-6 w-14 h-14 flex items-center justify-center rounded-xl bg-gradient-to-br ${item.color} text-white group-hover:scale-110 transition`}
+                className={`mx-auto mb-6 w-14 h-14 flex items-center justify-center rounded-xl bg-linear-to-br ${item.color} text-white group-hover:scale-110 transition`}
               >
                 <Icon size={28} />
               </div>

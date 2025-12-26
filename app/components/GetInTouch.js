@@ -50,7 +50,7 @@ export default function GetInTouch() {
          }
     }
   return (
-    <section className="py-16 bg-gradient-to-br from-blue-50 to-indigo-100">
+    <section className="py-16 bg-linear-to-br from-blue-50 to-indigo-100">
       <div className="max-w-6xl mx-auto px-4">
         
         {/* Header */}

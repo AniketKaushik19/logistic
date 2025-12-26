@@ -78,6 +78,14 @@ function Navbar() {
                 Profit Add
               </Link>
             </li>
+                <li>
+              <Link
+                href="/access-dashboard"
+                className="cursor-pointer hover:text-red-600 transition"
+              >
+                Security
+              </Link>
+            </li>
             <button
               onClick={logout}
               className="p-2 rounded-full hover:bg-red-100 text-red-500"
@@ -116,6 +124,8 @@ function Navbar() {
               <Link onClick={() => setOpen(false)} href="/profit">
                 Profit Add
               </Link>
+              <Link onClick={() => setOpen(false)} href="/access-dashboard">
+Security              </Link>
 
               <button
                 onClick={() => {

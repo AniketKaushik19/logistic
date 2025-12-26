@@ -126,12 +126,12 @@ export default function ExpensesPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 ">
+      <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-indigo-50 ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 mt-12">
           {/* Header */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="space-y-1">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mt-7">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-linear-to-br from-blue-600 to-indigo-600 bg-clip-text text-transparent mt-7">
                 Expenses Dashboard
               </h1>
               <p className="text-gray-600 text-sm sm:text-base">
@@ -140,7 +140,7 @@ export default function ExpensesPage() {
             </div>
 
             {/* Total Cost Card */}
-            <Card className="bg-gradient-to-r from-green-500 to-emerald-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            <Card className="bg-linear-to-br from-green-500 to-emerald-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -326,7 +326,7 @@ export default function ExpensesPage() {
             <div className="flex justify-center pt-6">
               <Button
                 onClick={loadMore}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-8 py-3 rounded-xl"
+                className="bg-linear-to-br from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-8 py-3 rounded-xl"
               >
                 Load More Expenses
               </Button>

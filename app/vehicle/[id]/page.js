@@ -92,18 +92,18 @@ export default function Vehicle({ params }) {
   }, [response]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50">
 
         {/*Navbar for Vehicle page*/ }
         <Navbar/>
       <main className="container px-4 py-8 mt-12">
         <div className="grid grid-cols-1 gap-8">
           {/* Expenses Section */}
-          <div className="bg-gradient-to-br from-white to-blue-50 shadow-xl rounded-xl p-6 border border-blue-200 lg:w-250 lg:mx-auto">
+          <div className="bg-linear-to-br from-white to-blue-50 shadow-xl rounded-xl p-6 border border-blue-200 lg:w-250 lg:mx-auto">
              <h2 className='text-center text-xl font-semibold p-1'>{id}</h2>
         
             {/*  Expenses */}
-            <div className="mb-8 bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
+            <div className="mb-8 bg-linear-to-br from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
               <h3 className="text-lg font-semibold mb-3 text-green-800 flex items-center">
                 <span className="mr-2">💵</span>  Expenses
               </h3>
@@ -131,7 +131,7 @@ export default function Vehicle({ params }) {
                 />
                 <div>
 
-                <button onClick={addExpense} className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all transform hover:scale-105 shadow-md">
+                <button onClick={addExpense} className="bg-linear-to-br from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all transform hover:scale-105 shadow-md">
                   Add Expense
                 </button>
                 </div>

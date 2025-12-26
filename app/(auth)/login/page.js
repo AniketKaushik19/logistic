@@ -54,7 +54,7 @@ const handleSubmit = async (e) => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-slate-50 to-indigo-50 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-brrom-blue-50 via-slate-50 to-indigo-50 p-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -70,7 +70,7 @@ const handleSubmit = async (e) => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.1, duration: 0.4 }}
               >
-                <div className="mx-auto w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg">
+                <div className="mx-auto w-16 h-16 flex items-center justify-center rounded-2xl bg-linear-to-br from-blue-500 to-indigo-600 text-white shadow-lg">
                   <ShieldCheck size={32} className="drop-shadow-lg" />
                 </div>
                 <h2 className="text-3xl font-bold text-slate-900">Welcome Back</h2>
@@ -133,7 +133,7 @@ const handleSubmit = async (e) => {
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
                   <Button
                     type="submit"
-                    className="w-full rounded-lg text-base font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg text-white"
+                    className="w-full rounded-lg text-base font-semibold bg-linear-to-br from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg text-white"
                     disabled={loading}
                   >
                     {loading ? (

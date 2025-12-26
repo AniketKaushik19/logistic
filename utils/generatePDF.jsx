@@ -44,7 +44,6 @@ export async function generatePDF(cn, payload) {
       doc.text("7A, Buddh Vihar Colony Kotwali Road,", 15, 30);
       doc.text("Chinhat, Lucknow - 226028", 15, 35);
       doc.text("Mob.: 7388533786", 15, 40);
-      doc.text("Mob.: 7905093236", 15, 44);
 
       doc.text(`CONSIGNMENT NOTE No.: ${payload.cn || cn || ""}`, pageWidth - 15, 30, { align: "right" });
       doc.text("PAN No.: CKTPK5713K", pageWidth - 15, 35, { align: "right" });
