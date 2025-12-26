@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export const AdminNav = ({id}) => {
   return (
-     <nav className="bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg">
+     <nav className="bg-linear-to-r from-blue-600 to-purple-600 shadow-lg">
         <div className="container mx-auto px-3 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">

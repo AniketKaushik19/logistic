@@ -35,7 +35,7 @@ export default function SignupPage() {
         setLoading(true);
 
         try {
-            const response = await fetch('/api/auth/signup', {
+            const response = await fetch('/api/auth/access', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -50,9 +50,9 @@ export default function SignupPage() {
                 toast.success('Account created successfully!');
                 // Redirect to login page
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                router.push('/login');
+                router.push('/dashboard');
             } else {
-                setError(data.error || 'Signup failed. Please try again.');
+                setError(data.error || 'Admin Access failed. Please try again.');
             }
         } catch (error) {
             setError('Something went wrong. Please try again.');
@@ -64,7 +64,7 @@ export default function SignupPage() {
   return (
     <>
     <Navbar/>
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-slate-50 to-indigo-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-brrom-blue-50 via-slate-50 to-indigo-50 p-4">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -80,13 +80,11 @@ export default function SignupPage() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.4 }}
             >
-              <div className="mx-auto w-16 h-16 flex items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg">
+              <div className="mx-auto w-16 h-16 flex items-center justify-center rounded-2xl bg-linear-to-br from-emerald-500 to-teal-600 text-white shadow-lg">
                 <ShieldCheck size={32} className="drop-shadow-lg" />
               </div>
-              <h2 className="text-3xl font-bold text-slate-900">Create Account</h2>
-              <p className="text-sm text-slate-600">
-                Join our logistics platform today
-              </p>
+              <h2 className="text-3xl font-bold text-slate-900">Give Access to  Account</h2>
+     
             </motion.div>
 
             {error && (
@@ -195,7 +193,7 @@ export default function SignupPage() {
                 >
                   <Button
                       type="submit"
-                      className="w-full rounded-lg text-base font-semibold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                      className="w-full rounded-lg text-base font-semibold bg-linear-to-br from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl"
                       disabled={loading}
                   >
                       {loading ? (
@@ -215,13 +213,13 @@ export default function SignupPage() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.45 }}
             >
-              Already have an account?{" "}
+ Access to profit-and-loss data is strictly limited and must be granted only to authorized individuals.
               <button
                 type="button"
                 className="text-emerald-600 font-semibold cursor-pointer hover:text-emerald-700 hover:underline transition-colors"
-                onClick={() => router.push('/login')}
+                onClick={() => router.push('/access-dashboard')}
               >
-                Sign in
+                View Existing Admins
               </button>
             </motion.p>
           </CardContent>

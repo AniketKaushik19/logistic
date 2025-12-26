@@ -79,6 +79,14 @@ function Navbar() {
                 Consignment
               </Link>
             </li>
+            <li>
+              <Link
+                href="/access-dashboard"
+                className="cursor-pointer hover:text-red-600 transition"
+              >
+                Security
+              </Link>
+            </li>
             <button
               className="bg-white bg-opacity-20 px-3 py-1 text-center rounded-full text-sm text-red-400 font-bold hover:cursor-pointer"
               onClick={logout}

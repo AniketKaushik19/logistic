@@ -71,14 +71,14 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+        <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50">
             <main className="container px-4 py-8 mt-8">
                 <h1 className="text-3xl font-bold text-center mt-7 mb-8 text-gray-800">Dashboard</h1>
                 {/* Totals Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
 
                {/* Total Consignments */}
-             <div className="group relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-2xl shadow-lg transition hover:scale-[1.03]">
+             <div className="group relative overflow-hidden bg-linear-to-br from-blue-500 to-blue-600 text-white p-6 rounded-2xl shadow-lg transition hover:scale-[1.03]">
                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition" />
            
                <div className="flex items-center justify-between">
@@ -98,7 +98,7 @@ export default function Dashboard() {
              </div>
 
                {/* Total Profit */}
-               <div className="group relative overflow-hidden bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-2xl shadow-lg transition hover:scale-[1.03]">
+               <div className="group relative overflow-hidden bg-linear-to-br from-green-500 to-green-600 text-white p-6 rounded-2xl shadow-lg transition hover:scale-[1.03]">
                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition" />
              
                  <div className="flex items-center justify-between">
@@ -118,7 +118,7 @@ export default function Dashboard() {
                         </div>
              
                     {/* Total Cost */}
-                    <div className="group relative overflow-hidden bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-2xl shadow-lg transition hover:scale-[1.03]">
+                    <div className="group relative overflow-hidden bg-linear-to-br from-purple-500 to-purple-600 text-white p-6 rounded-2xl shadow-lg transition hover:scale-[1.03]">
                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition" />
              
                  <div className="flex items-center justify-between">
