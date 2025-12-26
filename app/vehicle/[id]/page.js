@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import { use } from 'react';
 import Link from 'next/link';
-import Router from 'next/router';
-import { AdminNav } from '@/app/components/AdminNav';
 import Navbar from '@/app/_components/Navbar';
 import toast from 'react-hot-toast';
 
@@ -38,15 +36,6 @@ export default function Vehicle({ params }) {
     console.error("Error fetching expenses:",error)
   }
 }
-  useEffect(() => {
-    if (response) {
-      const timer = setTimeout(() => {
-        setResponse('');
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-    getLatestExpenses(id);
-  }, [response]);
 
   const addExpense = async() => {
     if(!Amount || !eDate || !title){
@@ -63,15 +52,15 @@ export default function Vehicle({ params }) {
 
       try {
         // Send POST request to your API route
-              const token = localStorage.getItem("auth_token");
+          const token = localStorage.getItem("auth_token");
 
         const res = await fetch("/api/expense", {
-   cache: "no-store",
-   method: "POST",
-   headers: {
-     "Content-Type": "application/json",
-     Authorization: `Bearer ${token}`,
-    },
+          method: "POST",
+          cache: "no-store",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+           },
           body: JSON.stringify(newExpense), // send the new order data
         });
 
@@ -82,6 +71,7 @@ export default function Vehicle({ params }) {
           setAmount('');
           setEDate('');
           setTitle('')
+          getLatestExpenses(id)
         } else {
           toast.error(`Error: ${data.error}`);
         }
@@ -91,6 +81,15 @@ export default function Vehicle({ params }) {
       }
     }
   };
+    useEffect(() => {
+    if (response) {
+      const timer = setTimeout(() => {
+        setResponse('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+    getLatestExpenses(id);
+  }, [response]);
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50">
@@ -142,7 +141,7 @@ export default function Vehicle({ params }) {
               <div className="space-y-2 max-h-40 overflow-y-auto">
                 <span className='p-2 text-green-500 flex justify-end-safe hover:cursor-pointer hover:text-green-600'>
                   <Link href={`/vehicle/${id}/expenses`}>
-                  view all
+                  View all
                   </Link>
                   </span>
                 {Expenses?.map((expense, index) => (

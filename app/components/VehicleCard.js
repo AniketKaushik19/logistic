@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { Trash2 } from "lucide-react";
 import { EditVehicle } from "./EditVehicle";
-import toast from "react-hot-toast";
+
 
 export default function VehicleCard({
   id,
@@ -11,6 +11,7 @@ export default function VehicleCard({
   registrationYear,
   driverName,
   onDelete,
+  fetchVehicles
 }) {
   
   return (
@@ -25,6 +26,7 @@ export default function VehicleCard({
             name={name}
             driverName={driverName}
             capacity={capacity}
+            fetchVehicles={fetchVehicles}
           />
         </div>
 

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -14,21 +14,21 @@ import { Label } from "@/components/ui/label"
 import { Pencil } from "lucide-react"
 import toast from "react-hot-toast"
 
-export function EditVehicle({ name, driverName, capacity }) {
+export function EditVehicle({ name, driverName, capacity ,fetchVehicles }) {
   // Local state for form fields
   const [vehicleName, setVehicleName] = useState(name)
   const [driver, setDriver] = useState(driverName)
   const [vehicleCapacity, setVehicleCapacity] = useState(capacity)
 
   // State for feedback
+  const [open , setIsOpen]=useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
-  const handleSubmit = async (e) => {
+  const onEdit = async (e) => {
     e.preventDefault()
     setError("")
     setLoading(true)
-
     try {
       const response = await fetch("/api/vehicle", {
         method: "PUT",
@@ -41,7 +41,6 @@ export function EditVehicle({ name, driverName, capacity }) {
           capacity: vehicleCapacity,
         }),
       })
-    toast.success("Vehicle updated successfully")
       const data = await response.json()
       if (data.message) {
         toast.success("Vehicle updated successfully")
@@ -53,15 +52,19 @@ export function EditVehicle({ name, driverName, capacity }) {
       setError("Update failed. Please try again.")
     } finally {
       setLoading(false)
+      setIsOpen(false)
     }
   }
-
+  useEffect(()=>{
+     fetchVehicles()
+  },[open])
   return (
-    <Dialog>
-      <form onSubmit={handleSubmit}>
+    <Dialog open={open}>
+      <form onSubmit={onEdit}>
         <DialogTrigger asChild>
           <button 
             title="Edit Vehicle"
+            onClick={()=>setIsOpen(true)}
           >
             <Pencil size={18} className="text-blue-600" />
           </button>
@@ -99,13 +102,13 @@ export function EditVehicle({ name, driverName, capacity }) {
           {error && <p className="text-red-500 text-sm">{error}</p>}
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline" className="hover:bg-red-200">
+              <Button variant="outline" className="hover:bg-red-200" onClick={()=>setIsOpen(false)}>
                 Cancel
               </Button>
             </DialogClose>
             <Button
               type="submit"
-              onClick={handleSubmit}
+              onClick={onEdit}
               disabled={loading}
               className="border hover:bg-green-300"
             >

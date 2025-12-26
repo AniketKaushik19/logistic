@@ -13,7 +13,7 @@ export async function middleware(req) {
 
   // Protect only app pages
   if (!pathname.startsWith("/consignment") &&
-      !pathname.startsWith("/dashboard")) {
+      !pathname.startsWith("/dashboard") && !pathname.startsWith("/vehicleDashboard") && !pathname.startsWith("/profit") && !pathname.startsWith("/vehicle") ){
     return NextResponse.next();
   }
 

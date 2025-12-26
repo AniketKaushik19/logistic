@@ -12,9 +12,9 @@ import {
   Printer,
   Trash2,
   Pencil,
-  Table,
   PackageCheck,
   ArrowDownCircle,
+  Package,
 } from "lucide-react";
 import { printPDF } from "@/utils/printPDF";
 
@@ -106,9 +106,22 @@ export default function ConsignmentList() {
           {/* Header */}
           <div className="flex flex-col md:flex-row items-center justify-between mb-8">
             <h1 className="text-3xl font-bold text-slate-800 flex items-center gap-2">
+             
               <Truck className="w-7 h-7 text-indigo-600" />
               Consignments
             </h1>
+<div className="flex gap-5">
+
+            <Link href="/track">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center gap-2 bg-red-600 text-white mt-2 md:m-0 px-5 py-2 rounded-lg shadow hover:bg-red-700"
+              >
+                <Package/>
+                Tracker
+              </motion.button>
+            </Link>
 
             <Link href="/consignment">
               <motion.button
@@ -120,6 +133,9 @@ export default function ConsignmentList() {
                 New Consignment
               </motion.button>
             </Link>
+
+</div>
+
           </div>
 
           {/* Summary */}
