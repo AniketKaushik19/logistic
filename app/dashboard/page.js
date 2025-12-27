@@ -30,6 +30,9 @@ export default function Dashboard() {
           Authorization: `Bearer ${token}`,
         }
       });
+        if (!res.ok) {
+      throw new Error("API failed");
+    }
       const data = await res.json();
       setTotals(data);
     } catch (error) {
@@ -50,6 +53,9 @@ export default function Dashboard() {
           Authorization: `Bearer ${token}`,
         },
       });
+        if (!res.ok) {
+      throw new Error("API failed");
+    }
       const data = await res.json();
       setAnalysisData(data);
     } catch (error) {

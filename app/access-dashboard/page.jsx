@@ -120,7 +120,10 @@ export default function AccessDashboard() {
           Authorization: `Bearer ${token}`,
         },
       });
-      const data = await res.json();
+  if (!res.ok) {
+      throw new Error("API failed");
+    }
+          const data = await res.json();
       setAdmins(data.admins || []);
     } catch {
       toast.error("Failed to load admins");
@@ -152,8 +155,8 @@ export default function AccessDashboard() {
         body: JSON.stringify(body),
       });
 
-      const data = await res.json();
       if (!res.ok) throw new Error(data.error);
+      const data = await res.json();
 
       toast.success(action === "edit" ? "Password updated" : "Admin deleted");
       fetchAdmins();

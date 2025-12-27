@@ -28,6 +28,9 @@ export default function EditPage() {
     (async () => {
       try {
         const res = await fetch(`/api/consignment/${id}`);
+          if (!res.ok) {
+      throw new Error("Failed");
+    }
         const data = await res.json();
         setForm(data);
       } catch (err) {

@@ -64,7 +64,9 @@ export default function Vehicle({ params }) {
            },
           body: JSON.stringify(newExpense), // send the new order data
         });
-
+  if (!res.ok) {
+      throw new Error("API failed");
+    }
         const data = await res.json();
 
         if (res.ok) {

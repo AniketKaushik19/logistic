@@ -172,8 +172,9 @@ useEffect(() => {
           body: JSON.stringify(form),
         });
 
-        if (!res) return;
-
+  if (!res) {
+      throw new Error("Server Down");
+    }
         const data = await res.json();
         const cn = data?.data?.cn || form.cn;
 

@@ -37,6 +37,9 @@ export default function TrackClient() {
           Authorization: `Bearer ${token}`,
         },
       });
+        if (!res.ok) {
+      throw new Error("API failed");
+    }
       const json = await res.json();
 
       if (!res.ok || json?.success === false) {
