@@ -40,12 +40,15 @@ export default function ConsignmentList() {
       consignments.map(async (c) => {
         try {
           const res = await fetch(`/api/consignment/${c._id}/profit`, {
-            headers: { Authorization: `Bearer ${token}` },
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/json",
+            },
           });
 
           if (!res.ok) return c;
-
-          const data = await res.json();
+         const data = await res.json();
           return { ...c, profit: data.profit };
         } catch {
           return c;
@@ -63,7 +66,11 @@ export default function ConsignmentList() {
       const token = localStorage.getItem("auth_token");
 
       const res = await fetch("/api/consignment", {
-        headers: { Authorization: `Bearer ${token}` },
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
         cache: "no-store",
       });
 
@@ -97,9 +104,14 @@ export default function ConsignmentList() {
       const token = localStorage.getItem("auth_token");
       const res = await fetch(`/api/consignment/${id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}`,
+       Accept: "application/json" },
       });
-      if (!res.ok) throw new Error();
+if (!res.ok) {
+  const text = await res.text();
+  console.error("DELETE failed:", res.status, text);
+  throw new Error(`Delete failed: ${res.status}`);
+}
 
       setItems((prev) => prev.filter((i) => i._id !== id));
       toast.success("Deleted successfully");

@@ -24,10 +24,20 @@ export default function EditPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!id) return;
-    (async () => {
+    if (!id) return new Error("Failed");
+        (async () => {
+                const token = localStorage.getItem("auth_token");
+
       try {
-        const res = await fetch(`/api/consignment/${id}`);
+        const res = await fetch(`/api/consignment/${id}`,{
+                  method: "GET",
+ headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        cache: "no-store",
+      }
+        });
           if (!res.ok) {
       throw new Error("Failed");
     }
