@@ -25,13 +25,22 @@ import { useRouter } from "next/navigation";
 import ProfitModal from "@/app/_components/profitModal";
 
 const LOAD_COUNT = 6;
+const fetchProfit = async (id) => {
+  const token = localStorage.getItem("auth_token");
+
+  const res = await fetch(`/api/consignment/${id}/profit`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const data = await res.json();
+  return data.profit;
+};
 
 export default function ConsignmentList() {
   const [items, setItems] = useState([]);
   const [pageLoading, setPageLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [visibleCount, setVisibleCount] = useState(LOAD_COUNT);
-  const router = useRouter();
   const [showProfitModal, setShowProfitModal] = useState(false);
   const [selectedConsignment, setSelectedConsignment] = useState(null);
 
@@ -168,7 +177,7 @@ export default function ConsignmentList() {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {visibleItems.map((c) => {
                   const cn = c.cn || c.cnNo || c.consignmentNo || "—";
-
+{ fetchProfit(c._id)}
                   return (
                     <motion.div
                       key={String(c._id)}
