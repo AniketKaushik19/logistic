@@ -20,6 +20,7 @@ export default function Vehicle({ params }) {
 
      const response=await fetch(`/api/expense?vehicleId=${vehicleId}`, {
    cache: "no-store",
+   
    headers: {
      Authorization: `Bearer ${token}`,
    },

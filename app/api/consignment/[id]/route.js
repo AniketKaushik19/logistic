@@ -4,8 +4,11 @@ import { ObjectId } from "mongodb";
 import { requireAuth } from "@/lib/auth";
 
 /* ================= GET ================= */
-export async function GET(req, { params }) {
+export async function GET(req) {
   const auth = await requireAuth(req);
+ // ✅ Extract ID from URL
+    const url = new URL(req.url);
+    const id = url.pathname.split("/").pop();
   if (!auth.authenticated) {
     return NextResponse.json(
       { error: auth.error || "Unauthorized" },
@@ -14,8 +17,6 @@ export async function GET(req, { params }) {
   }
 
   try {
-    const { id } = params;
-
     if (!id || !ObjectId.isValid(id)) {
       return NextResponse.json(
         { error: "Invalid consignment ID" },
@@ -48,9 +49,10 @@ export async function GET(req, { params }) {
 }
 
 /* ================= PUT ================= */
-export async function PUT(req, { params }) {
-  const { id } = await params;
-
+export async function PUT(req) {
+ // ✅ Extract ID from URL
+    const url = new URL(req.url);
+    const id = url.pathname.split("/").pop();
   const auth = await requireAuth(req);
   if (!auth.authenticated) {
     return NextResponse.json(
@@ -59,14 +61,14 @@ export async function PUT(req, { params }) {
     );
   }
 
-  if (!id || !ObjectId.isValid(id)) {
-    return NextResponse.json(
-      { error: "Invalid or missing consignment ID" },
-      { status: 400 }
-    );
-  }
-
+  
   try {
+    if (!id || !ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { error: "Invalid or missing consignment ID" },
+        { status: 400 }
+      );
+    }
 
     if (!id || !ObjectId.isValid(id)) {
       return NextResponse.json(
