@@ -83,7 +83,7 @@ export default function GetInTouch() {
               </div>
               <div>
                 <h4 className="font-semibold text-lg">Phone</h4>
-                <p className="text-gray-600">+91 790509 3236</p>
+                <p className="text-gray-600">+91 738853 9768</p>
               </div>
             </div>
 

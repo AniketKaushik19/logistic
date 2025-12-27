@@ -1,85 +1,383 @@
 'use client';
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import DownloadBill from "../components/DownoladBill";
 import Navbar from '../_components/Navbar';
+import toast from 'react-hot-toast';
+import {
+  User,
+  Calendar,
+  MapPin,
+  Truck,
+  IndianRupee,
+  Gift,
+  Clock,
+  ReceiptText,
+  Home,
+  File
+} from "lucide-react";
+import { numberToWords } from '@/utils/numberToWord';
+
 
 export default function InvoiceForm() {
-  const [form, setForm] = useState({
-    customer: 'M/s. MOTORFAB SALES PVT LTD, LUCKNOW-19',
-    billDate: '2025-08-18',
-    cnDate: '2025-08-14',
-    from: 'LKO',
-    to: 'TML LKO',
-    freight: 700,
-    labour: 0,
-    detention: 0,
-    bonus: 0,
-  });
+ const [form, setForm] = useState({
+  customer: '',
+  customerAddress: '',
+  customerGstin: '',
+  billNo: '',
+  billDate: '',
+  partyCode: '',
+  vendorCode: '',
+  consignments: [
+    {
+      cnNo: '',
+      cnDate: '',
+      from: '',
+      to: '',
+      freight: '',
+      labour: '',
+      detention: '',
+      bonus: '',
+      total: 0,
+    },
+  ],
+  grandTotal: 0,
+  amountInWord: '',
+});
+
+  const handleConsignmentChange = (index, field, value) => {
+  const updated = [...form.consignments];
+  updated[index][field] = value;
+
+  // Auto total per consignment
+  const c = updated[index];
+  updated[index].total =
+    Number(c.freight) +
+    Number(c.labour) +
+    Number(c.detention) +
+    Number(c.bonus);
+
+  setForm({ ...form, consignments: updated });
+};
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+
+  useEffect(() => {
+  const grandTotal = form.consignments.reduce(
+    (sum, c) => sum + Number(c.total || 0),
+    0
+  );
+
+  setForm((prev) => ({
+    ...prev,
+    grandTotal,
+    amountInWord: grandTotal > 0 ? numberToWords(grandTotal) : '',
+  }));
+}, [form.consignments]);
+
+  const addConsignment = () => {
+  setForm({
+    ...form,
+    consignments: [
+      ...form.consignments,
+      {
+        cnNo: '',
+        cnDate: '',
+        from: '',
+        to: '',
+        freight: '',
+        labour: '',
+        detention: '',
+        bonus: '',
+        total: 0,
+      },
+    ],
+  });
+};
+
+  /* AUTO TOTAL → STORE IN FORM */
+  useEffect(() => {
+    const total =
+      Number(form.freight) +
+      Number(form.labour) +
+      Number(form.detention) +
+      Number(form.bonus);
+
+    setForm((prev) => ({ ...prev, total ,
+       amountInWord:total > 0 ? numberToWords(total):"",
+    }));
+  }, [form.freight, form.labour, form.detention, form.bonus]);
+
+  console.log(form.amountInWord)
+  
   return (
-    <main className="p-6 max-w-xl mx-auto space-y-4 mt-16">
-      <Navbar/>
-      <h1 className="text-xl font-bold">Transport Invoice Form</h1>
+    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <Navbar />
 
-      {/* Text Inputs */}
-      <input
-        name="customer"
-        value={form.customer}
-        onChange={handleChange}
-        placeholder="Customer"
-        className="border p-2 w-full"
-      />
-      <input
-        name="billDate"
-        type="date"
-        value={form.billDate}
-        onChange={handleChange}
-        className="border p-2 w-full"
-      />
-      <input
-        name="cnDate"
-        type="date"
-        value={form.cnDate}
-        onChange={handleChange}
-        className="border p-2 w-full"
-      />
-      <input
-        name="from"
-        value={form.from}
-        onChange={handleChange}
-        placeholder="From"
-        className="border p-2 w-full"
-      />
-      <input
-        name="to"
-        value={form.to}
-        onChange={handleChange}
-        placeholder="To"
-        className="border p-2 w-full"
-      />
+      <div className="max-w-5xl mx-auto px-6 py-10">
+        <h1 className="text-3xl font-bold text-gray-800 mb-8 mt-12">
+          Transport Invoice
+        </h1>
 
-      {/* Numeric Inputs */}
-      {['freight', 'labour', 'detention', 'bonus'].map((field) => (
-        <input
-          key={field}
-          name={field}
-          type="number"
-          value={form[field]}
-          onChange={handleChange}
-          placeholder={field}
-          className="border p-2 w-full"
+        <div className="bg-white rounded-2xl shadow-xl p-8 space-y-8">
+
+          {/* Bill no */}
+          <Section title="Bill No">
+            <Input
+              icon={<File size={18} />}
+              name="billNo"
+              value={form.billNo}
+              onChange={handleChange}
+              placeholder="BillNo"
+            />
+          </Section>
+          {/* CUSTOMER */}
+          <Section title="Customer Details">
+            <Input
+              icon={<User size={18} />}
+              name="customer"
+              value={form.customer}
+              onChange={handleChange}
+              placeholder="Customer Name"
+            />
+
+            <Textarea
+              icon={<Home size={18} />}
+              name="customerAddress"
+              value={form.customerAddress}
+              onChange={handleChange}
+              placeholder="Customer Address"
+            />
+          </Section>
+
+          {/* GSTIN */}
+          <Section title="GSTIN Details">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                icon={<ReceiptText size={18} />}
+                name="customerGstin"
+                value={form.customerGstin}
+                onChange={handleChange}
+                placeholder="Customer GSTIN"
+              />
+            </div>
+          </Section>
+               {/* Codes */}
+          <Section title="Code information">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                icon={""}
+                name="vendorCode"
+                value={form.vendorCode}
+                onChange={handleChange}
+                placeholder="Vendor Code"
+              />
+              <Input
+                icon={""}
+                name="partyCode"
+                value={form.partyCode}
+                onChange={handleChange}
+                placeholder="Party Code"
+              />
+            </div>
+          </Section>
+
+          {/* DATES */}
+
+          <div>
+            <h2 className='font-bold p-1 text-gray-600 text-xl'>
+              Invoice Dates
+            </h2>
+            <label htmlFor="billDate" className="block text-sm font-medium text-gray-700">
+              Bill Date
+            </label>
+            <Input
+              icon={<Calendar size={18} />}
+              name="billDate"
+              type="date"
+              value={form.billDate}
+              onChange={handleChange}
+            />
+          </div>
+
+         {form.consignments.map((c, index) => (
+  <div
+    key={index}
+    className="border rounded-xl p-5 space-y-4 bg-gray-50"
+  >
+    <h3 className="font-semibold text-indigo-700">
+      Consignment #{index + 1}
+    </h3>
+
+    {/* CN NO */}
+    <Input
+      icon={<File size={18} />}
+      placeholder="Consignment Number"
+      value={c.cnNo}
+      onChange={(e) =>
+        handleConsignmentChange(index, "cnNo", e.target.value)
+      }
+    />
+
+    {/* SHOW BELOW ONLY IF CN NO EXISTS */}
+    {c.cnNo && (
+      <>
+        {/* DATE */}
+        <Input
+          icon={<Calendar size={18} />}
+          type="date"
+          value={c.cnDate}
+          onChange={(e) =>
+            handleConsignmentChange(index, "cnDate", e.target.value)
+          }
         />
-      ))}
 
-      <button
-        className="bg-blue-600 text-white px-4 py-2 rounded"
-      >
-        <DownloadBill/>
-      </button>
-      
+        {/* ROUTE */}
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            icon={<MapPin size={18} />}
+            placeholder="From"
+            value={c.from}
+            onChange={(e) =>
+              handleConsignmentChange(index, "from", e.target.value)
+            }
+          />
+          <Input
+            icon={<Truck size={18} />}
+            placeholder="To"
+            value={c.to}
+            onChange={(e) =>
+              handleConsignmentChange(index, "to", e.target.value)
+            }
+          />
+        </div>
+
+        {/* CHARGES */}
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            icon={<IndianRupee size={18} />}
+            placeholder="Freight"
+            type="number"
+            value={c.freight}
+            onChange={(e) =>
+              handleConsignmentChange(index, "freight", e.target.value)
+            }
+          />
+          <Input
+            icon={<IndianRupee size={18} />}
+            placeholder="Labour"
+            type="number"
+            value={c.labour}
+            onChange={(e) =>
+              handleConsignmentChange(index, "labour", e.target.value)
+            }
+          />
+          <Input
+            icon={<Clock size={18} />}
+            placeholder="Detention"
+            type="number"
+            value={c.detention}
+            onChange={(e) =>
+              handleConsignmentChange(index, "detention", e.target.value)
+            }
+          />
+          <Input
+            icon={<Gift size={18} />}
+            placeholder="Bonus"
+            type="number"
+            value={c.bonus}
+            onChange={(e) =>
+              handleConsignmentChange(index, "bonus", e.target.value)
+            }
+          />
+        </div>
+
+        {/* TOTAL */}
+        <Input
+          icon={<IndianRupee size={18} />}
+          value={c.total}
+          readOnly
+        />
+      </>
+    )}
+  </div>
+))}
+
+<button
+  type="button"
+  onClick={addConsignment}
+  className="border border-indigo-600 text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-50"
+>
+  + Add Consignment
+</button>
+
+{/* //Grand total */}
+<Section title="Grand Total">
+  <Input
+    icon={<IndianRupee size={18} />}
+    value={form.grandTotal}
+    readOnly
+  />
+  <p className="text-sm text-gray-600 italic">
+    Amount in Words: {form.amountInWord}
+  </p>
+</Section>
+
+
+          {/* ACTION */}
+          <div className="flex justify-end pt-6">
+             <button
+              onClick={() => toast.success("Invoice Downloaded Successfully")}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl shadow-lg transition"
+            >
+              <DownloadBill form={form} />
+            </button>
+          </div>
+
+        </div>
+      </div>
     </main>
   );
 }
+
+/* ---------------- UI HELPERS ---------------- */
+
+const Section = ({ title, children }) => (
+  <div>
+    <h2 className="text-lg font-semibold text-gray-700 mb-4">
+      {title}
+    </h2>
+    <div className="space-y-4">{children}</div>
+  </div>
+);
+
+const Input = ({ icon, ...props }) => (
+  <div className="relative">
+    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+      {icon}
+    </span>
+    <input
+      {...props}
+      className="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3
+                 focus:outline-none focus:ring-2 focus:ring-indigo-500
+                 bg-gray-50 read-only:bg-gray-100"
+    />
+  </div>
+);
+
+const Textarea = ({ icon, ...props }) => (
+  <div className="relative">
+    <span className="absolute left-3 top-3 text-gray-400">
+      {icon}
+    </span>
+    <textarea
+      {...props}
+      rows={3}
+      className="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3
+                 focus:outline-none focus:ring-2 focus:ring-indigo-500
+                 bg-gray-50 resize-none"
+    />
+  </div>
+);
