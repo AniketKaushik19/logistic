@@ -32,10 +32,15 @@ const handleSave = async () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ profit: Number(netProfit) }),
+        body: JSON.stringify({
+          totalCost: Number(totalCost),
+          expenses: Number(expenses),
+          profit: Number(netProfit),
+          date,
+        }),
       }
     );
-console.log(res)
+
     if (!res.ok) {
       throw new Error("API failed");
     }
@@ -50,8 +55,6 @@ console.log(res)
     toast.error("Failed to save profit");
   }
 };
-
-
 
   return (
     <div className="fixed inset-0 bg-black/50 bg-opacity-40 flex items-center justify-center z-50">

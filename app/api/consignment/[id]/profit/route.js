@@ -3,6 +3,41 @@ import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { ObjectId } from "mongodb";
 
+
+export async function GET(req, context) {
+  const auth = await requireAuth(req);
+  if (!auth.authenticated) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // ✅ CORRECT: params is a Promise
+  const params = await context.params;
+  const { id } = params;
+ if (!id) {
+    return NextResponse.json(
+      { error: "Consignment id missing" },
+      { status: 400 }
+    );
+  }
+
+  if (!ObjectId.isValid(id)) {
+    return NextResponse.json(
+      { error: "Invalid consignment id" },
+      { status: 400 }
+    );
+  }
+
+  const client = await clientPromise;
+  const db = client.db("logisticdb");
+
+  const profitDoc = await db.collection("profits").findOne({
+    consignmentId: new ObjectId(id),
+  });
+ return NextResponse.json({
+    profit: profitDoc?.profit ?? null,
+  });
+}
+
 /**
  * POST → Save or update profit for a consignment
  */
@@ -15,11 +50,10 @@ export async function POST(req, { params }) {
   try {
     const { id } = await params;
     const body = await req.json();
-
+  
     const profit = Number(body.profit);
     const totalCost = Number(body.totalCost || 0);
     const expenses = Number(body.expenses || 0);
-
     if (Number.isNaN(profit)) {
       return NextResponse.json({ error: "Invalid profit" }, { status: 400 });
     }
