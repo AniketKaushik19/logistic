@@ -113,37 +113,39 @@ useEffect(() => {
 
 
   /* ========= POPULATE EDIT ========= */
-  useEffect(() => {
-    if (!editId) return;
+ useEffect(() => {
+  if (!editId) return;
 
-    let mounted = true;
-    const token = localStorage.getItem("auth_token");
-    (async () => {
+  let mounted = true;
+
+  (async () => {
+    try {
       const res = await authFetch(`/api/consignment/${editId}`, {
         cache: "no-store",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       });
-      if (!res || !mounted) return;
 
-      const text = await res.text();
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        toast.error("Invalid server response");
+      if (!res.ok) {
+        toast.error("Failed to load consignment");
         return;
       }
 
+      const data = await res.json();
+
+      if (!mounted) return;
+
       setForm((prev) => ({ ...prev, ...data }));
       setIsEdit(true);
-    })();
+    } catch (err) {
+      console.error(err);
+      toast.error("Server error");
+    }
+  })();
 
-    return () => {
-      mounted = false;
-    };
-  }, [editId]);
+  return () => {
+    mounted = false;
+  };
+}, [editId]);
+
 
   const handleChange = (e) => {
     let value = e.target.value;
