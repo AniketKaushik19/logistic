@@ -156,7 +156,7 @@ export default function TrackClient() {
             onClick={async () => await printPDF(cn, data.consignment)}
             className="flex items-center gap-2 bg-linear-to-br from-indigo-600 to-blue-600
                    text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg
-                   hover:from-indigo-700 hover:to-blue-700"
+                   hover:from-indigo-700 hover:to-blue-700 my-5"
           >
             <FileDown size={18} />
             Print PDF

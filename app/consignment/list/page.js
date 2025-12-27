@@ -88,7 +88,7 @@ export default function ConsignmentList() {
   /* ================= DELETE ================= */
   const handleDelete = async (id) => {
     const confirmed = await ConfirmToast({
-      msg: "Are you sure you want to delete this consignment?",
+      msg: "Are you sure. You want to delete this consignment?",
     });
     if (!confirmed) return;
 
@@ -99,7 +99,6 @@ export default function ConsignmentList() {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-
       if (!res.ok) throw new Error();
 
       setItems((prev) => prev.filter((i) => i._id !== id));
@@ -160,7 +159,7 @@ export default function ConsignmentList() {
           </div>
 
           {/* Summary */}
-          <div className="bg-white border-2 rounded-lg p-4 shadow-sm mb-6 w-[25vw]">
+          <div className="bg-white border-2 rounded-lg p-4 shadow-sm mb-6 w-[30vw]">
             <p className="text-sm text-slate-500">Total Consignments</p>
             <h2 className="text-2xl font-bold flex gap-2">
               <PackageCheck />
