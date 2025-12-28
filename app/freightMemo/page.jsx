@@ -16,8 +16,17 @@ import { useState, useEffect } from "react";
 import Navbar from "../_components/Navbar";
 import { numberToWords } from "@/utils/numberToWord";
 import toast from "react-hot-toast";
+import { Button } from "@/components/ui/button";
 
 export default function FreightMemo() {
+  const [openPdf, setOpenPdf] = useState(false);
+  const [pdfData, setPdfData] = useState(null);
+
+const handlePrint = () => {
+  setPdfData({ ...form }); // snapshot
+  setOpenPdf(true);
+};
+
   const initialFormState = {
   challanNo: "",
   date: "",
@@ -67,10 +76,9 @@ export default function FreightMemo() {
       const data = await res.json();
 
       if (data.success) {
-        toast.success("Freight memo saved");
+        toast.success("Downloaded successfully")
+        setForm(initialFormState)
       }
-      toast.success("Downloaded successfully")
-      setForm(initialFormState)
       
     } catch (error) {
       toast.error("Error saving freight");
@@ -92,13 +100,14 @@ const removeGrNo = (index) => {
   setForm({ ...form, grNos: updated });
 };
 
-  useEffect(() => {
-  const rate = Number(form.rate);
-  const weight = Number(form.weight);
-  const advance = Number(form.advance);
+useEffect(() => {
+  const rate = parseFloat(form.rate);
+  const weight = parseFloat(form.weight);
+  const advance = parseFloat(form.advance) || 0;
 
-  if (!rate || !weight) {
-    setForm((prev) => ({
+  // If inputs are empty or invalid → reset safely
+  if (isNaN(rate) || isNaN(weight) || rate <= 0 || weight <= 0) {
+    setForm(prev => ({
       ...prev,
       total: 0,
       netBalance: 0,
@@ -108,16 +117,14 @@ const removeGrNo = (index) => {
   }
 
   const total = rate * weight;
-  const netBalance = total - (advance || 0);
 
-  setForm((prev) => ({
+  setForm(prev => ({
     ...prev,
     total,
-    netBalance,
-    amountInWords: numberToWords(total),
+    netBalance: total - advance,
+    amountInWords: numberToWords(Math.floor(total)),
   }));
 }, [form.rate, form.weight, form.advance]);
-
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -352,12 +359,36 @@ const removeGrNo = (index) => {
           >
             Save
           </button> */}
-           <div className="flex justify-end pt-6">  
+           {/* <div className="flex justify-end pt-6">  
           
            {form.total > 0 && (
              <DownloadFreight form={form} onSave={saveFreight} />
            )}           
-          </div>
+          </div> */}
+          <button
+  disabled={form.total <= 0}
+  onClick={() => {setOpenPdf(true) 
+    setPdfData(true)
+  }}
+  className="px-4 py-2 bg-indigo-600 text-white rounded disabled:opacity-50"
+>
+  Save
+</button>
+  {openPdf && pdfData && (
+    <button onClick={()=>saveFreight()}>
+
+  <DownloadFreight
+    form={form}
+    setForm={setForm}
+    disabled={!form.rate || !form.weight || form.total <= 0}
+    onSave={() => {
+      saveFreight();
+      setOpenPdf(false);
+    }}
+    />
+    </button>
+)}
+
         </div>
 
       </div>

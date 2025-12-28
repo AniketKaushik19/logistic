@@ -73,6 +73,11 @@ function Navbar() {
                 E-bill
               </Link>
             </li>
+            <li>
+              <Link onClick={() => setOpen(false)} className="hover:text-red-600" href="/freightMemo">
+               Freight Memo
+              </Link>
+            </li>
            <li>
               <Link
                 href="/access-dashboard"
