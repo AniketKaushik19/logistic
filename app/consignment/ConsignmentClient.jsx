@@ -7,7 +7,6 @@ import toast, { Toaster } from "react-hot-toast";
 import { generatePDF } from "@/utils/generatePDF";
 import Navbar from "../_components/Navbar";
 import { printPDF } from "@/utils/printPDF";
-import { authFetch } from "@/lib/authFetch";
 /* ========= NUMBER VALIDATION PROPS ========= */
 const numberOnlyProps = {
   min: 0,
@@ -120,8 +119,9 @@ useEffect(() => {
 
   (async () => {
     try {
-      const res = await authFetch(`/api/consignment/${editId}`, {
+      const res = await fetch(`/api/consignment/${editId}`, {
         cache: "no-store",
+        credentials: "include",
       });
 
       if (!res.ok) {
@@ -167,8 +167,8 @@ useEffect(() => {
           cache: "no-store",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+                  },
+          credentials: "include",
           body: JSON.stringify(form),
         });
 
@@ -192,7 +192,6 @@ useEffect(() => {
       const res = await fetch("/api/consignment", {
         method: "POST",
         cache: "no-store",
-
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,

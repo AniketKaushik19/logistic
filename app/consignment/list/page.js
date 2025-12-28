@@ -32,65 +32,46 @@ export default function ConsignmentList() {
   const [showProfitModal, setShowProfitModal] = useState(false);
   const [selectedConsignment, setSelectedConsignment] = useState(null);
 
-  /* ================= FETCH PROFITS ================= */
-  const loadProfits = async (consignments) => {
+  
+
+const fetchItems = useCallback(async () => {
+  setPageLoading(true);
+  try {
     const token = localStorage.getItem("auth_token");
 
-    const updated = await Promise.all(
-      consignments.map(async (c) => {
-        try {
-          const res = await fetch(`/api/consignment/${c._id}/profit`, {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              Accept: "application/json",
-            },
-          });
-
-          if (!res.ok) return c;
-         const data = await res.json();
-          return { ...c, profit: data.profit };
-        } catch {
-          return c;
-        }
-      })
-    );
-
-    setItems(updated);
-  };
-
-  /* ================= FETCH CONSIGNMENTS ================= */
-  const fetchItems = useCallback(async () => {
-    setPageLoading(true);
-    try {
-      const token = localStorage.getItem("auth_token");
-
-      const res = await fetch("/api/consignment", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
+    const res = await fetch("/api/consignment", {
+      method: "GET",
+      headers: {
           Accept: "application/json",
-        },
-        cache: "no-store",
-      });
+      },
+      cache: "no-store",credentials: "include",
 
-      if (!res.ok) throw new Error();
+    });
 
-      const json = await res.json();
-      const data = Array.isArray(json) ? json : [];
+    if (!res.ok) throw new Error();
 
-      setItems(data);
-      await loadProfits(data);
-    } catch {
-      toast.error("Failed to load consignments");
-    } finally {
-      setPageLoading(false);
-    }
-  }, []);
+    const json = await res.json();
+    const data = Array.isArray(json) ? json : [];
+
+    // ✅ profit now comes directly inside consignment
+    setItems(data);
+  } catch {
+    toast.error("Failed to load consignments");
+  } finally {
+    setPageLoading(false);
+  }
+}, []);
 
   useEffect(() => {
     fetchItems();
   }, [fetchItems]);
+
+  useEffect(() => {
+  if (selectedConsignment && !selectedConsignment._id) {
+    setShowProfitModal(false);
+    toast.error("Consignment data is not ready");
+  }
+}, [selectedConsignment]);
 
   /* ================= DELETE ================= */
   const handleDelete = async (id) => {
@@ -104,7 +85,7 @@ export default function ConsignmentList() {
       const token = localStorage.getItem("auth_token");
       const res = await fetch(`/api/consignment/${id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}`,
+        headers: { 
        Accept: "application/json" },
       });
 if (!res.ok) {
@@ -239,27 +220,35 @@ if (!res.ok) {
                           </button>
 
                           {/* PROFIT */}
-                          {typeof c.profit === "number" ? (
-                            <div
-                              className={`px-3 py-1.5 rounded-md flex items-center gap-1 font-semibold
-      ${
-        c.profit < 0 ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
-      }`}
-                            >
-                              <IndianRupee size={14} />
-                              {c.profit.toFixed(2)}
-                            </div>
-                          ) : (
-                            <button
-                              onClick={() => {
-                                setSelectedConsignment(c);
-                                setShowProfitModal(true);
-                              }}
-                              className="bg-green-500 text-white px-3 py-1.5 rounded-md"
-                            >
-                              💵 Profit
-                            </button>
-                          )}
+                        {/* PROFIT */}
+{typeof c.profit?.amount === "number" ? (
+  <div
+    className={`px-3 py-1.5 rounded-md flex items-center gap-1 font-semibold
+    ${
+      c.profit.amount < 0
+        ? "bg-red-100 text-red-700"
+        : "bg-green-100 text-green-700"
+    }`}
+  >
+    <IndianRupee size={14} />
+    {c.profit.amount.toFixed(2)}
+  </div>
+) : (
+  <button
+    onClick={() => {
+      if (!c._id) {
+        toast.error("Consignment not loaded yet");
+        return;
+      }
+      setSelectedConsignment(c);
+      setShowProfitModal(true);
+    }}
+    className="bg-green-500 text-white px-3 py-1.5 rounded-md"
+  >
+    💵 Profit
+  </button>
+)}
+
                         </div>
                       </div>
                     </motion.div>
@@ -288,16 +277,25 @@ if (!res.ok) {
       {showProfitModal && selectedConsignment && (
         <ProfitModal
           consignment={selectedConsignment}
+          fetchItems={fetchItems }
+          
           onClose={() => setShowProfitModal(false)}
-          onSave={(profitAmount) => {
-            setItems((prev) =>
-              prev.map((i) =>
-                i._id === selectedConsignment._id
-                  ? { ...i, profit: profitAmount }
-                  : i
-              )
-            );
-          }}
+       onSave={(profitAmount) => {
+  setItems((prev) =>
+    prev.map((i) =>
+      i._id === selectedConsignment._id
+        ? {
+            ...i,
+            profit: {
+              ...(i.profit || {}),
+              amount: profitAmount,
+            },
+          }
+        : i
+    )
+  );
+}}
+
         />
       )}
     </>

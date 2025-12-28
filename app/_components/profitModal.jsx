@@ -4,60 +4,61 @@ import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { IndianRupee } from "lucide-react";
 
-export default function ProfitModal({ consignment, onClose, onSave }) {
-  const [totalCost, setTotalCost] = useState(consignment.amount || "");
-  const [expenses, setExpenses] = useState("");
-  const [netProfit, setNetProfit] = useState("");
-  const [date, setDate] = useState(
-    consignment.createdAt
-      ? new Date(consignment.createdAt).toISOString().split("T")[0]
-      : ""
+export default function ProfitModal({ consignment, onClose, onSave ,fetchItems }) {
+  const [totalCost, setTotalCost] = useState(
+    consignment?.profit?.totalCost || ""
   );
+  const [expenses, setExpenses] = useState(
+    consignment?.profit?.expenses || ""
+  );
+  const [netProfit, setNetProfit] = useState("");
 
   useEffect(() => {
-    const total = parseFloat(totalCost) || 0;
-    const exp = parseFloat(expenses) || 0;
+    const total = Number(totalCost) || 0;
+    const exp = Number(expenses) || 0;
     setNetProfit((total - exp).toFixed(2));
   }, [totalCost, expenses]);
 
-const handleSave = async () => {
+ const handleSave = async () => {
+  if (!consignment?._id) {
+    toast.error("Consignment ID is missing");
+    return;
+  }
+
   try {
     const token = localStorage.getItem("auth_token");
 
-    const res = await fetch(
-      `/api/consignment/${consignment._id}/profit`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          totalCost: Number(totalCost),
-          expenses: Number(expenses),
-          profit: Number(netProfit),
-          date,
-        }),
-      }
-    );
+    const res = await fetch(`/api/consignment/${consignment._id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        profit: Number(netProfit),
+        totalCost: Number(totalCost),
+        expenses: Number(expenses),
+      }),
+    });
 
     if (!res.ok) {
-      throw new Error("API failed");
+      const data = await res.json();
+      throw new Error(data?.error || "API failed");
     }
 
     const data = await res.json();
-
-    onSave(data.profit);
+    onSave(data.data.profit?.amount ?? netProfit);
     toast.success("Profit saved");
+    fetchItems()
     onClose();
   } catch (err) {
-    console.error(err);
-    toast.error("Failed to save profit");
+    console.error("Save failed:", err);
+    toast.error(err.message || "Failed to save profit");
   }
 };
 
   return (
-    <div className="fixed inset-0 bg-black/50 bg-opacity-40 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-96">
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <IndianRupee /> Add Profit for {consignment.cn}
@@ -70,6 +71,7 @@ const handleSave = async () => {
           placeholder="Total Cost"
           className="w-full p-2 mb-2 border rounded"
         />
+
         <input
           type="number"
           value={expenses}
@@ -77,18 +79,13 @@ const handleSave = async () => {
           placeholder="Expenses"
           className="w-full p-2 mb-2 border rounded"
         />
+
         <input
           type="number"
           value={netProfit}
           readOnly
           placeholder="Net Profit"
-          className="w-full p-2 mb-2 border rounded bg-gray-100"
-        />
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="w-full p-2 mb-4 border rounded"
+          className="w-full p-2 mb-4 border rounded bg-gray-100"
         />
 
         <div className="flex justify-end gap-2">
