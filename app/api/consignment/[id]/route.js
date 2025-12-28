@@ -4,17 +4,16 @@ import { ObjectId } from "mongodb";
 import { requireAuth } from "@/lib/auth";
 
 /* ================= GET ================= */
-export async function GET(req) {
+export async function GET(req, { params }) {
   const auth = await requireAuth(req);
   if (!auth.authenticated) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    // ✅ ALWAYS WORKS (local + Vercel)
-    const id = req.url.split("/").pop();
+    const { id } =await params;
 
-    if (!id || !ObjectId.isValid(id)) {
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json(
         { error: "Invalid consignment ID" },
         { status: 400 }
@@ -24,9 +23,9 @@ export async function GET(req) {
     const client = await clientPromise;
     const db = client.db("logisticdb");
 
-    const doc = await db
-      .collection("consignments")
-      .findOne({ _id: new ObjectId(id) });
+    const doc = await db.collection("consignments").findOne({
+      _id: new ObjectId(id),
+    });
 
     if (!doc) {
       return NextResponse.json(
@@ -46,16 +45,16 @@ export async function GET(req) {
 }
 
 /* ================= PUT ================= */
-export async function PUT(req) {
+export async function PUT(req, { params }) {
   const auth = await requireAuth(req);
   if (!auth.authenticated) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const id = req.url.split("/").pop();
+    const { id } =await params;
 
-    if (!id || !ObjectId.isValid(id)) {
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json(
         { error: "Invalid consignment ID" },
         { status: 400 }
@@ -63,18 +62,43 @@ export async function PUT(req) {
     }
 
     const body = await req.json();
-    const { _id, ...safeBody } = body;
+    const { _id, profit, ...rest } = body;
+
+    const updateDoc = {
+      ...rest,
+      updatedAt: new Date(),
+    };
+
+    // ✅ handle profit safely
+    if (profit !== undefined) {
+      const amount = Number(profit.amount ?? profit);
+      const totalCost = Number(profit.totalCost || 0);
+      const expenses = Number(profit.expenses || 0);
+
+      if (Number.isNaN(amount)) {
+        return NextResponse.json(
+          { error: "Invalid profit amount" },
+          { status: 400 }
+        );
+      }
+      updateDoc.profit = {
+        amount,
+        totalCost,
+        expenses,
+        updatedAt: new Date(),
+        updatedBy: auth.user.email,
+      };
+    }
 
     const client = await clientPromise;
     const db = client.db("logisticdb");
 
     const result = await db.collection("consignments").findOneAndUpdate(
       { _id: new ObjectId(id) },
-      { $set: { ...safeBody, updatedAt: new Date() } },
+      { $set: updateDoc },
       { returnDocument: "after" }
     );
-
-    if (!result.value) {
+    if (!result.profit) {
       return NextResponse.json(
         { error: "Consignment not found" },
         { status: 404 }
@@ -83,7 +107,7 @@ export async function PUT(req) {
 
     return NextResponse.json({
       success: true,
-      data: result.value,
+      data: result.profit,
     });
   } catch (error) {
     console.error("PUT consignment error:", error);
@@ -95,16 +119,16 @@ export async function PUT(req) {
 }
 
 /* ================= DELETE ================= */
-export async function DELETE(req) {
+export async function DELETE(req, { params }) {
   const auth = await requireAuth(req);
   if (!auth.authenticated) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const id = req.url.split("/").pop();
-
-    if (!id || !ObjectId.isValid(id)) {
+    const { id } =await params;
+console.log(id)
+    if (!ObjectId.isValid(id)) {
       return NextResponse.json(
         { error: "Invalid consignment ID" },
         { status: 400 }

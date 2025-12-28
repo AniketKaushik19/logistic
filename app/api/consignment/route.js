@@ -18,11 +18,24 @@ export async function GET(req) {
     const client = await clientPromise;
     const db = client.db("logisticdb");
 
-    const data = await db
-      .collection("consignments")
-      .find({})
-      .sort({ createdAt: -1 })
-      .toArray();
+  const data = await db
+  .collection("consignments")
+  .find(
+    {},
+    {
+      projection: {
+        cn: 1,
+        consigneeName: 1,
+        consignorName: 1,
+        createdAt: 1,
+        profit: 1, // 👈 important
+        status: 1,
+      },
+    }
+  )
+  .sort({ createdAt: -1 })
+  .toArray();
+
 
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
@@ -75,6 +88,7 @@ export async function POST(req) {
       ...body,
       cn,
       status: "Booked",
+       profit: null,
       createdAt: new Date(),
       updatedAt: new Date(),
       createdBy: auth.user.email,
