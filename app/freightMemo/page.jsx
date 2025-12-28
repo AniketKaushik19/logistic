@@ -18,6 +18,14 @@ import { numberToWords } from "@/utils/numberToWord";
 import toast from "react-hot-toast";
 
 export default function FreightMemo() {
+  const [openPdf, setOpenPdf] = useState(false);
+  const [pdfData, setPdfData] = useState(null);
+
+const handlePrint = () => {
+  setPdfData({ ...form }); // snapshot
+  setOpenPdf(true);
+};
+
   const initialFormState = {
   challanNo: "",
   date: "",
@@ -352,12 +360,35 @@ const removeGrNo = (index) => {
           >
             Save
           </button> */}
-           <div className="flex justify-end pt-6">  
+           {/* <div className="flex justify-end pt-6">  
           
            {form.total > 0 && (
              <DownloadFreight form={form} onSave={saveFreight} />
            )}           
-          </div>
+          </div> */}
+          <button
+  disabled={form.total <= 0}
+  onClick={() => setOpenPdf(true)}
+  className="px-4 py-2 bg-indigo-600 text-white rounded disabled:opacity-50"
+>
+  Save
+</button>
+  {openPdf && (
+  <DownloadFreight
+    form={form}
+    onSave={() => {
+      saveFreight();
+      setOpenPdf(false);
+    }}
+  />
+)}
+
+{openPdf && pdfData && (
+  <DownloadFreight form={pdfData} onSave={saveFreight} />
+)}
+
+
+
         </div>
 
       </div>
