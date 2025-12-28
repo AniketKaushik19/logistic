@@ -31,7 +31,7 @@ export default function ExpensesPage() {
   const fetchTotalExpenses = useCallback(async () => {
     setTotalLoading(true);
     try {
-            const token = localStorage.getItem("auth_token");
+      const token = localStorage.getItem("auth_token");
 
       const params = new URLSearchParams({
         vehicleId: id,
@@ -65,15 +65,14 @@ export default function ExpensesPage() {
     async (reset = false) => {
       setLoading(true);
       try {
-                const token = localStorage.getItem("auth_token");
+        const token = localStorage.getItem("auth_token");
 
         const params = new URLSearchParams({
-          vehicleId:id,
+          vehicleId: id,
           limit: latestOnly ? 5 : limit,
           skip: reset ? 0 : skip,
           latest: latestOnly.toString(),
-          period
-        
+          period,
         });
 
         const response = await fetch(`/api/expense?${params}`, {

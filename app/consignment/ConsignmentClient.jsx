@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
@@ -98,7 +98,22 @@ useEffect(() => {
 
   setForm((prev) => ({
     ...prev,
+
+    // ✅ existing amount (consignment total)
     amount: total > 0 ? total.toFixed(2) : "",
+
+    // ✅ sync profit object
+    profit: {
+      ...(prev.profit || {}),
+      totalCost: total > 0 ? Number(total.toFixed(2)) : 0,
+
+      // keep existing values if already set
+      expenses: prev.profit?.expenses || 0,
+      amount:
+        total > 0
+          ? Number(total.toFixed(2)) - (prev.profit?.expenses || 0)
+          : 0,
+    },
   }));
 }, [
   form.weightCharged,
@@ -112,39 +127,33 @@ useEffect(() => {
 
 
   /* ========= POPULATE EDIT ========= */
- useEffect(() => {
+const fetchConsignment = useCallback(async () => {
   if (!editId) return;
 
-  let mounted = true;
+  try {
+    const res = await fetch(`/api/consignment/${editId}`, {
+      cache: "no-store",
+      credentials: "include",
+    });
 
-  (async () => {
-    try {
-      const res = await fetch(`/api/consignment/${editId}`, {
-        cache: "no-store",
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        toast.error("Failed to load consignment");
-        return;
-      }
-
-      const data = await res.json();
-
-      if (!mounted) return;
-
-      setForm((prev) => ({ ...prev, ...data }));
-      setIsEdit(true);
-    } catch (err) {
-      console.error(err);
-      toast.error("Server error");
+    if (!res.ok) {
+      toast.error("Failed to load consignment");
+      return;
     }
-  })();
 
-  return () => {
-    mounted = false;
-  };
+    const data = await res.json();
+    setForm(data);
+    setIsEdit(true);
+  } catch (error) {
+    console.error("Fetch consignment error:", error);
+    toast.error("Error fetching consignment");
+  }
 }, [editId]);
+
+useEffect(() => {
+  fetchConsignment();
+}, [fetchConsignment]);
+
 
 
   const handleChange = (e) => {
@@ -154,80 +163,55 @@ useEffect(() => {
   };
 
   /* ========= SUBMIT ========= */
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (loading1 || loading2) return;
-    if (onlysave) setLoading1(true);
-    else setLoading2(true);
-    const token = localStorage.getItem("auth_token");
-    try {
-      if (isEdit && editId) {
-        const res = await fetch(`/api/consignment/${editId}`, {
-          method: "PUT",
-          cache: "no-store",
-          headers: {
-            "Content-Type": "application/json",
-                  },
-          credentials: "include",
-          body: JSON.stringify(form),
-        });
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (loading1 || loading2) return;
 
-  if (!res) {
-      throw new Error("Server Down");
+  onlysave ? setLoading1(true) : setLoading2(true);
+
+  try {
+    const url = isEdit
+      ? `/api/consignment/${editId}`
+      : "/api/consignment";
+
+    const method = isEdit ? "PUT" : "POST";
+
+    const res = await fetch(url, {
+      method,
+      cache: "no-store",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(form),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      toast.error(data?.error || "Failed to save consignment");
+      return;
     }
-        const data = await res.json();
-        const cn = data?.data?.cn || form.cn;
 
-        if (!onlysave) {
-          await printPDF(cn, { ...form, cn });
-          toast.success("Consignment saved & PDF generated");
-        } else {
-          toast.success("Consignment saved");
-        }
+    const cn = data?.data?.cn || data?.cn || form.cn;
 
-        router.push("/consignment/list");
-        return;
-      }
-
-      const res = await fetch("/api/consignment", {
-        method: "POST",
-        cache: "no-store",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(form),
-      });
-
-      if (!res) return;
-
-      const data = await res.json();
-      if (!res.ok) {
-        toast.error(data?.error || "Failed to save consignment");
-        return;
-      }
-
-      const cn = data?.cn;
-      if (!cn) {
-        toast.error("Failed to generate Consignment Number");
-        return;
-      }
-
-      if (!onlysave) {
-        await printPDF(cn, { ...form, cn });
-        toast.success("Consignment saved & PDF generated");
-      } else {
-        toast.success("Consignment saved");
-      }
-      router.push("/consignment/list");
-    } catch (err) {
-      console.error(err);
-      toast.error("Something went wrong");
-    } finally {
-      setLoading1(false);
-      setLoading2(false);
+    if (!onlysave) {
+      await printPDF(cn, { ...form, cn });
+      toast.success("Consignment saved & PDF generated");
+    } else {
+      toast.success("Consignment saved");
     }
-  };
+
+    router.push("/consignment/list");
+  } catch (error) {
+    console.error("Submit error:", error);
+    toast.error("Something went wrong");
+  } finally {
+    setLoading1(false);
+    setLoading2(false);
+  }
+};
+
   return (
     <>
       <Navbar />

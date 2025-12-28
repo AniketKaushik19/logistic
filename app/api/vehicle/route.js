@@ -95,6 +95,7 @@ export async function DELETE(req, res){
     const db=client.db("logisticdb")
     const collection=db.collection("vehicles")
     const result=await collection.deleteOne({truckNumber:truckNumber.toUpperCase()})
+   
     return NextResponse.json({message:"Vehicle deleted successfully"},{status:200})
   }
   catch(error){
