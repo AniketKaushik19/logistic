@@ -8,22 +8,22 @@ export async function POST(req) {
     const client = await clientPromise;
     const db = client.db("logisticdb");
     
-     const result = await db.collection("Freight").insertOne(body);
+     const result = await db.collection("E-bil").insertOne(body);
      if(result){
        return NextResponse.json({
          success: true,
-         message: "Freight memo saved successfully",
+         message: "E-bill  saved successfully",
         });
       }
     else {
        return NextResponse.json({
          success: true,
-         message: "Freight memo Not saved",
+         message: "E-bill Not saved",
         });
     }
   } catch (error) {
     return NextResponse.json(
-      { success: false, message: "Error saving freight" },
+      { success: false, message: "Error saving E-bill" },
       { status: 500 }
     );
   }
