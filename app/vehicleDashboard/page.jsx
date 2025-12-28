@@ -24,6 +24,7 @@ export default function Dashboard() {
  });
         const data = await response.json();
         setVehicles(data)
+        console.log(data)
         // Update state with fetched vehicles if implementing dynamic data
       } catch (error) {
         console.error('Error fetching vehicles:', error);

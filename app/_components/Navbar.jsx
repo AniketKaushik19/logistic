@@ -121,6 +121,9 @@ function Navbar() {
               <Link onClick={() => setOpen(false)} href="/e-bill">
                 E-bill
               </Link>
+              <Link onClick={() => setOpen(false)} href="/freightMemo">
+               Freight Memo
+              </Link>
               <Link onClick={() => setOpen(false)} href="/profit">
                 Profit Add
               </Link>

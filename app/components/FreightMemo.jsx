@@ -46,7 +46,7 @@ export default function FreightMemoPDF({ data }) {
           left="From"
           leftValue={data.from.toUpperCase()}
           right="G.R. No."
-          rightValue={data.grNos.toUpperCase().join(" / ")}
+          rightValue={data.grNos.join(" / ").toUpperCase()}
         />
 
         {/* ROW 3 */}

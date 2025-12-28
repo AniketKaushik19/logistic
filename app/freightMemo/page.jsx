@@ -15,12 +15,13 @@ import DownloadFreight from "../components/FreightDownload";
 import { useState, useEffect } from "react";
 import Navbar from "../_components/Navbar";
 import { numberToWords } from "@/utils/numberToWord";
+import toast from "react-hot-toast";
 
 export default function FreightMemo() {
-  const [form, setForm] = useState({
+  const initialFormState = {
   challanNo: "",
   date: "",
-  grNos: [""],     // 👈 multiple GR numbers
+  grNos: [""],     // multiple GR numbers
   to: "",
   from: "",
   lorryNo: "",
@@ -44,9 +45,8 @@ export default function FreightMemo() {
   licenceNo: "",
 
   through: "",
-});
-
-
+};
+  const [form, setForm] = useState(initialFormState);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -67,10 +67,13 @@ export default function FreightMemo() {
       const data = await res.json();
 
       if (data.success) {
-        alert("Freight memo saved");
+        toast.success("Freight memo saved");
       }
+      toast.success("Downloaded successfully")
+      setForm(initialFormState)
+      
     } catch (error) {
-      alert("Error saving freight");
+      toast.error("Error saving freight");
     }
   };
   
@@ -90,23 +93,31 @@ const removeGrNo = (index) => {
 };
 
   useEffect(() => {
-    const rate = Number(form.rate || 0);
-    const weight = Number(form.weight || 0);
-    const advance = Number(form.advance || 0);
+  const rate = Number(form.rate);
+  const weight = Number(form.weight);
+  const advance = Number(form.advance);
 
-    const total = rate * weight;
-    const netBalance = total - advance;
-
+  if (!rate || !weight) {
     setForm((prev) => ({
       ...prev,
-      total,
-      netBalance,
+      total: 0,
+      netBalance: 0,
+      amountInWords: "",
     }));
-    setForm((prev) => ({ ...prev, total ,
-           amountInWords:total > 0 ? numberToWords(total):"",
-        }));
-    console.log(form)
-  }, [form.rate, form.weight, form.advance]);
+    return;
+  }
+
+  const total = rate * weight;
+  const netBalance = total - (advance || 0);
+
+  setForm((prev) => ({
+    ...prev,
+    total,
+    netBalance,
+    amountInWords: numberToWords(total),
+  }));
+}, [form.rate, form.weight, form.advance]);
+
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -334,15 +345,19 @@ const removeGrNo = (index) => {
           <p>Signature of Driver / Owner / Agent</p>
           <p>Signature of Challan</p>
         </div>
-        <div className="flex justify-end gap-4 pt-6">
-          <button
+        <div className="flex justify-end gap-4 pt-2">
+          {/* <button
             onClick={saveFreight}
-            className="px-6 py-2 bg-gray-800 text-white rounded-lg"
+            className="px-4  bg-gray-800 text-white rounded-lg hover:cursor-pointer"
           >
             Save
-          </button>
-
-          <DownloadFreight form={form} onClick={saveFreight} />
+          </button> */}
+           <div className="flex justify-end pt-6">  
+          
+           {form.total > 0 && (
+             <DownloadFreight form={form} onSave={saveFreight} />
+           )}           
+          </div>
         </div>
 
       </div>

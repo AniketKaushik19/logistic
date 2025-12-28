@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import DownloadBill from "../components/DownoladBill";
+import DownloadBill from "../components/DownloadBill";
 import Navbar from '../_components/Navbar';
 import toast from 'react-hot-toast';
 import {
