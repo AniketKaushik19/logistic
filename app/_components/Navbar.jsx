@@ -73,12 +73,7 @@ function Navbar() {
                 E-bill
               </Link>
             </li>
-            <li>
-              <Link href="/profit" className="hover:text-red-600">
-                Profit Add
-              </Link>
-            </li>
-                <li>
+           <li>
               <Link
                 href="/access-dashboard"
                 className="cursor-pointer hover:text-red-600 transition"

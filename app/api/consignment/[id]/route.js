@@ -4,17 +4,15 @@ import { ObjectId } from "mongodb";
 import { requireAuth } from "@/lib/auth";
 
 /* ================= GET ================= */
-export async function GET(req, { params }) {
+export async function GET(req) {
   const auth = await requireAuth(req);
   if (!auth.authenticated) {
-    return NextResponse.json(
-      { error: auth.error || "Unauthorized" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const { id } = params;
+    // ✅ ALWAYS WORKS (local + Vercel)
+    const id = req.url.split("/").pop();
 
     if (!id || !ObjectId.isValid(id)) {
       return NextResponse.json(
@@ -37,36 +35,25 @@ export async function GET(req, { params }) {
       );
     }
 
-    return NextResponse.json(doc, { status: 200 });
+    return NextResponse.json(doc);
   } catch (error) {
     console.error("GET consignment error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Server error" },
       { status: 500 }
     );
   }
 }
 
 /* ================= PUT ================= */
-export async function PUT(req, { params }) {
-  const { id } = await params;
-
+export async function PUT(req) {
   const auth = await requireAuth(req);
   if (!auth.authenticated) {
-    return NextResponse.json(
-      { error: auth.error || "Unauthorized" },
-      { status: 401 }
-    );
-  }
-
-  if (!id || !ObjectId.isValid(id)) {
-    return NextResponse.json(
-      { error: "Invalid or missing consignment ID" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
+    const id = req.url.split("/").pop();
 
     if (!id || !ObjectId.isValid(id)) {
       return NextResponse.json(
@@ -76,8 +63,6 @@ export async function PUT(req, { params }) {
     }
 
     const body = await req.json();
-
-    // 🚫 Do not allow _id to be updated
     const { _id, ...safeBody } = body;
 
     const client = await clientPromise;
@@ -96,46 +81,42 @@ export async function PUT(req, { params }) {
       );
     }
 
-    return NextResponse.json(
-      { success: true, data: result.value },
-      { status: 200 }
-    );
+    return NextResponse.json({
+      success: true,
+      data: result.value,
+    });
   } catch (error) {
     console.error("PUT consignment error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Server error" },
       { status: 500 }
     );
   }
 }
 
-
-
-export async function DELETE(req, {params}) {
-  const { id } = await params;
-
+/* ================= DELETE ================= */
+export async function DELETE(req) {
   const auth = await requireAuth(req);
   if (!auth.authenticated) {
-    return NextResponse.json(
-      { error: auth.error || "Unauthorized" },
-      { status: 401 }
-    );
-  }
-
-  if (!id || !ObjectId.isValid(id)) {
-    return NextResponse.json(
-      { error: "Invalid or missing consignment ID" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
+    const id = req.url.split("/").pop();
+
+    if (!id || !ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { error: "Invalid consignment ID" },
+        { status: 400 }
+      );
+    }
+
     const client = await clientPromise;
     const db = client.db("logisticdb");
 
-    const result = await db
-      .collection("consignments")
-      .deleteOne({ _id: new ObjectId(id) });
+    const result = await db.collection("consignments").deleteOne({
+      _id: new ObjectId(id),
+    });
 
     if (result.deletedCount === 0) {
       return NextResponse.json(
@@ -144,16 +125,12 @@ export async function DELETE(req, {params}) {
       );
     }
 
-    return NextResponse.json(
-      { success: true, message: "Consignment deleted successfully" },
-      { status: 200 }
-    );
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("DELETE consignment error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "Server error" },
       { status: 500 }
     );
   }
 }
-
