@@ -6,18 +6,20 @@ import { IndianRupee } from "lucide-react";
 
 export default function ProfitModal({ consignment, onClose, onSave ,fetchItems }) {
   const [totalCost, setTotalCost] = useState(
-    consignment?.profit?.totalCost || ""
+    consignment?.amount || ""
   );
+  console.log(consignment)
   const [expenses, setExpenses] = useState(
     consignment?.profit?.expenses || ""
   );
   const [netProfit, setNetProfit] = useState("");
 
   useEffect(() => {
-    const total = Number(totalCost) || 0;
     const exp = Number(expenses) || 0;
-    setNetProfit((total - exp).toFixed(2));
-  }, [totalCost, expenses]);
+    const profit = totalCost - exp; // negative allowed
+    setNetProfit(profit.toFixed(2));
+  }, [expenses, totalCost]);
+
 
  const handleSave = async () => {
   if (!consignment?._id) {
@@ -28,13 +30,14 @@ export default function ProfitModal({ consignment, onClose, onSave ,fetchItems }
   try {
     const token = localStorage.getItem("auth_token");
 
-    const res = await fetch(`/api/consignment/${consignment._id}`, {
+    const res = await fetch(`/api/consignment`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
+        consignmentNumberId:consignment._id,
         profit: Number(netProfit),
         totalCost: Number(totalCost),
         expenses: Number(expenses),
@@ -47,6 +50,7 @@ export default function ProfitModal({ consignment, onClose, onSave ,fetchItems }
     }
 
     const data = await res.json();
+    console.log(data)
     onSave(data.data.profit?.amount ?? netProfit);
     toast.success("Profit saved");
     fetchItems()
@@ -66,7 +70,7 @@ export default function ProfitModal({ consignment, onClose, onSave ,fetchItems }
 
         <input
           type="number"
-          value={totalCost}
+          value={totalCost }
           onChange={(e) => setTotalCost(e.target.value)}
           placeholder="Total Cost"
           className="w-full p-2 mb-2 border rounded"
