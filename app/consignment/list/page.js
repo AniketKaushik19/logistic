@@ -5,6 +5,8 @@ import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
 import { motion } from "framer-motion";
 import Navbar from "@/app/_components/Navbar";
+import { useRouter } from "next/navigation";
+
 import {
   Plus,
   Calendar,
@@ -21,7 +23,6 @@ import {
 import { printPDF } from "@/utils/printPDF";
 import ConfirmToast from "@/app/components/ConfirmToast";
 import ProfitModal from "@/app/_components/profitModal";
-import EditConsignmentModal from "@/app/_components/EditConsignmentModal";
 
 const LOAD_COUNT = 6;
 
@@ -32,7 +33,8 @@ export default function ConsignmentList() {
   const [visibleCount, setVisibleCount] = useState(LOAD_COUNT);
   const [showProfitModal, setShowProfitModal] = useState(false);
   const [selectedConsignment, setSelectedConsignment] = useState(null);
-  const [editId, setEditId] = useState(null);
+
+const router = useRouter();
 
   const fetchItems = async () => {
     setPageLoading(true);
@@ -117,13 +119,7 @@ export default function ConsignmentList() {
     <>
       <Navbar />
       <Toaster />
-      {editId && (
-        <EditConsignmentModal
-          id={editId}
-          onClose={() => setEditId(null)}
-          onSuccess={() => fetchItems()} // refresh list
-        />
-      )}
+    
       <div className="pt-25 px-6 pb-20 bg-blue-50">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
@@ -180,12 +176,14 @@ export default function ConsignmentList() {
                       className="rounded-xl bg-white border shadow-md hover:shadow-xl transition"
                     >
                       <div className="p-5 relative">
-                        {/* <button
-                          className="absolute top-3 right-3 bg-yellow-500 text-white w-9 h-9 rounded-full flex items-center justify-center"
-                          onClick={() => setEditId(c._id)}
-                        >
-                          <Pencil size={14} />
-                        </button> */}
+                       <button
+  type="button"
+  className="absolute top-3 right-3 bg-yellow-500 text-white w-9 h-9 rounded-full flex items-center justify-center"
+  onClick={() => router.push(`/consignment?editId=${c._id}`)}
+>
+  <Pencil size={14} />
+</button>
+ 
 
                         <h3 className="font-bold text-lg">{cn}</h3>
                         <p className="text-xs text-gray-500 flex items-center gap-1">

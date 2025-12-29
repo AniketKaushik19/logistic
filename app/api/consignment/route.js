@@ -25,6 +25,7 @@ export async function GET(req) {
         {
           projection: {
             cn: 1,
+            amount: 1,
             consigneeName: 1,
             consignorName: 1,
             createdAt: 1,
@@ -35,7 +36,6 @@ export async function GET(req) {
       )
       .sort({ createdAt: -1 })
       .toArray();
-
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
     console.error("Database error:", error);
@@ -166,37 +166,33 @@ export async function PUT(req) {
 
   try {
     const body = await req.json();
-    const { consignmentNumberId, profit, ...rest } = body;
-console.log(body)
-    if (!consignmentNumberId ) {
+    const { _id, profit, ...rest } = body;
+
+    if (!_id || !ObjectId.isValid(_id)) {
       return NextResponse.json(
         { error: "Invalid consignment ID" },
         { status: 400 }
       );
     }
 
+    /* ================= UPDATE DOC ================= */
     const updateDoc = {
       ...rest,
       updatedAt: new Date(),
       updatedBy: auth.user.email,
     };
 
-    /* ===== PROFIT (SAFE) ===== */
-    if (profit != null) { // ✅ blocks undefined & null
-      const amount =
-        typeof profit === "object"
-          ? Number(profit.amount)
-          : Number(profit);
+    /* ================= PROFIT (SAFE) ================= */
+    if (profit !== undefined) {
+      const amount = Number(
+        typeof profit === "object" ? profit.amount : profit
+      );
 
       const totalCost =
-        typeof profit === "object"
-          ? Number(profit.totalCost || 0)
-          : 0;
+        typeof profit === "object" ? Number(profit.totalCost || 0) : 0;
 
       const expenses =
-        typeof profit === "object"
-          ? Number(profit.expenses || 0)
-          : 0;
+        typeof profit === "object" ? Number(profit.expenses || 0) : 0;
 
       if (Number.isNaN(amount)) {
         return NextResponse.json(
@@ -214,16 +210,16 @@ console.log(body)
       };
     }
 
+    /* ================= DB UPDATE ================= */
     const client = await clientPromise;
     const db = client.db("logisticdb");
 
     const result = await db.collection("consignments").findOneAndUpdate(
-      { _id: new ObjectId(consignmentNumberId) },
+      { _id: new ObjectId(_id) },
       { $set: updateDoc },
       { returnDocument: "after" }
     );
-
-    // ✅ correct Mongo check
+console.log(result)
     if (!result) {
       return NextResponse.json(
         { error: "Consignment not found" },
@@ -235,7 +231,7 @@ console.log(body)
       {
         success: true,
         message: "Consignment updated successfully",
-        data: result,
+        data: result.value,
       },
       { status: 200 }
     );

@@ -11,11 +11,18 @@ function CeoVerifyModal({ open, onClose, onConfirm }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  useEffect(() => {
+    if (!open) {
+      setEmail("");
+      setPassword("");
+    }
+  }, [open]);
+
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
-      <div className="bg-white rounded-2xl p-6 w-[360px] shadow-2xl animate-scaleIn">
+    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center ">
+      <div className="bg-white rounded-2xl p-6 w-[360px] shadow-2xl">
         <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
           <Shield className="text-indigo-600" />
           CEO Verification
@@ -41,10 +48,7 @@ function CeoVerifyModal({ open, onClose, onConfirm }) {
             Cancel
           </button>
           <button
-            onClick={() => {
-              onConfirm({ adminEmail: email, adminPassword: password });
-              onClose();
-            }}
+            onClick={() => onConfirm({ adminEmail: email, adminPassword: password })}
             className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700"
           >
             Verify
@@ -59,11 +63,15 @@ function CeoVerifyModal({ open, onClose, onConfirm }) {
 function PasswordModal({ open, onClose, onSave }) {
   const [password, setPassword] = useState("");
 
+  useEffect(() => {
+    if (!open) setPassword("");
+  }, [open]);
+
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
-      <div className="bg-white rounded-2xl p-6 w-[340px] shadow-2xl animate-scaleIn">
+      <div className="bg-white rounded-2xl p-6 w-[340px] shadow-2xl">
         <h2 className="text-lg font-bold mb-4">Update Password</h2>
 
         <input
@@ -79,10 +87,7 @@ function PasswordModal({ open, onClose, onSave }) {
             Cancel
           </button>
           <button
-            onClick={() => {
-              onSave(password);
-              onClose();
-            }}
+            onClick={() => onSave(password)}
             className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
           >
             Update
@@ -96,14 +101,21 @@ function PasswordModal({ open, onClose, onSave }) {
 /* ================= MAIN PAGE ================= */
 export default function AccessDashboard() {
   const [admins, setAdmins] = useState([]);
+  const [currentAdminId, setCurrentAdminId] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const [selectedId, setSelectedId] = useState(null);
-  const [action, setAction] = useState(null);
-
-  const [ceoModal, setCeoModal] = useState(false);
   const [passwordModal, setPasswordModal] = useState(false);
+  const [ceoModal, setCeoModal] = useState(false);
   const [newPassword, setNewPassword] = useState("");
+
+  /* ================= RESET ================= */
+  const resetState = () => {
+    setSelectedId(null);
+    setNewPassword("");
+    setPasswordModal(false);
+    setCeoModal(false);
+  };
 
   /* ================= FETCH ADMINS ================= */
   const fetchAdmins = async () => {
@@ -111,20 +123,18 @@ export default function AccessDashboard() {
       const token = localStorage.getItem("auth_token");
 
       const res = await fetch("/api/admin/access", {
-        method: "GET",
         credentials: "include",
         cache: "no-store",
-
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
-  if (!res.ok) {
-      throw new Error("API failed");
-    }
-          const data = await res.json();
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error);
+
       setAdmins(data.admins || []);
+      setCurrentAdminId(data.currentAdminId);
     } catch {
       toast.error("Failed to load admins");
     } finally {
@@ -136,63 +146,98 @@ export default function AccessDashboard() {
     fetchAdmins();
   }, []);
 
-  /* ================= CONFIRM ================= */
+const handlePasswordSave = async (password) => {
+  if (!currentAdminId) {
+    toast.error("Admin ID not available");
+    return;
+  }
+  if (!password) {
+    toast.error("Password cannot be empty");
+    return;
+  }
+
+  try {
+    // const token = localStorage.getItem("auth_token");
+    // console.log(token)
+    // if (!token) {
+    //   toast.error("No auth token found");
+    //   return;
+    // }
+
+    const res = await fetch(`/api/admin/access`, {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ adminId: currentAdminId, password }),
+    });
+
+    // Check if response has body
+    let data = {};
+    const text = await res.text();
+    if (text) {
+      data = JSON.parse(text);
+    }
+
+    if (!res.ok) throw new Error(data?.error || "Failed to update password");
+
+    toast.success("Password updated successfully");
+    resetState();
+  } catch (err) {
+    console.error("Password update error:", err);
+    toast.error(err.message);
+  }
+};
+
+
+  /* ================= DELETE ADMIN (CEO) ================= */
   const handleCeoConfirm = async (ceo) => {
     try {
       const token = localStorage.getItem("auth_token");
 
-      const body = action === "edit" ? { ...ceo, password: newPassword } : ceo;
-
       const res = await fetch(`/api/admin/access/${selectedId}`, {
-        method: action === "edit" ? "PUT" : "DELETE",
+        method: "DELETE",
         credentials: "include",
-        cache: "no-store",
-
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify(ceo),
       });
 
-      if (!res.ok) throw new Error(data.error);
       const data = await res.json();
+      if (!res.ok) throw new Error(data?.error);
 
-      toast.success(action === "edit" ? "Password updated" : "Admin deleted");
+      toast.success("Admin deleted");
       fetchAdmins();
+      resetState();
     } catch (err) {
-      toast.error(err.message || "Action failed");
+      toast.error(err.message);
     }
   };
 
-  if (loading)
+  if (loading) {
     return (
       <>
         <Navbar />
-        <p className="p-10 text-center flex gap-5 my-20 justify-center">
-          <Loader className="text-5xl text-purple-500 transition-all animate-spin tracking-tight"/>
-          <p className=" text-2xl text-purple-500">
-               Loading Dashbord ...
-            </p>
-        </p>{" "}
+        <div className="flex items-center justify-center min-h-[60vh] gap-4">
+          <Loader className="animate-spin text-purple-600" />
+          <span className="text-xl text-purple-600">Loading Dashboard...</span>
+        </div>
       </>
     );
+  }
 
   return (
     <>
       <Navbar />
-      <div className="p-10 min-h-screen bg-linear-to-br from-indigo-50 to-purple-100 mt-15 md:mt-10">
-        <div className="flex items-center gap-2 md:justify-between md:m-8">
+      <div className="p-10 min-h-screen bg-linear-to-br from-indigo-50 to-purple-100">
+        <div className="flex gap-4 md:justify-between items-center mt-15 mb-5 md:my-15">
           <h1 className="md:text-3xl font-bold">Admin Access Control</h1>
-          <Link href={"/adminAccess"}>
-            <button
-              onClick={() => setGiveAccessOpen(true)}
-              className="flex items-center px-1.5 py-1 gap-2 md:px-5 md:py-2.5 rounded-xl
-               bg-linear-to-r from-indigo-600 to-purple-600
-               text-white font-semibold shadow-lg
-               hover:shadow-xl hover:-translate-y-0.5 transition-all mb-2"
-            >
-              + Give Access
+          <Link href="/adminAccess">
+            <button className="px-2 md:px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold">
+              + Access
             </button>
           </Link>
         </div>
@@ -201,43 +246,41 @@ export default function AccessDashboard() {
           {admins.map((admin) => (
             <div
               key={admin._id}
-              className="relative bg-white rounded-3xl p-6 shadow-xl transform transition-all hover:-translate-y-2 hover:rotate-1 hover:shadow-2xl"
+              className="relative bg-white rounded-3xl p-6 shadow-xl"
             >
-              {/* ICONS */}
               <div className="absolute top-4 right-4 flex gap-2">
-                <button
-                  onClick={() => {
-                    setSelectedId(admin._id);
-                    setAction("edit");
-                    setPasswordModal(true);
-                  }}
-                  className="p-2 rounded-full bg-blue-100 hover:bg-blue-200"
-                >
-                  <Pencil size={16} />
-                </button>
+                {/* ✅ Edit ONLY self */}
+                {admin._id === currentAdminId && (
+                  <button
+                    onClick={() => setPasswordModal(true)}
+                    className="p-2 rounded-full bg-blue-100 hover:bg-blue-200"
+                  >
+                    <Pencil size={16} />
+                  </button>
+                )}
 
-                <button
-                  onClick={() => {
-                    setSelectedId(admin._id);
-                    setAction("delete");
-                    setCeoModal(true);
-                  }}
-                  className="p-2 rounded-full bg-red-100 hover:bg-red-200"
-                >
-                  <Trash2 size={16} />
-                </button>
+                {/* ❌ Delete others only (CEO) */}
+                {admin._id !== currentAdminId && (
+                  <button
+                    onClick={() => {
+                      setSelectedId(admin._id);
+                      setCeoModal(true);
+                    }}
+                    className="p-2 rounded-full bg-red-100 hover:bg-red-200"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
               </div>
 
-              {/* CONTENT */}
-              <div className="mt-6">
-                <h2 className="text-xl font-bold text-indigo-700">
-                  {admin.name || "Admin"}
-                </h2>
-                <p className="text-sm text-gray-600">{admin.email}</p>
-                <span className="inline-block mt-3 px-3 py-1 text-xs rounded-full bg-indigo-600 text-white">
-                  ADMIN
-                </span>
-              </div>
+              <h2 className="text-xl font-bold text-indigo-700 mt-6">
+                {admin.name || "Admin"}
+              </h2>
+              <p className="text-sm text-gray-600">{admin.email}</p>
+
+              <span className="inline-block mt-3 px-3 py-1 text-xs rounded-full bg-indigo-600 text-white">
+                ADMIN
+              </span>
             </div>
           ))}
         </div>
@@ -245,18 +288,13 @@ export default function AccessDashboard() {
         {/* MODALS */}
         <PasswordModal
           open={passwordModal}
-          onClose={() => setPasswordModal(false)}
-          onSave={(pwd) => {
-            setNewPassword(pwd);
-            setAction("edit");
-            setPasswordModal(false);
-            setCeoModal(true);
-          }}
+          onClose={resetState}
+          onSave={handlePasswordSave}
         />
 
         <CeoVerifyModal
           open={ceoModal}
-          onClose={() => setCeoModal(false)}
+          onClose={resetState}
           onConfirm={handleCeoConfirm}
         />
       </div>
