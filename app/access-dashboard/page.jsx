@@ -147,40 +147,34 @@ export default function AccessDashboard() {
   }, []);
 
 const handlePasswordSave = async (password) => {
-  if (!currentAdminId) {
-    toast.error("Admin ID not available");
+  if (!currentAdminId || typeof currentAdminId !== "string") {
+    toast.error("Admin ID not ready. Please refresh.");
     return;
   }
-  if (!password) {
-    toast.error("Password cannot be empty");
+
+  if (!password || password.length < 6) {
+    toast.error("Password must be at least 6 characters");
     return;
   }
 
   try {
-    // const token = localStorage.getItem("auth_token");
-    // console.log(token)
-    // if (!token) {
-    //   toast.error("No auth token found");
-    //   return;
-    // }
-
-    const res = await fetch(`/api/admin/access`, {
+    const res = await fetch("/api/admin/access", {
       method: "PUT",
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ adminId: currentAdminId, password }),
+      body: JSON.stringify({
+        adminId: currentAdminId, // ✅ always send string
+        password,
+      }),
     });
 
-    // Check if response has body
-    let data = {};
-    const text = await res.text();
-    if (text) {
-      data = JSON.parse(text);
-    }
+    const data = await res.json();
 
-    if (!res.ok) throw new Error(data?.error || "Failed to update password");
+    if (!res.ok) {
+      throw new Error(data?.error || "Failed to update password");
+    }
 
     toast.success("Password updated successfully");
     resetState();
@@ -191,31 +185,38 @@ const handlePasswordSave = async (password) => {
 };
 
 
+
   /* ================= DELETE ADMIN (CEO) ================= */
-  const handleCeoConfirm = async (ceo) => {
-    try {
-      const token = localStorage.getItem("auth_token");
+const handleCeoConfirm = async (ceo) => {
+  if (!selectedId) {
+    toast.error("Admin ID not selected");
+    return;
+  }
 
-      const res = await fetch(`/api/admin/access/${selectedId}`, {
-        method: "DELETE",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(ceo),
-      });
+  try {
+    const res = await fetch("/api/admin/access", {
+      method: "DELETE",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        adminId: selectedId,
+        adminEmail: ceo.adminEmail,
+        adminPassword: ceo.adminPassword,
+      }),
+    });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.error || "Delete failed");
 
-      toast.success("Admin deleted");
-      fetchAdmins();
-      resetState();
-    } catch (err) {
-      toast.error(err.message);
-    }
-  };
+    toast.success("Admin deleted successfully");
+    fetchAdmins();
+    resetState();
+  } catch (err) {
+    toast.error(err.message);
+  }
+};
 
   if (loading) {
     return (
