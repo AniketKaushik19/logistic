@@ -60,15 +60,35 @@ export async function POST(req) {
 
   try {
     const body = await req.json();
-    if (!body || typeof body !== "object") {
-      return NextResponse.json(
-        { error: "Invalid request body" },
-        { status: 400 }
-      );
-    }
-
     const client = await clientPromise;
     const db = client.db("logisticdb");
+
+    /* ========= FETCH CONSIGNMENT (EDIT) ========= */
+    if (body.action === "GET_BY_ID") {
+      const { id } = body;
+
+      if (!id || !ObjectId.isValid(id)) {
+        return NextResponse.json(
+          { error: "Invalid consignment ID" },
+          { status: 400 }
+        );
+      }
+
+      const doc = await db.collection("consignments").findOne({
+        _id: new ObjectId(id),
+      });
+
+      if (!doc) {
+        return NextResponse.json(
+          { error: "Consignment not found" },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(doc);
+    }
+
+    /* ========= CREATE CONSIGNMENT ========= */
     const counters = db.collection("counters");
 
     await counters.updateOne(
@@ -102,7 +122,9 @@ export async function POST(req) {
       createdBy: auth.user.email,
     };
 
-    const result = await db.collection("consignments").insertOne(consignment);
+    const result = await db
+      .collection("consignments")
+      .insertOne(consignment);
 
     return NextResponse.json(
       {
@@ -116,7 +138,7 @@ export async function POST(req) {
   } catch (error) {
     console.error("POST consignment error:", error);
     return NextResponse.json(
-      { error: "Failed to save consignment" },
+      { error: "Failed to process request" },
       { status: 500 }
     );
   }
@@ -219,19 +241,12 @@ export async function PUT(req) {
       { $set: updateDoc },
       { returnDocument: "after" }
     );
-console.log(result)
-    if (!result) {
-      return NextResponse.json(
-        { error: "Consignment not found" },
-        { status: 404 }
-      );
-    }
-
+    
     return NextResponse.json(
       {
         success: true,
         message: "Consignment updated successfully",
-        data: result.value,
+        data: result,
       },
       { status: 200 }
     );

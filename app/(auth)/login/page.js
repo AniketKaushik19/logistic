@@ -41,7 +41,7 @@ const handleSubmit = async (e) => {
     toast.success("Logged in");
 
     // 🚀 Instant redirect
-    router.replace("/dashboard");
+    router.replace("/vehicleDashboard");
   } catch (err) {
     console.error(err);
     setError("Invalid Credentials.");

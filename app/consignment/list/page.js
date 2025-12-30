@@ -39,13 +39,12 @@ const router = useRouter();
   const fetchItems = async () => {
     setPageLoading(true);
     try {
-      const token = localStorage.getItem("auth_token");
-
+   
       const res = await fetch("/api/consignment", {
         cache: "no-store",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+         headers: {
+          "Content-Type": "application/json",
+          },
       });
       const data = await res.json();
       setItems(data);
@@ -76,15 +75,12 @@ const router = useRouter();
 
     setActionLoadingId(consignmentNumber);
     try {
-      const token = localStorage.getItem("auth_token");
-
       const res = await fetch(`/api/consignment`, {
         method: "DELETE",
         cache: "no-store",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+          },
         body: JSON.stringify({ consignmentNumber }),
       });
 

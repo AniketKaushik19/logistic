@@ -117,32 +117,40 @@ export default function Page() {
     form.serviceCharge,
   ]);
 
-  /* ========= LOAD EDIT DATA ========= */
-  const fetchConsignment = useCallback(async () => {
-    if (!editId) return;
+ /* ========= LOAD EDIT DATA ========= */
+const fetchConsignment = useCallback(async () => {
+  if (!editId) return;
 
-    try {
-      const res = await fetch(`/api/consignment/${editId}`, {
-        credentials: "include",
-        cache: "no-store",
-      });
+  try {
+    const res = await fetch("/api/consignment", {
+      method: "POST", // ⬅ IMPORTANT
+      credentials: "include",
+      cache: "no-store",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        action: "GET_BY_ID",
+        id: editId,
+      }),
+    });
 
-      if (!res.ok) throw new Error();
-      const data = await res.json();
+    if (!res.ok) throw new Error();
+    const data = await res.json();
 
-      setForm({
-        ...INITIAL_FORM,
-        ...data,
-        profit: data.profit || INITIAL_FORM.profit,
-      });
-    } catch {
-      toast.error("Failed to load consignment");
-    }
-  }, [editId]);
+    setForm({
+      ...INITIAL_FORM,
+      ...data,
+      profit: data.profit || INITIAL_FORM.profit,
+    });
+  } catch {
+    toast.error("Failed to load consignment");
+  }
+}, [editId]);
 
-  useEffect(() => {
-    fetchConsignment();
-  }, [fetchConsignment]);
+useEffect(() => {
+  fetchConsignment();
+}, [fetchConsignment]);
 
   /* ========= CHANGE ========= */
   const handleChange = (e) => {
