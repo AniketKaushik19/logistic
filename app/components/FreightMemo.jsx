@@ -26,7 +26,7 @@ export default function FreightMemoPDF({ data }) {
             <Text style={styles.memo}>FREIGHT MEMO</Text>
             <Text style={styles.title}>ANIKET LOGISTIC</Text>
             <Text style={styles.sub}>
-              7/A Buddh Vihar Colony, Phase-2 Kotwali Road Chinhat, Lucknow-227105
+              7/A Buddh Vihar Colony, Phase-2 Kotwali Road Chinhat, Lucknow-226028
             </Text>
           </View>
         </View>

@@ -84,7 +84,6 @@ export default function Vehicle({ params }) {
     }
     getLatestExpenses(id);
   }, [response]);
-
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/*Navbar for Vehicle page*/}

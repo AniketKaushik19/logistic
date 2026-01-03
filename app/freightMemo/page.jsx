@@ -118,12 +118,13 @@ useEffect(() => {
 
   const total = rate * weight;
 
-  setForm(prev => ({
-    ...prev,
-    total,
-    netBalance: total - advance,
-    amountInWords: numberToWords(Math.floor(netBalance)),
-  }));
+  const netBalance = total - advance;
+setForm(prev => ({
+  ...prev,
+  total,
+  netBalance,
+  amountInWords: numberToWords(Math.floor(netBalance)),
+}));
 }, [form.rate, form.weight, form.advance]);
 
   return (
@@ -138,7 +139,7 @@ useEffect(() => {
             ANIKET LOGISTIC
           </h1>
           <p className="text-sm text-gray-600">
-            7/A Buddh Vihar Colony, Phase-2 Kotwali Road, Chinhat, Lucknow – 227105
+            7/A Buddh Vihar Colony, Phase-2 Kotwali Road, Chinhat, Lucknow – 226028
           </p>
         </div>
 
