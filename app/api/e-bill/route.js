@@ -84,6 +84,87 @@ export async function POST(req) {
 }
 
 
+export async function PUT(req) {
+  const auth = await requireAuth(req);
+  if (!auth.authenticated) {
+    return NextResponse.json(
+      { error: auth.error || "Unauthorized" },
+      { status: 401 }
+    );
+  }
+  try {
+    const { customer,
+    customerAddress,
+    customerGstin,
+    billNo,
+    billDate,
+    partyCode,
+    vendorCode,
+    consignments: [
+      {
+        cnNo,
+        cnDate,
+        from,
+        to,
+        freight,
+        labour,
+        detention,
+        bonus,
+        total,
+      },
+    ],
+    grandTotal,
+    amountInWord,} = await req.json();
+     // Connect to DB
+     const data={
+       customer,
+    customerAddress,
+    customerGstin,
+    billNo,
+    billDate,
+    partyCode,
+    vendorCode,
+    consignments: [
+      {
+        cnNo,
+        cnDate,
+        from,
+        to,
+        freight,
+        labour,
+        detention,
+        bonus,
+        total,
+      },
+    ],
+    grandTotal,
+    amountInWord,
+     }
+    const client = await clientPromise;
+    const db = client.db("logisticdb");   
+     const result = await db.collection("E-bill").findOneAndUpdate( { billNo:  billNo },
+      { $set: data },);
+     if(result){
+       return NextResponse.json({
+         success: true,
+         message: "E-bill  saved successfully",
+        });
+      }
+    else {
+       return NextResponse.json({
+         success: true,
+         message: "E-bill Not saved",
+        });
+    }
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, message: "Error saving E-bill" },
+      { status: 500 }
+    );
+  }
+  
+}
+
 
 /**
  * GET → Fetch latest 5 consignments for profit calculation
