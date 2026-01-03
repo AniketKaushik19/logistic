@@ -113,22 +113,22 @@ export default function EBillsDashboard() {
 
                 {/* Action buttons aligned to the right */}
                 <div className="flex gap-3 justify-end pt-2">
-                  <Button
+                  {/* <Button
                     size="icon"
                     className="bg-amber-500 text-white h-9 w-9 rounded-full shadow hover:scale-105 transition"
                     variant="outline"
                     onClick={() => handleEdit(b)}
                   >
                     <Edit size={18} />
-                  </Button>
-                  {/* <Button
+                  </Button> */}
+                  <Button
                     size="icon"
                     className="bg-blue-500 text-white h-9 w-9 rounded-full shadow hover:scale-105 transition"
                     variant="outline"
                     onClick={() => handlePrint(b)}
                   >
                     <Printer size={18} />
-                  </Button> */}
+                  </Button>
                   <Button
                     size="icon"
                     className="bg-red-500 text-white h-9 w-9 rounded-full shadow hover:scale-105 transition"
