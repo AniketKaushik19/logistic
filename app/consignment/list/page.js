@@ -23,6 +23,7 @@ import {
 import { printPDF } from "@/utils/printPDF";
 import ConfirmToast from "@/app/components/ConfirmToast";
 import ProfitModal from "@/app/_components/profitModal";
+import { error } from "pdf-lib";
 
 const LOAD_COUNT = 6;
 

@@ -7,7 +7,6 @@ export async function POST(req) {
   try {
     const { email, password } = await req.json();
 
-    /* -------------------- VALIDATION -------------------- */
     if (!email || !password) {
       return NextResponse.json(
         { error: "Email and password are required" },
@@ -15,30 +14,20 @@ export async function POST(req) {
       );
     }
 
-    /* =====================================================
-       1️⃣ ENV ADMIN LOGIN (CEO / SUPER ADMIN)
-    ===================================================== */
+    /* ===== ENV ADMIN LOGIN ===== */
     if (
       email === process.env.ADMIN_EMAIL &&
       password === process.env.ADMIN_PASSWORD
     ) {
       const token = jwt.sign(
-        {
-          email,
-          role: "admin",
-          source: "env",
-        },
+        { email, role: "admin", source: "env" },
         process.env.JWT_SECRET,
         { expiresIn: "1d" }
       );
 
       const res = NextResponse.json({
         success: true,
-        message: "Admin login successful",
-        user: {
-          email,
-          role: "admin",
-        },
+        user: { email, role: "admin" },
       });
 
       res.cookies.set("token", token, {
@@ -52,14 +41,11 @@ export async function POST(req) {
       return res;
     }
 
-    /* =====================================================
-       2️⃣ DATABASE LOGIN (Admin / User)
-    ===================================================== */
+    /* ===== DB LOGIN ===== */
     const client = await clientPromise;
     const db = client.db("logisticdb");
-
-    const user = await db.collection("users").findOne({ email });
-
+    
+    const user = await db.collection("users").findOne({ email:email });
     if (!user) {
       return NextResponse.json(
         { error: "Invalid email or password" },
@@ -77,7 +63,7 @@ export async function POST(req) {
 
     const token = jwt.sign(
       {
-        id: user._id,
+        id: user._id.toString(),
         email: user.email,
         role: user.role,
         source: "db",
@@ -88,9 +74,8 @@ export async function POST(req) {
 
     const res = NextResponse.json({
       success: true,
-      message: "Login successful",
       user: {
-        _id: user._id,
+        _id: user._id.toString(),
         name: user.name,
         email: user.email,
         role: user.role,
@@ -106,8 +91,8 @@ export async function POST(req) {
     });
 
     return res;
-  } catch (error) {
-    console.error("Login error:", error);
+  } catch (err) {
+    console.error("Login error:", err);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

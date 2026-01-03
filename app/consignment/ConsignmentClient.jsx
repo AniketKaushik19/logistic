@@ -117,40 +117,40 @@ export default function Page() {
     form.serviceCharge,
   ]);
 
- /* ========= LOAD EDIT DATA ========= */
-const fetchConsignment = useCallback(async () => {
-  if (!editId) return;
+  /* ========= LOAD EDIT DATA ========= */
+  const fetchConsignment = useCallback(async () => {
+    if (!editId) return;
 
-  try {
-    const res = await fetch("/api/consignment", {
-      method: "POST", // ⬅ IMPORTANT
-      credentials: "include",
-      cache: "no-store",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        action: "GET_BY_ID",
-        id: editId,
-      }),
-    });
+    try {
+      const res = await fetch("/api/consignment", {
+        method: "POST", // ⬅ IMPORTANT
+        credentials: "include",
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "GET_BY_ID",
+          id: editId,
+        }),
+      });
 
-    if (!res.ok) throw new Error();
-    const data = await res.json();
+      if (!res.ok) throw new Error();
+      const data = await res.json();
 
-    setForm({
-      ...INITIAL_FORM,
-      ...data,
-      profit: data.profit || INITIAL_FORM.profit,
-    });
-  } catch {
-    toast.error("Failed to load consignment");
-  }
-}, [editId]);
+      setForm({
+        ...INITIAL_FORM,
+        ...data,
+        profit: data.profit || INITIAL_FORM.profit,
+      });
+    } catch {
+      toast.error("Failed to load consignment");
+    }
+  }, [editId]);
 
-useEffect(() => {
-  fetchConsignment();
-}, [fetchConsignment]);
+  useEffect(() => {
+    fetchConsignment();
+  }, [fetchConsignment]);
 
   /* ========= CHANGE ========= */
   const handleChange = (e) => {
@@ -169,14 +169,12 @@ useEffect(() => {
     onlySave ? setLoadingSave(true) : setLoadingPrint(true);
 
     try {
-      const res = await fetch( `/api/consignment` ,
-        {
-          method: isEdit ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(form),
-        }
-      );
+      const res = await fetch(`/api/consignment`, {
+        method: isEdit ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(form),
+      });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error);
@@ -213,7 +211,7 @@ useEffect(() => {
           onSubmit={handleSubmit}
           className="max-w-4xl mx-auto space-y-10 bg-white p-8 rounded-xl shadow-lg"
         >
-            {/* ================= CONSIGNOR ================= */}
+          {/* ================= CONSIGNOR ================= */}
           <section>
             <h2 className="font-semibold text-lg mb-3">Consignor Details</h2>
 
@@ -345,16 +343,15 @@ useEffect(() => {
               placeholder="Description (Said to contain)"
               className="input"
             />
-          
 
             <div className="grid sm:grid-cols-4 gap-4 mt-3">
-                <input
-              name="fax"
-              value={form.fax}
-              onChange={handleChange}
-              placeholder="Fax"
-              className="input"
-            />
+              <input
+                name="fax"
+                value={form.fax}
+                onChange={handleChange}
+                placeholder="Fax"
+                className="input"
+              />
               <input
                 name="packageCount"
                 type="number"
@@ -378,7 +375,37 @@ useEffect(() => {
                 <option value="Loose">Loose</option>
               </select>
 
+                   </div>
+          </section>
+
+        
+          {/* ================= VEHICLE ================= */}
+          <section>
+            <h2 className="font-semibold text-lg mb-3">Vehicle</h2>
+
+            <div className="grid sm:grid-cols-3 gap-4">
               <input
+                name="vehicleNo"
+                value={form.vehicleNo}
+                onChange={handleChange}
+                placeholder="Vehicle No"
+                className="input"
+              />
+              <input
+                name="driverName"
+                value={form.driverName}
+                onChange={handleChange}
+                placeholder="Driver Name"
+                className="input"
+              />
+            </div>
+          </section>
+  {/* ================= CHARGES ================= */}
+          <section>
+            <h2 className="font-semibold text-lg mb-3">Charges</h2>
+
+            <div className="grid sm:grid-cols-3 gap-4">
+                <input
                 name="weightActual"
                 type="number"
                 step="0.01"
@@ -399,14 +426,6 @@ useEffect(() => {
                 placeholder="Weight (Charged)"
                 className="input"
               />
-            </div>
-          </section>
-
-          {/* ================= CHARGES ================= */}
-          <section>
-            <h2 className="font-semibold text-lg mb-3">Charges</h2>
-
-            <div className="grid sm:grid-cols-3 gap-4">
               <input
                 name="rateperkg"
                 type="number"
@@ -439,28 +458,6 @@ useEffect(() => {
             </div>
           </section>
 
-          {/* ================= VEHICLE ================= */}
-          <section>
-            <h2 className="font-semibold text-lg mb-3">Vehicle</h2>
-
-            <div className="grid sm:grid-cols-3 gap-4">
-              <input
-                name="vehicleNo"
-                value={form.vehicleNo}
-                onChange={handleChange}
-                placeholder="Vehicle No"
-                className="input"
-              />
-              <input
-                name="driverName"
-                value={form.driverName}
-                onChange={handleChange}
-                placeholder="Driver Name"
-                className="input"
-              />
-            </div>
-          </section>
-
           {/* ================= INVOICE & CHARGES ================= */}
           <section>
             <h2 className="font-semibold text-lg mb-3">Invoice & Charges</h2>
@@ -487,6 +484,7 @@ useEffect(() => {
                 type="text"
                 name="freight"
                 placeholder="Enter Freight"
+                {...numberOnlyProps}
                 value={form.freight}
                 onChange={handleChange}
                 className="input"
@@ -495,6 +493,7 @@ useEffect(() => {
               <input
                 type="text"
                 name="riskCharge"
+                {...numberOnlyProps}
                 placeholder="Enter Risk Charge"
                 value={form.riskCharge}
                 onChange={handleChange}
@@ -504,6 +503,7 @@ useEffect(() => {
               <input
                 type="text"
                 name="surcharge"
+                {...numberOnlyProps}
                 placeholder="Enter Surcharge"
                 value={form.surcharge}
                 onChange={handleChange}
@@ -513,6 +513,7 @@ useEffect(() => {
               <input
                 type="text"
                 name="hamali"
+                {...numberOnlyProps}
                 placeholder="Enter Hamali"
                 value={form.hamali}
                 onChange={handleChange}
@@ -523,6 +524,7 @@ useEffect(() => {
                 type="text"
                 name="serviceCharge"
                 placeholder="Enter Service Charge"
+                {...numberOnlyProps}
                 value={form.serviceCharge}
                 onChange={handleChange}
                 className="input"
@@ -531,15 +533,16 @@ useEffect(() => {
                 type="text"
                 name="measurement"
                 placeholder="Enter Measurement"
+                {...numberOnlyProps}
                 value={form.measurement}
                 onChange={handleChange}
                 className="input"
               />
               <div>
                 <input
-                  type="date"
+                  type="text"
                   name="paidAt"
-                  placeholder="Select Paid Date"
+                  placeholder="Select Paid Location"
                   value={form.paidAt}
                   onChange={handleChange}
                   className="input"

@@ -21,19 +21,7 @@ export async function GET(req) {
     const data = await db
       .collection("consignments")
       .find(
-        {},
-        {
-          projection: {
-            cn: 1,
-            amount: 1,
-            consigneeName: 1,
-            consignorName: 1,
-            createdAt: 1,
-            profit: 1, // 👈 important
-            status: 1,
-          },
-        }
-      )
+        {}  )
       .sort({ createdAt: -1 })
       .toArray();
     return NextResponse.json(data, { status: 200 });

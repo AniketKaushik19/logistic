@@ -122,7 +122,7 @@ useEffect(() => {
     ...prev,
     total,
     netBalance: total - advance,
-    amountInWords: numberToWords(Math.floor(total)),
+    amountInWords: numberToWords(Math.floor(netBalance)),
   }));
 }, [form.rate, form.weight, form.advance]);
 
