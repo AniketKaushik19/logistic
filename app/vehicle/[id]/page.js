@@ -17,7 +17,6 @@ export default function Vehicle({ params }) {
   const getLatestExpenses = async (vehicleId) => {
     try {
       const token = localStorage.getItem("auth_token");
-
       const response = await fetch(`/api/expense?vehicleId=${vehicleId}`, {
         cache: "no-store",
 
@@ -91,7 +90,6 @@ export default function Vehicle({ params }) {
     }
     getLatestExpenses(id);
   }, [response]);
-
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/*Navbar for Vehicle page*/}
