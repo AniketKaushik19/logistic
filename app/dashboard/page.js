@@ -1,71 +1,111 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { Package, TrendingUp, Wallet } from "lucide-react";
-import Navbar from '../_components/Navbar';
+import Navbar from "../_components/Navbar";
+import ProfitChart from "../_components/ProfitChart";
+import WeeklyTrendChart from "../_components/WeeklyTrendChart";
+import ProfitVsCostChart from "../_components/ProfitVsCostChart";
 
 export default function Dashboard() {
   const [totals, setTotals] = useState({
     totalConsignments: 0,
     totalProfit: 0,
-    totalCost: 0
+    totalCost: 0,
   });
   const [analysisData, setAnalysisData] = useState([]);
-  const [analysisType, setAnalysisType] = useState('monthly');
-  const [customStart, setCustomStart] = useState('');
-  const [customEnd, setCustomEnd] = useState('');
+  const [analysisType, setAnalysisType] = useState("monthly");
+  const [customStart, setCustomStart] = useState("");
+  const [customEnd, setCustomEnd] = useState("");
+  const [weeklyData, setWeeklyData] = useState([]);
+const [monthlyProfit, setMonthlyProfit] = useState([]);
+const [profitVsCost, setProfitVsCost] = useState([]);
 
   useEffect(() => {
     fetchTotals();
-    handleAnalysisClick('monthly')
+    handleAnalysisClick("monthly");
   }, []);
+
+const fetchWeekly = async () => {
+  const res = await fetch("/api/dashboard/weekly", {
+    cache: "no-store",
+    credentials: "include",
+  });
+
+  if (!res.ok) return;
+  const data = await res.json();
+  setWeeklyData(data);
+};
+
+const fetchProfitVsCost = async () => {
+  const res = await fetch("/api/dashboard/profit-vs-cost", {
+    credentials: "include",
+    cache: "no-store",
+  });
+
+  if (!res.ok) return;
+  const data = await res.json();
+  setProfitVsCost(data);
+};
+
+
+const fetchMonthlyProfit = async () => {
+  const res = await fetch("/api/dashboard/monthly-profit", {
+    credentials: "include",
+    cache: "no-store",
+  });
+
+  if (!res.ok) return;
+  const data = await res.json();
+  setMonthlyProfit(data);
+};
+
 
   const fetchTotals = async () => {
     try {
-      const token = localStorage.getItem("auth_token");
-
-      const res = await fetch('/api/dashboard', {
+      const res = await fetch("/api/dashboard", {
         cache: "no-store",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
       });
-        if (!res.ok) {
-      throw new Error("API failed");
-    }
+      if (!res.ok) {
+        throw new Error("API failed");
+      }
       const data = await res.json();
       setTotals(data);
     } catch (error) {
-      console.error('Failed to fetch totals:', error);
+      console.error("Failed to fetch totals:", error);
     }
   };
 
-  const fetchAnalysis = async (type, start = '', end = '') => {
+  const fetchAnalysis = async (type, start = "", end = "") => {
     try {
-      const token = localStorage.getItem("auth_token");
-
       const params = new URLSearchParams({ type });
-      if (start) params.append('start', start);
-      if (end) params.append('end', end);
+      if (start) params.append("start", start);
+      if (end) params.append("end", end);
       const res = await fetch(`/api/dashboard/analysis?${params}`, {
         cache: "no-store",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       });
-        if (!res.ok) {
-      throw new Error("API failed");
-    }
+      if (!res.ok) {
+        throw new Error("API failed");
+      }
       const data = await res.json();
       setAnalysisData(data);
     } catch (error) {
-      console.error('Failed to fetch analysis:', error);
+      console.error("Failed to fetch analysis:", error);
     }
   };
 
+useEffect(() => {
+  fetchWeekly();
+    fetchMonthlyProfit();
+    fetchProfitVsCost();
+
+}, []);
+
+
+
   const handleAnalysisClick = (type) => {
     setAnalysisType(type);
-    if (type === 'custom') {
+    if (type === "custom") {
       // For custom, we'll handle in the button
     } else {
       fetchAnalysis(type);
@@ -74,18 +114,20 @@ export default function Dashboard() {
 
   const handleCustomAnalysis = () => {
     if (customStart && customEnd) {
-      fetchAnalysis('custom', customStart, customEnd);
+      fetchAnalysis("custom", customStart, customEnd);
     }
   };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50">
+      {/* {console.log(totals)} */}
       <Navbar />
       <main className="container px-4 py-8 mt-8">
-        <h1 className="text-3xl font-bold text-center mt-7 mb-8 text-gray-800">Dashboard</h1>
+        <h1 className="text-3xl font-bold text-center mt-7 mb-8 text-gray-800">
+          Dashboard
+        </h1>
         {/* Totals Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-
           {/* Total Consignments */}
           <div className="group relative overflow-hidden bg-linear-to-br from-blue-500 to-blue-600 text-white p-6 rounded-2xl shadow-lg transition hover:scale-[1.03]">
             <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition" />
@@ -149,25 +191,29 @@ export default function Dashboard() {
 
         {/* Analysis Section */}
         <div className="bg-white shadow-xl rounded-xl p-6 border border-gray-200">
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800">Analysis</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-gray-800">
+            Analysis
+          </h2>
 
           {/* Analysis Buttons */}
           <div className="flex flex-wrap gap-4 mb-6">
             <button
-              onClick={() => handleAnalysisClick('monthly')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${analysisType === 'monthly'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
+              onClick={() => handleAnalysisClick("monthly")}
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                analysisType === "monthly"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
             >
               Monthly
             </button>
             <button
-              onClick={() => handleAnalysisClick('yearly')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${analysisType === 'yearly'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
+              onClick={() => handleAnalysisClick("yearly")}
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                analysisType === "yearly"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
             >
               Yearly
             </button>
@@ -202,7 +248,6 @@ export default function Dashboard() {
                 Apply
               </button>
             </div>
-
           </div>
 
           {/* Analysis Data */}
@@ -211,19 +256,35 @@ export default function Dashboard() {
               <table className="w-full border-collapse border border-gray-300">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="border border-gray-300 px-4 py-2 text-left">Period</th>
-                    <th className="border border-gray-300 px-4 py-2 text-left">Consignments</th>
-                    <th className="border border-gray-300 px-4 py-2 text-left">Total Cost</th>
-                    <th className="border border-gray-300 px-4 py-2 text-left">Total Profit</th>
+                    <th className="border border-gray-300 px-4 py-2 text-left">
+                      Period
+                    </th>
+                    <th className="border border-gray-300 px-4 py-2 text-left">
+                      Consignments
+                    </th>
+                    <th className="border border-gray-300 px-4 py-2 text-left">
+                      Total Cost
+                    </th>
+                    <th className="border border-gray-300 px-4 py-2 text-left">
+                      Total Profit
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {analysisData.map((item, index) => (
                     <tr key={index} className="hover:bg-gray-50">
-                      <td className="border border-gray-300 px-4 py-2">{item.period}</td>
-                      <td className="border border-gray-300 px-4 py-2">{item.consignments}</td>
-                      <td className="border border-gray-300 px-4 py-2">₹{item.totalCost.toFixed(2)}</td>
-                      <td className="border border-gray-300 px-4 py-2">₹{item.totalProfit.toFixed(2)}</td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {item.period}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        {item.consignments}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        ₹{item.totalCost.toFixed(2)}
+                      </td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        ₹{item.totalProfit.toFixed(2)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -232,6 +293,14 @@ export default function Dashboard() {
           )}
         </div>
       </main>
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <ProfitChart data={monthlyProfit} />
+  <WeeklyTrendChart data={weeklyData} />
+  <ProfitVsCostChart data={profitVsCost} />
+</div>
+
+
+
     </div>
   );
 }

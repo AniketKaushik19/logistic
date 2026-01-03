@@ -37,10 +37,12 @@ const INITIAL_FORM = {
   packageMethod: "",
   fax: "",
 
-  weightActual: "",
-  weightCharged: "",
-  rateperkg: "",
+  amountType: "fixed",
+  weightActual: "fixed",
+  weightCharged: "fixed",
+  rateperkg: "fixed",
   amount: "",
+  tempAmount: "",
 
   invoiceNo: "",
   invoiceValue: "",
@@ -64,7 +66,6 @@ const INITIAL_FORM = {
 
   paymentType: "Paid",
   yourName: "Suresh Kumar",
-
   profit: {
     totalCost: 0,
     expenses: 0,
@@ -86,27 +87,29 @@ export default function Page() {
 
   /* ========= AUTO CALCULATE AMOUNT + PROFIT ========= */
   useEffect(() => {
-    const weight = Number(form.weightCharged) || 0;
-    const rate = Number(form.rateperkg) || 0;
+    if (form.amountType === "not-fixed") {
+      const weight = Number(form.weightCharged) || 0;
+      const rate = Number(form.rateperkg) || 0;
 
-    const extras =
-      Number(form.freight) +
-      Number(form.riskCharge) +
-      Number(form.surcharge) +
-      Number(form.hamali) +
-      Number(form.serviceCharge);
+      const extras =
+        Number(form.freight) +
+        Number(form.riskCharge) +
+        Number(form.surcharge) +
+        Number(form.hamali) +
+        Number(form.serviceCharge);
 
-    const total = weight * rate + extras;
+      const total = weight * rate + extras;
 
-    setForm((prev) => ({
-      ...prev,
-      amount: total > 0 ? total.toFixed(2) : "",
-      profit: {
-        ...prev.profit,
-        totalCost: total,
-        amount: total - (prev.profit?.expenses || 0),
-      },
-    }));
+      setForm((prev) => ({
+        ...prev,
+        amount: total > 0 ? total.toFixed(2) : "",
+        profit: {
+          ...prev.profit,
+          totalCost: total,
+          amount: total - (prev.profit?.expenses || 0),
+        },
+      }));
+    }
   }, [
     form.weightCharged,
     form.rateperkg,
@@ -374,11 +377,9 @@ export default function Page() {
                 <option value="Drum">Drum</option>
                 <option value="Loose">Loose</option>
               </select>
-
-                   </div>
+            </div>
           </section>
 
-        
           {/* ================= VEHICLE ================= */}
           <section>
             <h2 className="font-semibold text-lg mb-3">Vehicle</h2>
@@ -400,62 +401,117 @@ export default function Page() {
               />
             </div>
           </section>
-  {/* ================= CHARGES ================= */}
           <section>
             <h2 className="font-semibold text-lg mb-3">Charges</h2>
 
-            <div className="grid sm:grid-cols-3 gap-4">
-                <input
-                name="weightActual"
-                type="number"
-                step="0.01"
-                {...numberOnlyProps}
-                value={form.weightActual}
+            {/* Select Amount Type */}
+            <div className="mb-3">
+              <label className="mr-3 font-medium">Amount Type:</label>
+              <select
+                name="amountType"
+                value={form.amountType}
                 onChange={handleChange}
-                placeholder="Weight (Actual)"
-                className="input"
-              />
-
-              <input
-                name="weightCharged"
-                type="number"
-                step="0.01"
-                {...numberOnlyProps}
-                value={form.weightCharged}
-                onChange={handleChange}
-                placeholder="Weight (Charged)"
-                className="input"
-              />
-              <input
-                name="rateperkg"
-                type="number"
-                step="0.01"
-                {...numberOnlyProps}
-                value={form.rateperkg}
-                onChange={handleChange}
-                placeholder="Rate / Kg"
-                className="input"
-              />
-
-              <input
-                name="amount"
-                value={form.amount}
-                disabled
-                placeholder="Auto Calculated Amount"
-                className="input bg-gray-100"
-              />
-
-              <input
-                name="freight"
-                type="number"
-                step="0.01"
-                {...numberOnlyProps}
-                value={form.freight}
-                onChange={handleChange}
-                placeholder="Freight"
-                className="input"
-              />
+                className="border rounded px-2 py-1"
+              >
+                <option value="not-fixed">Not Fixed</option>
+                <option value="fixed">Fixed</option>
+              </select>
             </div>
+
+            {form.amountType === "not-fixed" ? (
+              <div className="grid sm:grid-cols-4 gap-4">
+                <input
+                  name="weightActual"
+                  type="number"
+                  step="0.01"
+                  {...numberOnlyProps}
+                  value={form.weightActual}
+                  onChange={handleChange}
+                  placeholder="Weight (Actual)"
+                  className="input"
+                />
+
+                <input
+                  name="weightCharged"
+                  type="number"
+                  step="0.01"
+                  {...numberOnlyProps}
+                  value={form.weightCharged}
+                  onChange={handleChange}
+                  placeholder="Weight (Charged)"
+                  className="input"
+                />
+                <input
+                  name="rateperkg"
+                  type="number"
+                  step="0.01"
+                  {...numberOnlyProps}
+                  value={form.rateperkg}
+                  onChange={handleChange}
+                  placeholder="Rate / Kg"
+                  className="input"
+                />
+
+                <input
+                  name="amount"
+                  value={form.amount}
+                  disabled
+                  placeholder="Auto Calculated Amount"
+                  className="input bg-gray-100"
+                />
+
+                <input
+                  name="freight"
+                  type="number"
+                  step="0.01"
+                  {...numberOnlyProps}
+                  value={form.freight}
+                  onChange={handleChange}
+                  placeholder="Freight"
+                  className="input"
+                />
+              </div>
+            ) : (
+              <div className="grid sm:grid-cols-2 gap-4">
+                {/* Manual base amount */}
+                <input
+                  name="tempAmount"
+                  type="number"
+                  step="0.01"
+                  {...numberOnlyProps}
+                  value={form.tempAmount}
+                  onChange={handleChange}
+                  placeholder="Enter Base Amount"
+                  className="input"
+                />
+
+                {/* Auto-calculated with extras */}
+                <input
+                  value={(() => {
+                    const base = Number(form.tempAmount) || 0;
+                    const extras =
+                      (Number(form.hamali) || 0) +
+                      (Number(form.surcharge) || 0) +
+                      (Number(form.freight) || 0) +
+                      (Number(form.riskCharge) || 0) +
+                      (Number(form.serviceCharge) || 0);
+                    const total = base + extras;
+
+                    // Save into form.amount automatically
+                    if (form.amount !== total.toFixed(2)) {
+                      setForm((prev) => ({
+                        ...prev,
+                        amount: total.toFixed(2),
+                      }));
+                    }
+                    return total.toFixed(2);
+                  })()}
+                  disabled
+                  placeholder="Total with Extras"
+                  className="input bg-gray-100"
+                />
+              </div>
+            )}
           </section>
 
           {/* ================= INVOICE & CHARGES ================= */}
@@ -542,12 +598,11 @@ export default function Page() {
                 <input
                   type="text"
                   name="paidAt"
-                  placeholder="Select Paid Location"
+                  placeholder="Paid At Location"
                   value={form.paidAt}
                   onChange={handleChange}
                   className="input"
                 />
-                <small className="px-2 text-gray-500">Select Paid Date</small>
               </div>
               <div>
                 <input

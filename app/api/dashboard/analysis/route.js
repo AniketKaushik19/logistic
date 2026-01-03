@@ -22,24 +22,31 @@ export async function GET(req) {
 
     /* ================= MONTHLY ================= */
     if (type === "monthly") {
-      const pipeline = [
-        {
-          $group: {
-            _id: {
-              year: { $year: { date: "$createdAt", timezone: "UTC" } },
-              month: { $month: { date: "$createdAt", timezone: "UTC" } },
-            },
-            consignments: { $sum: 1 },
-            totalCost: { $sum: "$totalCost" },
-            totalProfit: { $sum: "$netProfit" },
-          },
-        },
-        { $sort: { "_id.year": -1, "_id.month": -1 } },
-      ];
-
       const results = await db
-        .collection("profits")
-        .aggregate(pipeline)
+        .collection("consignments")
+        .aggregate([
+          {
+            $addFields: {
+              createdAtDate: { $toDate: "$createdAt" },
+            },
+          },
+          {
+            $group: {
+              _id: {
+                year: { $year: "$createdAtDate" },
+                month: { $month: "$createdAtDate" },
+              },
+              consignments: { $sum: 1 },
+              totalCost: {
+                $sum: { $ifNull: ["$profit.totalCost", 0] },
+              },
+              totalProfit: {
+                $sum: { $ifNull: ["$profit.amount", 0] },
+              },
+            },
+          },
+          { $sort: { "_id.year": -1, "_id.month": -1 } },
+        ])
         .toArray();
 
       return NextResponse.json(
@@ -54,26 +61,33 @@ export async function GET(req) {
 
     /* ================= YEARLY ================= */
     if (type === "yearly") {
-      const pipeline = [
-        {
-          $group: {
-            _id: { $year: { date: "$createdAt", timezone: "UTC" } },
-            consignments: { $sum: 1 },
-            totalCost: { $sum: "$totalCost" },
-            totalProfit: { $sum: "$netProfit" },
-          },
-        },
-        { $sort: { _id: -1 } },
-      ];
-
       const results = await db
-        .collection("profits")
-        .aggregate(pipeline)
+        .collection("consignments")
+        .aggregate([
+          {
+            $addFields: {
+              createdAtDate: { $toDate: "$createdAt" },
+            },
+          },
+          {
+            $group: {
+              _id: { $year: "$createdAtDate" },
+              consignments: { $sum: 1 },
+              totalCost: {
+                $sum: { $ifNull: ["$profit.totalCost", 0] },
+              },
+              totalProfit: {
+                $sum: { $ifNull: ["$profit.amount", 0] },
+              },
+            },
+          },
+          { $sort: { _id: -1 } },
+        ])
         .toArray();
 
       return NextResponse.json(
         results.map((r) => ({
-          period: `${r._id}`,
+          period: String(r._id),
           consignments: r.consignments,
           totalCost: r.totalCost,
           totalProfit: r.totalProfit,
@@ -83,24 +97,49 @@ export async function GET(req) {
 
     /* ================= CUSTOM ================= */
     if (type === "custom" && start && end) {
-      const match = {
-        createdAt: {
-          $gte: new Date(`${start}T00:00:00.000Z`),
-          $lte: new Date(`${end}T23:59:59.999Z`),
-        },
-      };
-
-      const profits = await db
-        .collection("profits")
-        .find(match)
+      const results = await db
+        .collection("consignments")
+        .aggregate([
+          {
+            $addFields: {
+              createdAtDate: { $toDate: "$createdAt" },
+            },
+          },
+          {
+            $match: {
+              createdAtDate: {
+                $gte: new Date(`${start}T00:00:00.000Z`),
+                $lte: new Date(`${end}T23:59:59.999Z`),
+              },
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              consignments: { $sum: 1 },
+              totalCost: {
+                $sum: { $ifNull: ["$profit.totalCost", 0] },
+              },
+              totalProfit: {
+                $sum: { $ifNull: ["$profit.amount", 0] },
+              },
+            },
+          },
+        ])
         .toArray();
+
+      const stats = results[0] || {
+        consignments: 0,
+        totalCost: 0,
+        totalProfit: 0,
+      };
 
       return NextResponse.json([
         {
           period: `${start} → ${end}`,
-          consignments: profits.length,
-          totalCost: profits.reduce((s, p) => s + (p.totalCost || 0), 0),
-          totalProfit: profits.reduce((s, p) => s + (p.netProfit || 0), 0),
+          consignments: stats.consignments,
+          totalCost: stats.totalCost,
+          totalProfit: stats.totalProfit,
         },
       ]);
     }

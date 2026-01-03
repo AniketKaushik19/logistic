@@ -64,6 +64,11 @@ function Navbar() {
               </Link>
             </li>
             <li>
+              <Link href="/driver/list" className="hover:text-red-600">
+                Drivers
+              </Link>
+            </li>
+            <li>
               <Link href="/consignment/list" className="hover:text-red-600">
                 Consignment
               </Link>
@@ -114,6 +119,9 @@ function Navbar() {
             <ul className="flex flex-col gap-4 px-6 py-4 text-sm font-medium">
               <Link onClick={() => setOpen(false)} href="/dashboard">
                 Dashboard
+              </Link>
+              <Link onClick={() => setOpen(false)} href="/driver/list">
+                Drivers
               </Link>
               <Link onClick={() => setOpen(false)} href="/consignment/list">
                 Consignment

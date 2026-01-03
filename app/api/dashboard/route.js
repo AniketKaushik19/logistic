@@ -2,6 +2,14 @@ import clientPromise from "@/lib/mongodb";
 import { requireAuth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
+/* ================= CACHE ================= */
+let cache = {
+  data: null,
+  timestamp: 0,
+};
+
+const CACHE_TTL = 1000 * 60 * 5; // ⏱ 5 minutes
+
 export async function GET(req) {
   const auth = await requireAuth(req);
   if (!auth.authenticated) {
@@ -12,19 +20,62 @@ export async function GET(req) {
   }
 
   try {
+    const now = Date.now();
+
+    /* 🚀 RETURN CACHED DATA IF VALID */
+    if (cache.data && now - cache.timestamp < CACHE_TTL) {
+      return NextResponse.json({
+        ...cache.data,
+        cached: true, // optional (remove in prod if you want)
+      });
+    }
+
+    /* 🔄 FETCH FRESH DATA */
     const client = await clientPromise;
     const db = client.db("logisticdb");
 
-    const totalConsignments = await db
+    const [stats] = await db
       .collection("consignments")
-      .countDocuments();
+      .aggregate([
+        {
+          $group: {
+            _id: null,
+            totalConsignments: { $sum: 1 },
+            totalProfit: {
+              $sum: { $ifNull: ["$profit.amount", 0] },
+            },
+            totalCost: {
+              $sum: { $ifNull: ["$profit.totalCost", 0] },
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            totalConsignments: 1,
+            totalProfit: 1,
+            totalCost: 1,
+          },
+        },
+      ])
+      .toArray();
 
-    const profits = await db.collection("profits").find({}).toArray();
+    const responseData =
+      stats || {
+        totalConsignments: 0,
+        totalProfit: 0,
+        totalCost: 0,
+      };
+
+    /* 💾 UPDATE CACHE */
+    cache = {
+      data: responseData,
+      timestamp: now,
+    };
 
     return NextResponse.json({
-      totalConsignments,
-      totalProfit: profits.reduce((s, p) => s + (p.netProfit || 0), 0),
-      totalCost: profits.reduce((s, p) => s + (p.totalCost || 0), 0),
+      ...responseData,
+      cached: false, // optional
     });
   } catch (error) {
     console.error("Dashboard error:", error);
