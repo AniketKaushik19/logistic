@@ -41,14 +41,13 @@ export default function TrackClient() {
       throw new Error("API failed");
     }
       const json = await res.json();
-
       if (!res.ok || json?.success === false) {
         setError(json?.message || "Consignment not found");
       } else {
         setData(json);
       }
     } catch {
-      setError("Network error");
+      setError("Consignment not Found");
     } finally {
       setLoading(false);
     }

@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
 });
 
 export const BillPDF = ({ bill }) => (
-  <Document>
+    <Document>
     <Page size="A4" style={styles.page} orientation="landscape">
 
       {/* HEADER */}
@@ -91,7 +91,7 @@ export const BillPDF = ({ bill }) => (
           <Text style={styles.title}>ANIKET LOGISTIC</Text>
           <Text style={styles.subtitle}>
             7/A Buddh Vihar Colony, Phase-2 Kotwali Road, Chinhat,
-            Lucknow – 227105
+            Lucknow – 226028
           </Text>
           <Text style={styles.subtitle}>
             Fleet Owners & Transport Contractors
@@ -168,7 +168,7 @@ export const BillPDF = ({ bill }) => (
         <View style={[styles.footerBox, { width: "30%" }]}>
           <Text>
             <Text style={styles.label}>Grand Total: </Text>
-            ₹ {bill.grandTotal}
+             {bill.grandTotal}
           </Text>
         </View>
       </View>

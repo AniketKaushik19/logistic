@@ -4,221 +4,207 @@ import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
-import { generatePDF } from "@/utils/generatePDF";
 import Navbar from "../_components/Navbar";
 import { printPDF } from "@/utils/printPDF";
-/* ========= NUMBER VALIDATION PROPS ========= */
+
+/* ========= NUMBER VALIDATION ========= */
 const numberOnlyProps = {
   min: 0,
   onKeyDown: (e) => {
-    if (["e", "E", "-", "+"].includes(e.key)) {
-      e.preventDefault();
-    }
+    if (["e", "E", "-", "+"].includes(e.key)) e.preventDefault();
+  },
+};
+
+/* ========= INITIAL FORM ========= */
+const INITIAL_FORM = {
+  consignorName: "",
+  consignorAddress: "",
+  consignorPhone: "",
+  consignorCSTNo: "",
+
+  consigneeName: "",
+  consigneeAddress: "",
+  consigneePhone: "",
+  consigneeCSTNo: "",
+  deliveryAddress: "",
+
+  fromLocation: "",
+  toLocation: "",
+  consignmentDate: "",
+
+  goodsDescription: "",
+  packageCount: "",
+  packageMethod: "",
+  fax: "",
+
+  weightActual: "",
+  weightCharged: "",
+  rateperkg: "",
+  amount: "",
+
+  invoiceNo: "",
+  invoiceValue: "",
+  freight: "",
+  riskCharge: "",
+  surcharge: "",
+  hamali: "",
+  serviceCharge: "",
+  paidAt: "",
+  billedAt: "",
+  measurement: "",
+
+  validUpTo: "",
+  declarationDate: "",
+
+  deliveryRemarks: "",
+  deliveryDate: "",
+
+  vehicleNo: "",
+  driverName: "",
+
+  paymentType: "Paid",
+  yourName: "Suresh Kumar",
+
+  profit: {
+    totalCost: 0,
+    expenses: 0,
+    amount: 0,
   },
 };
 
 export default function Page() {
-  const [loading1, setLoading1] = useState(false);
-  const [loading2, setLoading2] = useState(false);
-  const search = useSearchParams();
   const router = useRouter();
+  const search = useSearchParams();
   const editId = search.get("editId");
-  const [isEdit, setIsEdit] = useState(false);
-  const [form, setForm] = useState({
-    // Consignor
-    consignorName: "",
-    consignorAddress: "",
-    consignorPhone: "",
-    consignorCSTNo: "",
 
-    // Consignee
-    consigneeName: "",
-    consigneeAddress: "",
-    consigneePhone: "",
-    consigneeCSTNo: "",
-    deliveryAddress: "",
+  const isEdit = Boolean(editId);
 
-    // Route & Date
-    fromLocation: "",
-    toLocation: "",
-    consignmentDate: "",
+  const [form, setForm] = useState(INITIAL_FORM);
+  const [loadingSave, setLoadingSave] = useState(false);
+  const [loadingPrint, setLoadingPrint] = useState(false);
+  const [onlySave, setOnlySave] = useState(false);
 
-    // Goods
-    goodsDescription: "",
-    packageCount: "",
-    packageMethod: "",
-    fax: "",
+  /* ========= AUTO CALCULATE AMOUNT + PROFIT ========= */
+  useEffect(() => {
+    const weight = Number(form.weightCharged) || 0;
+    const rate = Number(form.rateperkg) || 0;
 
-    // Weight & Rates
-    weightActual: "",
-    weightCharged: "",
-    rateperkg: "",
-    amount: "",
+    const extras =
+      Number(form.freight) +
+      Number(form.riskCharge) +
+      Number(form.surcharge) +
+      Number(form.hamali) +
+      Number(form.serviceCharge);
 
-    // Invoice & Charges
-    invoiceNo: "",
-    invoiceValue: "",
-    freight: "",
-    riskCharge: "",
-    surcharge: "",
-    hamali: "",
-    serviceCharge: "",
-    paidAt: "",
-    billedAt: "",
-    measurement: "",
-    // Tax / Declaration
-    validUpTo: "",
-    declarationDate: "",
+    const total = weight * rate + extras;
 
-    // Delivery
-    deliveryRemarks: "",
-    deliveryDate: "",
+    setForm((prev) => ({
+      ...prev,
+      amount: total > 0 ? total.toFixed(2) : "",
+      profit: {
+        ...prev.profit,
+        totalCost: total,
+        amount: total - (prev.profit?.expenses || 0),
+      },
+    }));
+  }, [
+    form.weightCharged,
+    form.rateperkg,
+    form.freight,
+    form.riskCharge,
+    form.surcharge,
+    form.hamali,
+    form.serviceCharge,
+  ]);
 
-    // Vehicle & Driver
-    vehicleNo: "",
-    driverName: "",
+  /* ========= LOAD EDIT DATA ========= */
+  const fetchConsignment = useCallback(async () => {
+    if (!editId) return;
 
-    // Payment
-    paymentType: "Paid",
+    try {
+      const res = await fetch("/api/consignment", {
+        method: "POST", // ⬅ IMPORTANT
+        credentials: "include",
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "GET_BY_ID",
+          id: editId,
+        }),
+      });
 
-    //consignee form filler name
-    yourName: "Suresh Kumar",
-  });
-  const [onlysave, setOnlySave] = useState(false);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
 
-useEffect(() => {
-  const weight = parseFloat(form.weightCharged) || 0;
-  const rate = parseFloat(form.rateperkg) || 0;
-
-  // List of optional charges
-  const charges = ["freight", "riskCharge", "surcharge", "hamali", "serviceCharge"];
-  const extra = charges.reduce((sum, field) => sum + (parseFloat(form[field]) || 0), 0);
-
-  const total = weight * rate + extra;
-
-  setForm((prev) => ({
-    ...prev,
-
-    // ✅ existing amount (consignment total)
-    amount: total > 0 ? total.toFixed(2) : "",
-
-    // ✅ sync profit object
-    profit: {
-      ...(prev.profit || {}),
-      totalCost: total > 0 ? Number(total.toFixed(2)) : 0,
-
-      // keep existing values if already set
-      expenses: prev.profit?.expenses || 0,
-      amount:
-        total > 0
-          ? Number(total.toFixed(2)) - (prev.profit?.expenses || 0)
-          : 0,
-    },
-  }));
-}, [
-  form.weightCharged,
-  form.rateperkg,
-  form.freight,
-  form.riskCharge,
-  form.surcharge,
-  form.hamali,
-  form.serviceCharge,
-]);
-
-
-  /* ========= POPULATE EDIT ========= */
-const fetchConsignment = useCallback(async () => {
-  if (!editId) return;
-
-  try {
-    const res = await fetch(`/api/consignment/${editId}`, {
-      cache: "no-store",
-      credentials: "include",
-    });
-
-    if (!res.ok) {
+      setForm({
+        ...INITIAL_FORM,
+        ...data,
+        profit: data.profit || INITIAL_FORM.profit,
+      });
+    } catch {
       toast.error("Failed to load consignment");
-      return;
     }
+  }, [editId]);
 
-    const data = await res.json();
-    setForm(data);
-    setIsEdit(true);
-  } catch (error) {
-    console.error("Fetch consignment error:", error);
-    toast.error("Error fetching consignment");
-  }
-}, [editId]);
+  useEffect(() => {
+    fetchConsignment();
+  }, [fetchConsignment]);
 
-useEffect(() => {
-  fetchConsignment();
-}, [fetchConsignment]);
-
-
-
+  /* ========= CHANGE ========= */
   const handleChange = (e) => {
-    let value = e.target.value;
-    if (e.target.name === "vehicleNo") value = value.toUpperCase();
-    setForm({ ...form, [e.target.name]: value });
+    const { name, value } = e.target;
+    setForm((p) => ({
+      ...p,
+      [name]: name === "vehicleNo" ? value.toUpperCase() : value,
+    }));
   };
 
   /* ========= SUBMIT ========= */
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (loading1 || loading2) return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (loadingSave || loadingPrint) return;
 
-  onlysave ? setLoading1(true) : setLoading2(true);
+    onlySave ? setLoadingSave(true) : setLoadingPrint(true);
 
-  try {
-    const url = isEdit
-      ? `/api/consignment/${editId}`
-      : "/api/consignment";
+    try {
+      const res = await fetch(`/api/consignment`, {
+        method: isEdit ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(form),
+      });
 
-    const method = isEdit ? "PUT" : "POST";
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error);
 
-    const res = await fetch(url, {
-      method,
-      cache: "no-store",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
-    });
+      const cn = data?.data?.cn || form.cn;
 
-    const data = await res.json();
+      if (!onlySave) {
+        await printPDF(cn, { ...form, cn });
+        toast.success("Saved & PDF printed");
+      } else {
+        toast.success("Saved successfully");
+      }
 
-    if (!res.ok) {
-      toast.error(data?.error || "Failed to save consignment");
-      return;
+      router.push("/consignment/list");
+    } catch (err) {
+      toast.error(err.message || "Failed to save");
+    } finally {
+      setLoadingSave(false);
+      setLoadingPrint(false);
     }
-
-    const cn = data?.data?.cn || data?.cn || form.cn;
-
-    if (!onlysave) {
-      await printPDF(cn, { ...form, cn });
-      toast.success("Consignment saved & PDF generated");
-    } else {
-      toast.success("Consignment saved");
-    }
-
-    router.push("/consignment/list");
-  } catch (error) {
-    console.error("Submit error:", error);
-    toast.error("Something went wrong");
-  } finally {
-    setLoading1(false);
-    setLoading2(false);
-  }
-};
+  };
 
   return (
     <>
       <Navbar />
+      <Toaster />
+
       <div className="pt-20 pb-20 px-6 bg-white">
-        <Toaster />
-        <h1 className="text-3xl font-bold text-center mb-2">
-          Create Consignment Note
+        <h1 className="text-3xl font-bold text-center mb-6">
+          {isEdit ? "Edit Consignment Note" : "Create Consignment Note"}
         </h1>
 
         <form
@@ -357,16 +343,15 @@ useEffect(() => {
               placeholder="Description (Said to contain)"
               className="input"
             />
-          
 
             <div className="grid sm:grid-cols-4 gap-4 mt-3">
-                <input
-              name="fax"
-              value={form.fax}
-              onChange={handleChange}
-              placeholder="Fax"
-              className="input"
-            />
+              <input
+                name="fax"
+                value={form.fax}
+                onChange={handleChange}
+                placeholder="Fax"
+                className="input"
+              />
               <input
                 name="packageCount"
                 type="number"
@@ -390,7 +375,37 @@ useEffect(() => {
                 <option value="Loose">Loose</option>
               </select>
 
+                   </div>
+          </section>
+
+        
+          {/* ================= VEHICLE ================= */}
+          <section>
+            <h2 className="font-semibold text-lg mb-3">Vehicle</h2>
+
+            <div className="grid sm:grid-cols-3 gap-4">
               <input
+                name="vehicleNo"
+                value={form.vehicleNo}
+                onChange={handleChange}
+                placeholder="Vehicle No"
+                className="input"
+              />
+              <input
+                name="driverName"
+                value={form.driverName}
+                onChange={handleChange}
+                placeholder="Driver Name"
+                className="input"
+              />
+            </div>
+          </section>
+  {/* ================= CHARGES ================= */}
+          <section>
+            <h2 className="font-semibold text-lg mb-3">Charges</h2>
+
+            <div className="grid sm:grid-cols-3 gap-4">
+                <input
                 name="weightActual"
                 type="number"
                 step="0.01"
@@ -411,14 +426,6 @@ useEffect(() => {
                 placeholder="Weight (Charged)"
                 className="input"
               />
-            </div>
-          </section>
-
-          {/* ================= CHARGES ================= */}
-          <section>
-            <h2 className="font-semibold text-lg mb-3">Charges</h2>
-
-            <div className="grid sm:grid-cols-3 gap-4">
               <input
                 name="rateperkg"
                 type="number"
@@ -451,28 +458,6 @@ useEffect(() => {
             </div>
           </section>
 
-          {/* ================= VEHICLE ================= */}
-          <section>
-            <h2 className="font-semibold text-lg mb-3">Vehicle</h2>
-
-            <div className="grid sm:grid-cols-3 gap-4">
-              <input
-                name="vehicleNo"
-                value={form.vehicleNo}
-                onChange={handleChange}
-                placeholder="Vehicle No"
-                className="input"
-              />
-              <input
-                name="driverName"
-                value={form.driverName}
-                onChange={handleChange}
-                placeholder="Driver Name"
-                className="input"
-              />
-            </div>
-          </section>
-
           {/* ================= INVOICE & CHARGES ================= */}
           <section>
             <h2 className="font-semibold text-lg mb-3">Invoice & Charges</h2>
@@ -499,6 +484,7 @@ useEffect(() => {
                 type="text"
                 name="freight"
                 placeholder="Enter Freight"
+                {...numberOnlyProps}
                 value={form.freight}
                 onChange={handleChange}
                 className="input"
@@ -507,6 +493,7 @@ useEffect(() => {
               <input
                 type="text"
                 name="riskCharge"
+                {...numberOnlyProps}
                 placeholder="Enter Risk Charge"
                 value={form.riskCharge}
                 onChange={handleChange}
@@ -516,6 +503,7 @@ useEffect(() => {
               <input
                 type="text"
                 name="surcharge"
+                {...numberOnlyProps}
                 placeholder="Enter Surcharge"
                 value={form.surcharge}
                 onChange={handleChange}
@@ -525,6 +513,7 @@ useEffect(() => {
               <input
                 type="text"
                 name="hamali"
+                {...numberOnlyProps}
                 placeholder="Enter Hamali"
                 value={form.hamali}
                 onChange={handleChange}
@@ -535,6 +524,7 @@ useEffect(() => {
                 type="text"
                 name="serviceCharge"
                 placeholder="Enter Service Charge"
+                {...numberOnlyProps}
                 value={form.serviceCharge}
                 onChange={handleChange}
                 className="input"
@@ -543,15 +533,16 @@ useEffect(() => {
                 type="text"
                 name="measurement"
                 placeholder="Enter Measurement"
+                {...numberOnlyProps}
                 value={form.measurement}
                 onChange={handleChange}
                 className="input"
               />
               <div>
                 <input
-                  type="date"
+                  type="text"
                   name="paidAt"
-                  placeholder="Select Paid Date"
+                  placeholder="Select Paid Location"
                   value={form.paidAt}
                   onChange={handleChange}
                   className="input"
@@ -653,37 +644,24 @@ useEffect(() => {
             </div>
           </section>
 
+          {/* ===== ACTION BUTTONS ===== */}
           <div className="flex gap-5">
             <motion.button
-              whileHover={!loading1 ? { scale: 1.05 } : {}}
-              disabled={loading1}
-              onClick={() => {
-                setOnlySave(true);
-              }}
-              className={`w-full py-3 rounded-lg font-bold transition
-    ${
-      loading1
-        ? "bg-gray-400 cursor-not-allowed"
-        : "bg-red-600 hover:bg-red-700 text-white"
-    }
-  `}
               type="submit"
+              disabled={loadingSave}
+              onClick={() => setOnlySave(true)}
+              className="w-full py-3 bg-red-600 text-white rounded-lg font-bold"
             >
-              {loading1 ? "Processing..." : "Save"}
+              {loadingSave ? "Saving..." : "Save"}
             </motion.button>
+
             <motion.button
-              whileHover={!loading2 ? { scale: 1.05 } : {}}
-              disabled={loading2}
-              className={`w-full py-3 rounded-lg font-bold transition
-    ${
-      loading2
-        ? "bg-gray-400 cursor-not-allowed"
-        : "bg-red-600 hover:bg-red-700 text-white"
-    }
-  `}
               type="submit"
+              disabled={loadingPrint}
+              onClick={() => setOnlySave(false)}
+              className="w-full py-3 bg-red-700 text-white rounded-lg font-bold"
             >
-              {loading2 ? "Processing..." : "Save & Print PDF"}
+              {loadingPrint ? "Processing..." : "Save & Print PDF"}
             </motion.button>
           </div>
         </form>

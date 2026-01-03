@@ -88,6 +88,7 @@ export default function Dashboard() {
           {vehicles.map((vehicle) => (
             <VehicleCard
               key={vehicle.truckNumber}
+              id={vehicle.truckNumber}
               name={vehicle.truckNumber}
               capacity={vehicle.capacity}
               registrationYear={vehicle.registrationYear}

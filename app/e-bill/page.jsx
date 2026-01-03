@@ -1,429 +1,149 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import DownloadBill from "../components/DownloadBill";
-import Navbar from '../_components/Navbar';
-import toast from 'react-hot-toast';
-import {
-  User,
-  Calendar,
-  MapPin,
-  Truck,
-  IndianRupee,
-  Gift,
-  Clock,
-  ReceiptText,
-  Home,
-  File
-} from "lucide-react";
-import { numberToWords } from '@/utils/numberToWord';
+import React, { useEffect, useState } from "react";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Edit, Trash2, Printer } from "lucide-react";
+import Navbar from "../_components/Navbar";
+import toast from "react-hot-toast";
+import Link from "next/link";
+import { BillPDF } from "../components/BillPDF";
+import { pdf } from "@react-pdf/renderer";
+export default function EBillsDashboard() {
+  const [ebill, setEbill] = useState([]);
 
-
-export default function InvoiceForm() {
-  const [form, setForm] = useState({
-    customer: '',
-    customerAddress: '',
-    customerGstin: '',
-    billNo: '',
-    billDate: '',
-    partyCode: '',
-    vendorCode: '',
-    consignments: [
-      {
-        cnNo: '',
-        cnDate: '',
-        from: '',
-        to: '',
-        freight: '',
-        labour: '',
-        detention: '',
-        bonus: '',
-        total: 0,
-      },
-    ],
-    grandTotal: 0,
-    amountInWord: '',
-  });
-
-  const handleConsignmentChange = (index, field, value) => {
-    const updated = [...form.consignments];
-    updated[index][field] = value;
-
-    // Auto total per consignment
-    const c = updated[index];
-    updated[index].total =
-      Number(c.freight) +
-      Number(c.labour) +
-      Number(c.detention) +
-      Number(c.bonus);
-
-    setForm({ ...form, consignments: updated });
-  };
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  useEffect(() => {
-    const grandTotal = form.consignments.reduce(
-      (sum, c) => sum + Number(c.total || 0),
-      0
-    );
-
-    setForm((prev) => ({
-      ...prev,
-      grandTotal,
-      amountInWord: grandTotal > 0 ? numberToWords(grandTotal) : '',
-    }));
-  }, [form.consignments]);
-
-  const addConsignment = () => {
-    setForm({
-      ...form,
-      consignments: [
-        ...form.consignments,
-        {
-          cnNo: '',
-          cnDate: '',
-          from: '',
-          to: '',
-          freight: '',
-          labour: '',
-          detention: '',
-          bonus: '',
-          total: 0,
-        },
-      ],
-    });
-  };
-
-  /* AUTO TOTAL → STORE IN FORM */
-  useEffect(() => {
-    const total =
-      Number(form.freight) +
-      Number(form.labour) +
-      Number(form.detention) +
-      Number(form.bonus);
-
-    setForm((prev) => ({
-      ...prev, total,
-      amountInWord: total > 0 ? numberToWords(total) : "",
-    }));
-  }, [form.freight, form.labour, form.detention, form.bonus]);
-
-  console.log(form.amountInWord)
-
-  const saveEbill = async () => {
-    try {
-      const res = await fetch("/api/e-bill", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-
-      const data = await res.json();
-
-      if (data) {
-        toast.success("Downloaded successfully")
-        setForm(
-          {
-            customer: '',
-            customerAddress: '',
-            customerGstin: '',
-            billNo: '',
-            billDate: '',
-            partyCode: '',
-            vendorCode: '',
-            consignments: [
-              {
-                cnNo: '',
-                cnDate: '',
-                from: '',
-                to: '',
-                freight: '',
-                labour: '',
-                detention: '',
-                bonus: '',
-                total: 0,
-              },
-            ],
-            grandTotal: 0,
-            amountInWord: '',
-          }
-        )
+  const handleEdit = async(billNo) => alert(`Editing ${billNo}`);
+  const handlePrint = async (bill) => {
+      const blob = await pdf(<BillPDF bill={bill} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const newWindow = window.open(url);
+      if (newWindow) {
+        newWindow.onload = () => {
+        newWindow.print(); // trigger browser print dialog
+        };
       }
+};
 
+  const getEbill = async () => {
+    const token = localStorage.getItem("auth_token");
+    try {
+      const response = await fetch("/api/e-bill", {
+        cache: "no-store",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const {data} = await response.json();
+      setEbill(Array.isArray(data) ? data : []);
     } catch (error) {
-      toast.error("Error saving E-bill");
+      toast.error("Failed to fetch bills");
+      console.log("Error in getting ebill:", error);
     }
   };
 
-  return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <Navbar />
+  const handleDelete=async(_id)=>{
+    const token = localStorage.getItem("auth_token");
+    try {
+      const response = await fetch("/api/e-bill", {
+        cache: "no-store",
+        method:"DELETE",
+        headers: { Authorization: `Bearer ${token}`,
+      },
+      body:JSON.stringify({_id})
+      });
+      const data = await response.json();
+      console.log(data)
+      if(data){
+        toast.success("E-bill deleted successfully!!")
+        getEbill()
+      }
+      else{
+        toast.error(data.error)
+      }
+    } catch (error) {
+      toast.error("Failed to delete bills");
+      console.log("Error in deleting Ebill:", error);
+    }
+  }
 
-      <div className="max-w-5xl mx-auto px-6 py-10">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8 mt-12">
-          Transport Invoice
-        </h1>
+  useEffect(() => {
+    getEbill();
+  }, []);
 
-        <div className="bg-white rounded-2xl shadow-xl p-8 space-y-8">
-
-          {/* Bill no */}
-          <Section title="Bill No">
-            <Input
-              icon={<File size={18} />}
-              name="billNo"
-              value={form.billNo}
-              onChange={handleChange}
-              placeholder="BillNo"
-            />
-          </Section>
-          {/* CUSTOMER */}
-          <Section title="Customer Details">
-            <Input
-              icon={<User size={18} />}
-              name="customer"
-              value={form.customer}
-              onChange={handleChange}
-              placeholder="Customer Name"
-            />
-
-            <Textarea
-              icon={<Home size={18} />}
-              name="customerAddress"
-              value={form.customerAddress}
-              onChange={handleChange}
-              placeholder="Customer Address"
-            />
-          </Section>
-
-          {/* GSTIN */}
-          <Section title="GSTIN Details">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                icon={<ReceiptText size={18} />}
-                name="customerGstin"
-                value={form.customerGstin}
-                onChange={handleChange}
-                placeholder="Customer GSTIN"
-              />
-            </div>
-          </Section>
-          {/* Codes */}
-          <Section title="Code information">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                icon={""}
-                name="vendorCode"
-                value={form.vendorCode}
-                onChange={handleChange}
-                placeholder="Vendor Code"
-              />
-              <Input
-                icon={""}
-                name="partyCode"
-                value={form.partyCode}
-                onChange={handleChange}
-                placeholder="Party Code"
-              />
-            </div>
-          </Section>
-
-          {/* DATES */}
-
-          <div>
-            <h2 className='font-bold p-1 text-gray-600 text-xl'>
-              Invoice Dates
-            </h2>
-            <label htmlFor="billDate" className="block text-sm font-medium text-gray-700">
-              Bill Date
-            </label>
-            <Input
-              icon={<Calendar size={18} />}
-              name="billDate"
-              type="date"
-              value={form.billDate}
-              onChange={handleChange}
-            />
-          </div>
-
-          {form.consignments.map((c, index) => (
-            <div
-              key={index}
-              className="border rounded-xl p-5 space-y-4 bg-gray-50"
+  return (<>
+    <Navbar />
+    <div className="p-6 bg-slate-100 min-h-screen mt-16">
+      <button className="bg-green-500 rounded-2xl p-3  font-semibold hover:bg-green-600 hover:cursor-pointer text-white font-semibold">
+          <Link href={`e-bill/addE-bill`}>Add E-bill</Link>
+        </button>
+      {/* Responsive grid for better alignment */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-16">
+        {ebill.length === 0 ? (
+          <p className="text-center text-gray-500 col-span-full">No bills found</p>
+        ) : (
+          ebill.map((b, i) => (
+            <Card
+              key={i}
+              className="rounded-xl shadow-md hover:shadow-lg transition-all duration-300 bg-white w-full"
             >
-              <h3 className="font-semibold text-indigo-700">
-                Consignment #{index + 1}
-              </h3>
-
-              {/* CN NO */}
-              <Input
-                icon={<File size={18} />}
-                placeholder="Consignment Number"
-                value={c.cnNo}
-                onChange={(e) =>
-                  handleConsignmentChange(index, "cnNo", e.target.value)
-                }
-              />
-
-              {/* SHOW BELOW ONLY IF CN NO EXISTS */}
-              {c.cnNo && (
-                <>
-                  {/* DATE */}
-                  <Input
-                    icon={<Calendar size={18} />}
-                    type="date"
-                    value={c.cnDate}
-                    onChange={(e) =>
-                      handleConsignmentChange(index, "cnDate", e.target.value)
-                    }
-                  />
-
-                  {/* ROUTE */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input
-                      icon={<MapPin size={18} />}
-                      placeholder="From"
-                      value={c.from}
-                      onChange={(e) =>
-                        handleConsignmentChange(index, "from", e.target.value)
-                      }
-                    />
-                    <Input
-                      icon={<Truck size={18} />}
-                      placeholder="To"
-                      value={c.to}
-                      onChange={(e) =>
-                        handleConsignmentChange(index, "to", e.target.value)
-                      }
-                    />
+              <CardHeader className="p-2 border-b">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-bold text-lg text-slate-800">{b.customer}</p>
+                    <p className="text-sm text-slate-500">
+                      {b.billNo} • {b.billDate}
+                    </p>
                   </div>
+                  <p className="font-bold text-indigo-600 text-lg">₹{b.grandTotal}</p>
+                </div>
+              </CardHeader>
 
-                  {/* CHARGES */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input
-                      icon={<IndianRupee size={18} />}
-                      placeholder="Freight"
-                      type="number"
-                      value={c.freight}
-                      onChange={(e) =>
-                        handleConsignmentChange(index, "freight", e.target.value)
-                      }
-                    />
-                    <Input
-                      icon={<IndianRupee size={18} />}
-                      placeholder="Labour"
-                      type="number"
-                      value={c.labour}
-                      onChange={(e) =>
-                        handleConsignmentChange(index, "labour", e.target.value)
-                      }
-                    />
-                    <Input
-                      icon={<Clock size={18} />}
-                      placeholder="Detention"
-                      type="number"
-                      value={c.detention}
-                      onChange={(e) =>
-                        handleConsignmentChange(index, "detention", e.target.value)
-                      }
-                    />
-                    <Input
-                      icon={<Gift size={18} />}
-                      placeholder="Bonus"
-                      type="number"
-                      value={c.bonus}
-                      onChange={(e) =>
-                        handleConsignmentChange(index, "bonus", e.target.value)
-                      }
-                    />
+              <CardContent className="space-y-3 text-sm p-2">
+                <p className="text-slate-700">
+                  <span className="font-medium">Address:</span> {b.customerAddress}
+                </p>
+
+                {b.consignments?.map((c, j) => (
+                  <div
+                    key={j}
+                    className="flex justify-between items-center bg-slate-50 rounded-lg px-3 py-2 border"
+                  >
+                    <span className="text-slate-600">{c.from} → {c.to}</span>
+                    <span className="font-semibold text-slate-800">₹{c.total}</span>
                   </div>
+                ))}
 
-                  {/* TOTAL */}
-                  <Input
-                    icon={<IndianRupee size={18} />}
-                    value={c.total}
-                    readOnly
-                  />
-                </>
-              )}
-            </div>
-          ))}
-
-          <button
-            type="button"
-            onClick={addConsignment}
-            className="border border-indigo-600 text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-50"
-          >
-            + Add Consignment
-          </button>
-
-          {/* //Grand total */}
-          <Section title="Grand Total">
-            <Input
-              icon={<IndianRupee size={18} />}
-              value={form.grandTotal}
-              readOnly
-            />
-            <p className="text-sm text-gray-600 italic">
-              Amount in Words: {form.amountInWord}
-            </p>
-          </Section>
-
-
-          {/* ACTION */}
-          <div className="flex justify-end pt-6">
-            <button
-              onClick={() => saveEbill()}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl shadow-lg transition"
-            >
-              <DownloadBill form={form} />
-            </button>
-          </div>
-
-        </div>
+                {/* Action buttons aligned to the right */}
+                <div className="flex gap-3 justify-end pt-2">
+                  <Button
+                    size="icon"
+                    className="bg-amber-500 text-white h-9 w-9 rounded-full shadow hover:scale-105 transition"
+                    variant="outline"
+                    onClick={() => handleEdit(b)}
+                  >
+                    <Edit size={18} />
+                  </Button>
+                  {/* <Button
+                    size="icon"
+                    className="bg-blue-500 text-white h-9 w-9 rounded-full shadow hover:scale-105 transition"
+                    variant="outline"
+                    onClick={() => handlePrint(b)}
+                  >
+                    <Printer size={18} />
+                  </Button> */}
+                  <Button
+                    size="icon"
+                    className="bg-red-500 text-white h-9 w-9 rounded-full shadow hover:scale-105 transition"
+                    variant="destructive"
+                    onClick={() => handleDelete(b._id)}
+                  >
+                    <Trash2 size={18} />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
-    </main>
+    </div>
+     </>
   );
 }
-
-/* ---------------- UI HELPERS ---------------- */
-
-const Section = ({ title, children }) => (
-  <div>
-    <h2 className="text-lg font-semibold text-gray-700 mb-4">
-      {title}
-    </h2>
-    <div className="space-y-4">{children}</div>
-  </div>
-);
-
-const Input = ({ icon, ...props }) => (
-  <div className="relative">
-    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-      {icon}
-    </span>
-    <input
-      {...props}
-      className="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3
-                 focus:outline-none focus:ring-2 focus:ring-indigo-500
-                 bg-gray-50 read-only:bg-gray-100"
-    />
-  </div>
-);
-
-const Textarea = ({ icon, ...props }) => (
-  <div className="relative">
-    <span className="absolute left-3 top-3 text-gray-400">
-      {icon}
-    </span>
-    <textarea
-      {...props}
-      rows={3}
-      className="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3
-                 focus:outline-none focus:ring-2 focus:ring-indigo-500
-                 bg-gray-50 resize-none"
-    />
-  </div>
-);

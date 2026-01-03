@@ -8,7 +8,6 @@ export default function ProfitModal({ consignment, onClose, onSave ,fetchItems }
   const [totalCost, setTotalCost] = useState(
     consignment?.amount || ""
   );
-  console.log(consignment)
   const [expenses, setExpenses] = useState(
     consignment?.profit?.expenses || ""
   );
@@ -28,16 +27,13 @@ export default function ProfitModal({ consignment, onClose, onSave ,fetchItems }
   }
 
   try {
-    const token = localStorage.getItem("auth_token");
-
     const res = await fetch(`/api/consignment`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
-        consignmentNumberId:consignment._id,
+        _id:consignment._id,
         profit: Number(netProfit),
         totalCost: Number(totalCost),
         expenses: Number(expenses),
@@ -50,7 +46,6 @@ export default function ProfitModal({ consignment, onClose, onSave ,fetchItems }
     }
 
     const data = await res.json();
-    console.log(data)
     onSave(data.data.profit?.amount ?? netProfit);
     toast.success("Profit saved");
     fetchItems()

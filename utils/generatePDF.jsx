@@ -61,29 +61,9 @@ export async function generatePDF(cn, payload) {
       checkbox(doc, pageWidth - 25, 49, payload.doorDelivery === "NO");
       doc.text("NO", pageWidth - 18, 52);
 
-      /* CONSIGNEE */
+        /* CONSIGNOR / TAX */
       autoTable(doc, {
-        startY: 58,
-        theme: "grid",
-        styles: { fontSize: 9, fontStyle: "bold" },
-        body: [[
-          `Consignee's Name & Address\n${payload.consigneeName || ""}\n${payload.consigneeAddress || ""}`,
-          `Delivery Address\n${payload.deliveryAddress || ""}`
-        ]],
-        columnStyles: { 0: { cellWidth: 95 }, 1: { cellWidth: 95 } }
-      });
-
-      /* PAYMENT CONTROL */
-      autoTable(doc, {
-        startY: doc.lastAutoTable.finalY + 2,
-        theme: "grid",
-        styles: { fontSize: 9, fontStyle: "bold" },
-        body: [[`CONTROL WILL BE PAID BY CONSIGNOR CONSIGNEE`]]
-      });
-
-      /* CONSIGNOR / TAX */
-      autoTable(doc, {
-        startY: doc.lastAutoTable.finalY + 2,
+                startY: 58,
         theme: "grid",
         styles: { fontSize: 9, fontStyle: "bold" },
         body: [[
@@ -104,7 +84,26 @@ export async function generatePDF(cn, payload) {
         }
       });
 
-      /* DEMURRAGE */
+      /* PAYMENT CONTROL */
+      autoTable(doc, {
+        startY: doc.lastAutoTable.finalY + 2,
+        theme: "grid",
+        styles: { fontSize: 9, fontStyle: "bold" },
+        body: [[`CONTROL WILL BE PAID BY CONSIGNOR CONSIGNEE`]]
+      });
+        /* CONSIGNEE */
+      autoTable(doc, {
+        startY: doc.lastAutoTable.finalY + 2,
+        theme: "grid",
+        styles: { fontSize: 9, fontStyle: "bold" },
+        body: [[
+          `Consignee's Name & Address\n${payload.consigneeName || ""}\n${payload.consigneeAddress || ""}`,
+          `Delivery Address\n${payload.deliveryAddress || ""}`
+        ]],
+        columnStyles: { 0: { cellWidth: 95 }, 1: { cellWidth: 95 } }
+      });
+
+        /* DEMURRAGE */
       const demY = doc.lastAutoTable.finalY + 6;
       doc.setFont("helvetica", "bold");
       doc.text("SCHEDULE OF DEMURRAGE CHARGES", pageWidth / 2, demY, { align: "center" });
@@ -150,9 +149,9 @@ export async function generatePDF(cn, payload) {
         styles: { fontSize: 9, fontStyle: "bold" },
         body: [[
           `Invoice No\n${payload.invoiceNo || ""}`,
-          `Rate / Kg\n${payload.rateperkg || ""}`,
+          `Rate / Kg\n${payload.rateperkg || "Fixed"}`,
           `Measurement\n${payload.measurement || ""}`,
-          `Paid at\n${payload.paidAt || ""}`,
+          `Payment Type\n${payload.paymentType || ""}`,
           `Invoice Value\n${payload.invoiceValue || ""}`
         ]]
       });
@@ -163,8 +162,8 @@ export async function generatePDF(cn, payload) {
         theme: "grid",
         styles: { fontSize: 9, fontStyle: "bold" },
         body: [[
-          `Weight (Actual)\n${payload.weightActual || ""}`,
-          `Weight (Charged)\n${payload.weightCharged || ""}`,
+          `Weight (Actual)\n${payload.weightActual || "Fixed"}`,
+          `Weight (Charged)\n${payload.weightCharged || "Fixed"}`,
           `Freight\n${payload.freight || ""}`,
           `Billed at\n${payload.billedAt || ""}`,
           `Paid at\n${payload.paidAt || ""}`
@@ -180,7 +179,7 @@ export async function generatePDF(cn, payload) {
         startY: doc.lastAutoTable.finalY + 14,
         theme: "grid",
         styles: { fontSize: 9, fontStyle: "bold" },
-        head: [["Freight", "Risk", "Surcharge", "Hamali", "Service", "TOTAL"]],
+        head: [["Freight", "Risk Charges", "Surcharge", "Hamali Charges", "Service Charges", "TOTAL"]],
         body: [[payload.freight || "", payload.riskCharge || "", payload.surcharge || "", payload.hamali || "", payload.serviceCharge || "", payload.amount || ""]]
       });
 
@@ -194,15 +193,26 @@ export async function generatePDF(cn, payload) {
       });
 
       /* SIGNATURE */
-      const sigY = doc.lastAutoTable.finalY + 15;
-      doc.setFont("helvetica", "bold");
-      doc.text("Name", 60, sigY);
-      doc.text("Signature", 120, sigY);
-      doc.text("Code", 175, sigY);
-      doc.setLineWidth(0.5);
-      doc.line(60, sigY + 5, 110, sigY + 5);
-      doc.line(120, sigY + 5, 170, sigY + 5);
-      doc.line(175, sigY + 5, 205, sigY + 5);
+     /* SIGNATURE */
+const sigY = doc.lastAutoTable.finalY + 15;
+
+doc.setFont("helvetica", "bold");
+
+// Labels
+doc.text("Name", 60, sigY);
+doc.text("Signature", 120, sigY);
+doc.text("Code", 175, sigY);
+
+// Name value (above line)
+doc.setFont("helvetica", "normal");
+doc.text(payload.yourName || "", 60, sigY + 4);
+
+// Lines
+doc.setLineWidth(0.5);
+doc.line(60, sigY + 6, 110, sigY + 6);
+doc.line(120, sigY + 6, 170, sigY + 6);
+doc.line(175, sigY + 6, 205, sigY + 6);
+
     }
 
     // draw two copies: Consignee and Lorry

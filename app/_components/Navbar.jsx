@@ -42,7 +42,7 @@ function Navbar() {
 
           {/* Logo */}
           <Link
-            href="/dashboard"
+            href="/vehicleDashboard"
             className="flex items-center gap-2"
           >
             <Image
@@ -59,8 +59,8 @@ function Navbar() {
           {/* Desktop Menu */}
           <ul className="hidden md:flex gap-6 text-sm font-medium items-center">
             <li>
-              <Link href="/vehicleDashboard" className="hover:text-red-600">
-                Vehicle
+              <Link href="/dashboard" className="hover:text-red-600">
+                Dashboard
               </Link>
             </li>
             <li>
@@ -112,8 +112,8 @@ function Navbar() {
             className="md:hidden bg-white border-t"
           >
             <ul className="flex flex-col gap-4 px-6 py-4 text-sm font-medium">
-              <Link onClick={() => setOpen(false)} href="/vehicleDashboard">
-                Vehicle
+              <Link onClick={() => setOpen(false)} href="/dashboard">
+                Dashboard
               </Link>
               <Link onClick={() => setOpen(false)} href="/consignment/list">
                 Consignment

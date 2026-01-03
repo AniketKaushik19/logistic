@@ -50,7 +50,7 @@ export default function SignupPage() {
                 toast.success('Account created successfully!');
                 // Redirect to login page
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                router.push('/dashboard');
+                router.push('/access-dashboard');
             } else {
                 setError(data.error || 'Admin Access failed. Please try again.');
             }

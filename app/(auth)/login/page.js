@@ -24,6 +24,7 @@ const handleSubmit = async (e) => {
   setLoading(true);
 
   try {
+    
     const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -41,7 +42,7 @@ const handleSubmit = async (e) => {
     toast.success("Logged in");
 
     // 🚀 Instant redirect
-    router.replace("/dashboard");
+    router.replace("/vehicleDashboard");
   } catch (err) {
     console.error(err);
     setError("Invalid Credentials.");
