@@ -1,152 +1,167 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Printer } from "lucide-react";
 import Navbar from "../_components/Navbar";
+import { Card } from "@/components/ui/card";
+import { Edit, Trash2, Printer, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { BillPDF } from "../components/BillPDF";
 import { pdf } from "@react-pdf/renderer";
+
 export default function EBillsDashboard() {
   const [ebill, setEbill] = useState([]);
 
-  const handleEdit = async (billNo) => alert(`Editing ${billNo}`);
-
+  /* ================= PRINT ================= */
   const handlePrint = async (bill) => {
     const blob = await pdf(<BillPDF bill={bill} />).toBlob();
     const url = URL.createObjectURL(blob);
-    const newWindow = window.open(url);
-    if (newWindow) {
-      newWindow.onload = () => {
-        newWindow.print(); // trigger browser print dialog
-      };
-    }
+    const win = window.open(url);
+    if (win) win.onload = () => win.print();
   };
 
+  /* ================= FETCH ================= */
   const getEbill = async () => {
-    const token = localStorage.getItem("auth_token");
     try {
-      const response = await fetch("/api/e-bill", {
-        cache: "no-store",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const { data } = await response.json();
-      setEbill(Array.isArray(data) ? data : []);
-    } catch (error) {
-      toast.error("Failed to fetch bills");
-      console.log("Error in getting ebill:", error);
+      const res = await fetch("/api/e-bill", { cache: "no-store" });
+      const json = await res.json();
+      setEbill(Array.isArray(json.data) ? json.data : []);
+    } catch (err) {
+      toast.error("Failed to fetch E-bills");
+      console.error(err);
     }
   };
 
+  /* ================= DELETE ================= */
   const handleDelete = async (_id) => {
-    const token = localStorage.getItem("auth_token");
     try {
-      const response = await fetch("/api/e-bill", {
-        cache: "no-store",
+      const res = await fetch("/api/e-bill", {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ _id })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ _id }),
       });
-      const data = await response.json();
-      console.log(data)
-      if (data) {
-        toast.success("E-bill deleted successfully!!")
-        getEbill()
-      }
-      else {
-        toast.error(data.error)
-      }
-    } catch (error) {
-      toast.error("Failed to delete bills");
-      console.log("Error in deleting Ebill:", error);
+
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error);
+
+      toast.success("E-Bill deleted successfully");
+      getEbill();
+    } catch (err) {
+      toast.error("Failed to delete E-Bill");
+      console.error(err);
     }
-  }
+  };
 
   useEffect(() => {
     getEbill();
   }, []);
 
-  return (<>
-    <Navbar />
-    <div className="p-6 bg-slate-100 min-h-screen mt-16">
-      <button className="bg-green-500 rounded-2xl p-3  font-semibold hover:bg-green-600 hover:cursor-pointer text-white font-semibold">
-        <Link href={`e-bill/addE-bill`}>Add E-bill</Link>
-      </button>
-      {/* Responsive grid for better alignment */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-16">
-        {ebill.length === 0 ? (
-          <p className="text-center text-gray-500 col-span-full">No bills found</p>
-        ) : (
-          ebill.map((b, i) => (
-            <Card
-              key={i}
-              className="rounded-xl shadow-md hover:shadow-lg transition-all duration-300 bg-white w-full"
-            >
-              <CardHeader className="p-2 border-b">
-                <div className="flex justify-between items-center">
+  return (
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-slate-100 p-6 mt-16">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold text-slate-800">
+            E-Bills Dashboard
+          </h1>
+          <Link href="/e-bill/addE-bill">
+            <button className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-white font-semibold shadow-lg hover:shadow-2xl transition">
+              <Plus className="size-4" />
+              Add E-Bill
+            </button>
+          </Link>
+        </div>
+
+        {/* Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {ebill.length === 0 ? (
+            <div className="col-span-full text-center text-slate-500">
+              No E-Bills found
+            </div>
+          ) : (
+            ebill.map((b, i) => (
+              <div
+                key={i}
+                className="relative rounded-2xl bg-white p-5 shadow-xl hover:shadow-2xl transition transform hover:-translate-y-1"
+              >
+                {/* Header */}
+                <div className="flex justify-between items-start mb-4">
                   <div>
-                    <p className="font-bold text-lg text-slate-800">{b.customer}</p>
-                    <p className="text-sm text-slate-500">
-                      {b.billNo} • {b.billDate}
+                    <h3 className="text-lg font-semibold text-slate-800">
+                      {b.customer}
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Bill No: <span className="font-medium">{b.billNo}</span>
+                    </p>
+                    <p className="text-xs text-slate-400">Date: {b.billDate}</p>
+                  </div>
+
+                  <div className="text-right">
+                    <p className="text-xs text-slate-400">Grand Total</p>
+                    <p className="text-2xl font-bold text-indigo-600">
+                      ₹ {b.grandTotal}
                     </p>
                   </div>
-                  <p className="font-bold text-indigo-600 text-lg">₹{b.grandTotal}</p>
                 </div>
-              </CardHeader>
 
-              <CardContent className="space-y-3 text-sm p-2">
-                <p className="text-slate-700">
-                  <span className="font-medium">Address:</span> {b.customerAddress}
-                </p>
+                {/* Body */}
+                <div className="space-y-3">
+                  <p className="text-sm text-slate-600">
+                    <span className="font-medium text-slate-700">Address:</span>{" "}
+                    {b.customerAddress}
+                  </p>
 
-                {b.consignments?.map((c, j) => (
-                  <div
-                    key={j}
-                    className="flex justify-between items-center bg-slate-50 rounded-lg px-3 py-2 border"
-                  >
-                    <span className="text-slate-600">{c.from} → {c.to}</span>
-                    <span className="font-semibold text-slate-800">₹{c.total}</span>
+                  {/* Consignments */}
+                  <div className="space-y-1">
+                    {b.consignments?.map((c, j) => (
+                      <div
+                        key={j}
+                        className="flex justify-between items-center rounded-xl bg-slate-50 px-3 py-2 shadow-sm hover:shadow-md transition"
+                      >
+                        <span className="text-slate-700">{c.from} → {c.to}</span>
+                        <span className="text-slate-500 font-mono">{c.cn || `#${j + 1}`}</span>
+                        <span className="text-indigo-600 font-semibold">₹ {c.total}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-
-                {/* Action buttons aligned to the right */}
-                <div className="flex gap-3 justify-end pt-2">
-                  <Link href={`/e-bill/editE-bill/${b._id}`}>
-                    <Button
-                      size="icon"
-                      className="bg-amber-500 text-white h-9 w-9 rounded-full shadow hover:scale-105 transition"
-                      variant="outline"
-                    >
-                      <Edit size={18} />
-                    </Button>
-                  </Link>
-                  <Button
-                    size="icon"
-                    className="bg-blue-500 text-white h-9 w-9 rounded-full shadow hover:scale-105 transition"
-                    variant="outline"
-                    onClick={() => handlePrint(b)}
-                  >
-                    <Printer size={18} />
-                  </Button>
-                  <Button
-                    size="icon"
-                    className="bg-red-500 text-white h-9 w-9 rounded-full shadow hover:scale-105 transition"
-                    variant="destructive"
-                    onClick={() => handleDelete(b._id)}
-                  >
-                    <Trash2 size={18} />
-                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
+
+                {/* Actions */}
+                <div className="flex justify-end gap-2 mt-4">
+                  <Link href={`/e-bill/editE-bill/${b._id}`}>
+                    <button
+                      className="rounded-xl bg-amber-100 text-amber-700 px-3 py-2 hover:bg-amber-200 transition flex items-center gap-1"
+                      title="Edit"
+                    >
+                      <Edit size={16} />
+                      Edit
+                    </button>
+                  </Link>
+
+                  <button
+                    onClick={() => handlePrint(b)}
+                    className="rounded-xl bg-blue-100 text-blue-700 px-3 py-2 hover:bg-blue-200 transition flex items-center gap-1"
+                    title="Print"
+                  >
+                    <Printer size={16} />
+                    Print
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(b._id)}
+                    className="rounded-xl bg-red-100 text-red-700 px-3 py-2 hover:bg-red-200 transition flex items-center gap-1"
+                    title="Delete"
+                  >
+                    <Trash2 size={16} />
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
-    </div>
-  </>
+    </>
   );
 }

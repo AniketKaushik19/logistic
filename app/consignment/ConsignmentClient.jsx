@@ -55,7 +55,7 @@ const INITIAL_FORM = {
   billedAt: "",
   measurement: "",
 
-  validUpTo: "",
+  ebayBill: "",
   declarationDate: "",
 
   deliveryRemarks: "",
@@ -622,19 +622,15 @@ export default function Page() {
           <section>
             <h2 className="font-semibold text-lg mb-3">Tax / Declaration</h2>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <input
-                  type="date"
-                  name="validUpTo"
-                  placeholder="Select Valid Upto Date"
-                  value={form.validUpTo}
+=                <input
+                  type="number"
+                  name="ebayBill"
+                  placeholder="E-BayBill"
+                  value={form.ebayBill}
                   onChange={handleChange}
                   className="input"
+                  pattern="\d{12}"
                 />
-                <small className="px-2 text-gray-500">
-                  Select Valid Upto Date
-                </small>
-              </div>
               <div>
                 <input
                   type="date"
