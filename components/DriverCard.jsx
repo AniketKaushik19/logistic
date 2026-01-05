@@ -14,6 +14,7 @@ import {
   ArrowUpCircle,
   MinusCircle,
 } from "lucide-react";
+import { generateSalaryPDF } from "@/utils/generateSalaryPDF";
 
 export default function DriverCard({
   driver,
@@ -21,9 +22,20 @@ export default function DriverCard({
   onDelete = () => {},
   onSalary = () => {},
   onPrint = () => {},
-  onHistory = () => {},
+  onHistory = () => {}, // ✅ SINGLE HISTORY CALLBACK
 }) {
-  const salaryPaid = driver.salaryStatus === "Paid";
+  /* ===============================
+     NORMALIZE SALARY DATA
+     =============================== */
+  const salary = driver.salaryDetails || {};
+
+  const salaryStatus = salary.status || "Unpaid";
+  const baseSalary = Number(salary.baseSalary ?? driver.salary ?? 0);
+  const advance = Number(salary.advance ?? 0);
+  const bonus = Number(salary.bonus ?? 0);
+  const penalty = Number(salary.penalty ?? 0);
+
+  const salaryPaid = salaryStatus === "Paid";
 
   return (
     <div className="relative rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow-lg transition">
@@ -44,16 +56,10 @@ export default function DriverCard({
         </div>
 
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-slate-800">
-            {driver.name}
-          </h3>
-
+          <h3 className="text-lg font-semibold text-slate-800">{driver.name}</h3>
           <p className="text-sm text-slate-500">{driver.contactNumber}</p>
-
           {driver.emailAddress && (
-            <p className="text-xs text-slate-400 mt-0.5">
-              {driver.emailAddress}
-            </p>
+            <p className="text-xs text-slate-400 mt-0.5">{driver.emailAddress}</p>
           )}
 
           {/* Vehicle */}
@@ -68,18 +74,14 @@ export default function DriverCard({
       <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
         <div>
           <p className="text-slate-400">Monthly Salary</p>
-          <p className="text-lg font-bold text-indigo-600">
-            ₹ {driver.salary || 0}
-          </p>
+          <p className="text-lg font-bold text-indigo-600">₹ {baseSalary}</p>
         </div>
 
         <div>
           <p className="text-slate-400">Current Month Status</p>
           <div
             className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${
-              salaryPaid
-                ? "bg-emerald-100 text-emerald-700"
-                : "bg-amber-100 text-amber-700"
+              salaryPaid ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
             }`}
           >
             {salaryPaid ? (
@@ -101,19 +103,19 @@ export default function DriverCard({
       <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
         <Info
           label="Advance"
-          value={driver.advance || 0}
+          value={advance}
           icon={<ArrowDownCircle className="size-4 text-red-500" />}
           color="text-red-600"
         />
         <Info
           label="Bonus"
-          value={driver.bonus || 0}
+          value={bonus}
           icon={<ArrowUpCircle className="size-4 text-green-500" />}
           color="text-green-600"
         />
         <Info
           label="Penalty"
-          value={driver.penalty || 0}
+          value={penalty}
           icon={<MinusCircle className="size-4 text-orange-500" />}
           color="text-orange-600"
         />
@@ -141,14 +143,30 @@ export default function DriverCard({
 
         {/* Right actions */}
         <div className="ml-auto flex gap-2">
-          <button
-            onClick={() => onPrint(driver)}
-            className="rounded-md border p-2 hover:bg-slate-100"
-            title="Print Salary Slip"
-          >
-            <Printer className="size-4" />
-          </button>
+          {/* Print */}
+       <button
+  onClick={() =>
+    generateSalaryPDF({
+      month: driver.salaryDetails?.month,
+      driverName: driver.name,
+      status: driver.salaryDetails?.status ? "Paid" : "Unpaid",
+      baseSalary: driver.salaryDetails?.baseSalary || driver.salary,
+      advance: driver.salaryDetails?.advance || 0,
+      bonus: driver.salaryDetails?.bonus || 0,
+      penalty: driver.salaryDetails?.penalty || 0,
+      paidAt: driver.salaryDetails?.paidAt
+        ? new Date(driver.salaryDetails.paidAt).toLocaleString()
+        : "-",
+    })
+  }
+  className="rounded-md border p-2 hover:bg-slate-100"
+  title="Download Salary Slip"
+>
+  <Printer className="size-4" />
+</button>
 
+
+          {/* Edit */}
           <button
             onClick={() => onEdit(driver)}
             className="rounded-md border border-red-200 p-2 text-red-600 hover:bg-red-50 flex items-center gap-1"
@@ -171,9 +189,7 @@ function Info({ label, value, icon, color }) {
         {icon}
         {label}
       </div>
-      <p className={`mt-1 font-semibold ${color}`}>
-        ₹ {value}
-      </p>
+      <p className={`mt-1 font-semibold ${color}`}>₹ {value}</p>
     </div>
   );
 }
