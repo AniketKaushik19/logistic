@@ -1,120 +1,90 @@
-"use client"
-import { Button } from "@/components/ui/button";
-import { generateSalaryPDF } from "@/utils/generateSalaryPDF";
+"use client";
 import { useState } from "react";
 import toast from "react-hot-toast";
-function SalaryActions({ driver, onClose }) {
-  const [advance, setAdvance] = useState('');
-  const [bonus, setBonus] = useState('');
-  const [penalty, setPenalty] = useState('');
-  const [loading, setLoading] = useState(false);
+import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
 
+export default function SalaryActions({ driver, onClose, onUpdated }) {
+  const salary = driver?.salaryDetails || {};
+  const alreadyPaid = salary?.status === "Paid";
 
-async function exportSalary(driverId) {
-  const res = await fetch(`/api/driver/salary?driverId=${driverId}`, {
-    credentials: "include",
-  });
+  const [advance, setAdvance] = useState("");
+  const [bonus, setBonus] = useState("");
+  const [penalty, setPenalty] = useState("");
+  const [markPaid, setMarkPaid] = useState(false);
 
-  if (!res.ok) {
-    alert("Failed to load salary");
-    return;
+useEffect(() => {
+  if (alreadyPaid) {
+    setMarkPaid(true);
   }
+}, [alreadyPaid]);
 
-  const salary = await res.json();
-  console.log(salary)
-  generateSalaryPDF(salary);
-}
-
-
-  const callApi = async (payload) => {
-    setLoading(true);
-    const res = await fetch('/api/driver/salary', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(payload),
+  const submit = async () => {
+    const res = await fetch("/api/driver/salary", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        driverId: driver._id,
+        type: "UPDATE",
+        advance: Number(advance) || 0,
+        bonus: Number(bonus) || 0,
+        penalty: Number(penalty) || 0,
+        markPaid,
+      }),
     });
-    const json = await res.json();
-    console.log(json)
-    setLoading(false);
 
-    if (!res.ok) throw new Error(json.error || 'Action failed');
-    toast.success('Updated successfully');
+    const json = await res.json();
+
+    if (!res.ok) {
+      toast.error(json.error || "Failed");
+      return;
+    }
+
+    toast.success("Salary updated successfully");
+    onUpdated?.(); 
+    onClose();
   };
 
   return (
-    <div className="space-y-4 mt-4 ">
-      {/* Advance */}
-      <div className="flex gap-2">
+    <div className="space-y-3">
+      <input
+        type="number"
+        className="w-full border rounded p-2"
+        placeholder="Advance Amount"
+        value={advance}
+        onChange={(e) => setAdvance(e.target.value)}
+      />
+      <input
+        type="number"
+        className="w-full border rounded p-2"
+        placeholder="Bonus Amount"
+        value={bonus}
+        onChange={(e) => setBonus(e.target.value)}
+      />
+      <input
+        type="number"
+        className="w-full border rounded p-2"
+        placeholder="Penalty Amount"
+        value={penalty}
+        onChange={(e) => setPenalty(e.target.value)}
+      />
+      <label className="flex items-center gap-2">
         <input
-          type="number"
-          placeholder="Advance Amount"
-          className="input"
-          value={advance}
-          onChange={(e) => setAdvance(e.target.value)}
+          type="checkbox"
+          checked={markPaid}
+          disabled={alreadyPaid} // ✅ disabled if already paid
+          onChange={(e) => setMarkPaid(e.target.checked)}
         />
-        <Button className="hover:cursor-pointer"
-          onClick={() => callApi({ driverId: driver._id, type: 'ADVANCE', amount: advance })}
-        >
-          Add Advance
+        {alreadyPaid ? "Salary Already Paid" : "Mark Salary as Paid"}
+      </label>
+
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" onClick={onClose}>
+          Cancel
         </Button>
+        <Button onClick={submit}>Submit</Button>
       </div>
-
-      {/* Bonus / Penalty */}
-      <div className="flex gap-2">
-        <input
-          type="number"
-          placeholder="Bonus (+)"
-          className="input"
-          value={bonus}
-          onChange={(e) => setBonus(e.target.value)}
-        />
-        <input
-          type="number"
-          placeholder="Penalty (-)"
-          className="input"
-          value={penalty}
-          onChange={(e) => setPenalty(e.target.value)}
-        />
-        <Button
-          onClick={() =>
-            callApi({
-              driverId: driver._id,
-              type: 'ADJUSTMENT',
-              bonus,
-              penalty,
-            })
-          }
-          className="hover:cursor-pointer"
-        >
-          Save
-        </Button>
-      </div>
-
-      {/* Mark Paid */}
-      <Button
-        className="w-full bg-green-600 hover:cursor-pointer"
-        onClick={() =>
-          callApi({ driverId: driver._id, type: 'MARK_PAID' })
-        }
-      >
-        Mark Salary as Paid
-      </Button>
-
-      {/* Export PDF */}
-      <Button
-        variant="outline"
-className="w-full hover:cursor-pointer"        
-          onClick={() => exportSalary(driver._id)}
-      >
-        Export Salary Slip (PDF)
-      </Button>
-
-      <Button variant="ghost" className="hover:cursor-pointer" onClick={onClose}>
-        Close
-      </Button>
     </div>
   );
 }
-
-export default SalaryActions;

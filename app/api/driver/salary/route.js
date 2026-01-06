@@ -20,15 +20,65 @@ export async function GET(req) {
   const client = await clientPromise;
   const db = client.db("logisticdb");
 
-  const query = {
-    driverId: new ObjectId(driverId),
-  };
+  /* ===== CURRENT MONTH DEFAULT ===== */
+  const now = new Date();
+  const currentMonth =
+    month ||
+    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
-  if (month) query.month = month;
+  /* ===== AGGREGATION ===== */
+  const result = await db
+    .collection("driverSalaries")
+    .aggregate([
+      {
+        $match: {
+          driverId: new ObjectId(driverId),
+          month: currentMonth,
+        },
+      },
+      {
+        $lookup: {
+          from: "drivers",
+          localField: "driverId",
+          foreignField: "_id",
+          as: "driver",
+        },
+      },
+      {
+        $unwind: {
+          path: "$driver",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          month: 1,
+          status: { $ifNull: ["$status", "Unpaid"] },
+          baseSalary: { $ifNull: ["$baseSalary", 0] },
+          advance: { $ifNull: ["$advance", 0] },
+          bonus: { $ifNull: ["$bonus", 0] },
+          penalty: { $ifNull: ["$penalty", 0] },
+          paidAt: 1,
+          createdAt: 1,
+          updatedAt: 1,
 
-  const salary = await db.collection("driverSalaries").findOne(query);
+          /* Driver fields */
+          driver: {
+            _id: "$driver._id",
+            name: "$driver.name",
+            contactNumber: "$driver.contactNumber",
+            emailAddress: "$driver.emailAddress",
+            vehicleNumber: "$driver.vehicleNumber",
+            salary: "$driver.salary",
+            status: "$driver.status",
+          },
+        },
+      },
+    ])
+    .toArray();
 
-  return NextResponse.json(salary || {}, { status: 200 });
+  return NextResponse.json(result[0] || {}, { status: 200 });
 }
 
 export async function POST(req) {
@@ -37,81 +87,66 @@ export async function POST(req) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await req.json();
-  const { driverId, type } = body;
+  const { driverId, type, advance = 0, bonus = 0, penalty = 0, markPaid } =
+    await req.json();
 
-  if (!ObjectId.isValid(driverId)) {
-    return NextResponse.json({ error: "Invalid driverId" }, { status: 400 });
+  if (!ObjectId.isValid(driverId) || type !== "UPDATE") {
+    return NextResponse.json({ error: "Invalid data" }, { status: 400 });
   }
 
   const client = await clientPromise;
   const db = client.db("logisticdb");
 
-  /* ===== CURRENT MONTH ===== */
   const now = new Date();
-  const month = `${now.getFullYear()}-${String(
-    now.getMonth() + 1
-  ).padStart(2, "0")}`;
+  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
+    2,
+    "0"
+  )}`;
 
-  /* ===== FETCH BASE SALARY ===== */
-  const driver = await db
-    .collection("drivers")
-    .findOne(
-      { _id: new ObjectId(driverId) },
-      { projection: { salary: 1 } }
-    );
+  // Fetch existing salary
+  const existing = await db.collection("driverSalaries").findOne({
+    driverId: new ObjectId(driverId),
+    month,
+  });
 
-  const baseSalary = Number(driver?.salary || 0);
-
-  /* ===== BASE UPDATE ===== */
-  const filter = { driverId: new ObjectId(driverId), month };
+  const newAdvance = (existing?.advance || 0) + Number(advance);
+  const newBonus = (existing?.bonus || 0) + Number(bonus);
+  const newPenalty = (existing?.penalty || 0) + Number(penalty);
 
   const update = {
     $set: {
+      advance: newAdvance,
+      bonus: newBonus,
+      penalty: newPenalty,
+      status: markPaid ? "Paid" : existing?.status || "Unpaid",
+      paidAt: markPaid ? new Date() : existing?.paidAt || null,
       updatedAt: new Date(),
     },
     $setOnInsert: {
       createdAt: new Date(),
-      baseSalary,
-      advance: 0,
-      bonus: 0,
-      penalty: 0,
     },
   };
 
-  /* ===== ACTIONS ===== */
-  if (type === "ADVANCE") {
-    update.$inc = { advance: Number(body.amount || 0) };
-  }
-
-  if (type === "ADJUSTMENT") {
-    update.$inc = {
-      bonus: Number(body.bonus || 0),
-      penalty: Number(body.penalty || 0),
-    };
-  }
-
-  if (type === "MARK_PAID") {
-    update.$set.status = "Paid";
-    update.$set.paidAt = new Date();
-  }
-
-  // default unpaid (only when NOT marking paid)
-  if (type !== "MARK_PAID") {
-    update.$set.status = "Unpaid";
-  }
-
   await db.collection("driverSalaries").updateOne(
-    filter,
+    { driverId: new ObjectId(driverId), month },
     update,
     { upsert: true }
   );
 
+  // Salary history
+  await db.collection("driverSalaryHistory").insertOne({
+    driverId: new ObjectId(driverId),
+    month,
+    advance: Number(advance),
+    bonus: Number(bonus),
+    penalty: Number(penalty),
+    markPaid: !!markPaid,
+    createdBy: auth.user?.id || null,
+    createdAt: new Date(),
+  });
+
   return NextResponse.json({ success: true });
 }
-
-
-
 
 export async function PUT(req) {
   const auth = await requireAuth(req);

@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import DriverForm from "@/components/DriverForm";
-import Navbar from "@/app/_components/Navbar";
 import { Loader } from "lucide-react";
 
 export default function DriverDetailPage() {
