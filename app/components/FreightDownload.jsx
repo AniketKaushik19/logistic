@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from "react";
 
 export default function DownloadFreight({setForm, form, onSave }) {
   const [mounted, setMounted] = useState(false);
-  const [loading, setLoading] = useState(false)
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -40,7 +39,7 @@ export default function DownloadFreight({setForm, form, onSave }) {
       {/* DOWNLOAD */}
       <PDFDownloadLink
         document={<FreightMemoPDF data={form} />}
-        fileName={`CH-${form.challanNo}`}
+        fileName={`${form.challanNo}`}
         className="bg-green-600 text-white px-4 py-2 rounded"
       >
         {({ loading }) => loading ? "Preparing..." : "Download PDF"}

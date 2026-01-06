@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import Navbar from "../_components/Navbar";
-import { Card } from "@/components/ui/card";
 import { Edit, Trash2, Printer, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
@@ -68,7 +67,7 @@ export default function EBillsDashboard() {
           <Link href="/e-bill/addE-bill">
             <button className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-white font-semibold shadow-lg hover:shadow-2xl transition">
               <Plus className="size-4" />
-              Add E-Bill
+             E-Bill
             </button>
           </Link>
         </div>

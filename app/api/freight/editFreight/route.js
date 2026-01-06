@@ -13,17 +13,18 @@ export async function POST(req) {
   }
   try {
     const _id=await req.json()
+    console.log(_id)
     const client = await clientPromise;
     const db = client.db("logisticdb");
-    const collection = db.collection("E-bill");
+    const collection = db.collection("Freight");
     const data = await collection
       .findOne({_id:new ObjectId(_id)})
     console.log(data)
-    return NextResponse.json({msg:"Edit E-bill data",data});
+    return NextResponse.json({msg:"Edit Freight data",data});
   } catch (error) {
-    console.error(" Error in edit ebill:", error);
+    console.error(" Error in edit Freight:", error);
     return NextResponse.json(
-      { error: "Failed to fetch edit ebill data" },
+      { error: "Failed to fetch edit Freight data" },
       { status: 500 }
     );
   }
