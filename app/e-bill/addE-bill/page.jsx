@@ -113,7 +113,6 @@ export default function InvoiceForm() {
     }));
   }, [form.freight, form.labour, form.detention, form.bonus]);
 
-  console.log(form.amountInWord)
 
     const handlePrint = async (bill) => {
       const blob = await pdf(<BillPDF bill={bill} />).toBlob();

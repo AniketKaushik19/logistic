@@ -26,6 +26,7 @@ export default function EditInvoice({params}) {
   const router =useRouter()
   
   const _id = use(params).id;
+  console.log(_id)
 
   const [form, setForm] = useState({
     customer: '',
