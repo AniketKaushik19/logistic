@@ -182,7 +182,7 @@ export default function EditInvoice() {
 
   const getEbill=async()=>{
     try {
-      const res = await fetch(`/api/e-bill/editE-bill`, {
+      const res = await fetch(`/api/e-bill/editE-bill/${_id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(_id),
@@ -191,7 +191,6 @@ export default function EditInvoice() {
       const data = await res.json();
 
       if (data) {
-        console.log({data})
         setForm(prev=>({
           ...prev,
           ...data.data

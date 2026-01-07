@@ -279,7 +279,6 @@ export default function FreightMemo() {
           />
         </div>
 
-
         {/* WORDS */}
         <Input
           label="Rupee in Words"

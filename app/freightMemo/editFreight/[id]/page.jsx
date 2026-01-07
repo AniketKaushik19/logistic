@@ -53,7 +53,7 @@ export default function EditFreight() {
 
   const getFreight = async () => {
     try {
-      const res = await fetch(`/api/freight/editFreight`, {
+      const res = await fetch(`/api/freight/editFreight/${_id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(_id),
