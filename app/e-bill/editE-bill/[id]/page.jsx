@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import Navbar from '@/app/_components/Navbar';
 import toast from 'react-hot-toast';
 import {
@@ -20,14 +20,13 @@ import { numberToWords } from '@/utils/numberToWord';
 import { pdf } from '@react-pdf/renderer';
 import { BillPDF } from '@/app/components/BillPDF';
 import { Button } from '@/components/ui/button';
-import { useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 
-export default function EditInvoice() {
+export default function EditInvoice({params}) {
   const router =useRouter()
   
-  const _id=useParams().id
-  console.log(_id)
+  const _id = use(params).id;
+
   const [form, setForm] = useState({
     customer: '',
     customerAddress: '',
