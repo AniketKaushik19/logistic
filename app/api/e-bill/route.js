@@ -165,7 +165,6 @@ export async function PUT(req) {
   
 }
 
-
 /**
  * GET → Fetch latest 5 consignments for profit calculation
  */

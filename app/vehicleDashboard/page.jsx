@@ -4,7 +4,7 @@ import VehicleCard from "../components/VehicleCard";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import ConfirmToast from "../components/ConfirmToast";
-import { Loader } from "lucide-react";
+import { Loader, Plus } from "lucide-react";
 import Navbar from "../_components/Navbar";
 
 export default function Dashboard() {
@@ -65,8 +65,8 @@ export default function Dashboard() {
             Monitor and manage your logistic vehicles
           </p>
         </div>
-        <button className="bg-purple-500 rounded-2xl p-3 mb-5 font-semibold hover:bg-purple-600 hover:cursor-pointer text-white font-semibold">
-          <Link href={`/AddVehicle`}>Add vehichle</Link>
+        <button className="bg-purple-500 rounded-2xl p-3 mb-5 font-semibold hover:bg-purple-600 hover:cursor-pointer text-white flex">
+          <Link href={`/AddVehicle`}> <span className="flex"><Plus/>Vehichle</span></Link>
         </button>
 
         {loading && (

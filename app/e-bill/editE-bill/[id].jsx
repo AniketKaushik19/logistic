@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import Navbar from '@/app/_components/Navbar';
 import toast from 'react-hot-toast';
 import {
@@ -20,14 +20,14 @@ import { numberToWords } from '@/utils/numberToWord';
 import { pdf } from '@react-pdf/renderer';
 import { BillPDF } from '@/app/components/BillPDF';
 import { Button } from '@/components/ui/button';
-import { useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 
-export default function EditInvoice() {
+export default function EditInvoice({params}) {
   const router =useRouter()
   
-  const _id=useParams().id
+  const _id = use(params).id;
   console.log(_id)
+
   const [form, setForm] = useState({
     customer: '',
     customerAddress: '',
@@ -182,7 +182,7 @@ export default function EditInvoice() {
 
   const getEbill=async()=>{
     try {
-      const res = await fetch(`/api/e-bill/editE-bill`, {
+      const res = await fetch(`/api/e-bill/editE-bill/${_id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(_id),
@@ -191,7 +191,6 @@ export default function EditInvoice() {
       const data = await res.json();
 
       if (data) {
-        console.log({data})
         setForm(prev=>({
           ...prev,
           ...data.data

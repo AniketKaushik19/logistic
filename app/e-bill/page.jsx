@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import Navbar from "../_components/Navbar";
-import { Card } from "@/components/ui/card";
 import { Edit, Trash2, Printer, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import Link from "next/link";
@@ -68,7 +67,7 @@ export default function EBillsDashboard() {
           <Link href="/e-bill/addE-bill">
             <button className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-white font-semibold shadow-lg hover:shadow-2xl transition">
               <Plus className="size-4" />
-              Add E-Bill
+             E-Bill
             </button>
           </Link>
         </div>
@@ -80,11 +79,13 @@ export default function EBillsDashboard() {
               No E-Bills found
             </div>
           ) : (
-            ebill.map((b, i) => (
-              <div
+            ebill.map((b, i) => {
+                const id = b._id;
+             return  <div
                 key={i}
                 className="relative rounded-2xl bg-white p-5 shadow-xl hover:shadow-2xl transition transform hover:-translate-y-1"
               >
+                
                 {/* Header */}
                 <div className="flex justify-between items-start mb-4">
                   <div>
@@ -129,7 +130,7 @@ export default function EBillsDashboard() {
 
                 {/* Actions */}
                 <div className="flex justify-end gap-2 mt-4">
-                  <Link href={`/e-bill/editE-bill/${b._id}`}>
+                  <Link href={`/e-bill/editE-bill/${id}`}>
                     <button
                       className="rounded-xl bg-amber-100 text-amber-700 px-3 py-2 hover:bg-amber-200 transition flex items-center gap-1"
                       title="Edit"
@@ -158,7 +159,7 @@ export default function EBillsDashboard() {
                   </button>
                 </div>
               </div>
-            ))
+})
           )}
         </div>
       </div>
