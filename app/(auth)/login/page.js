@@ -134,7 +134,7 @@ const handleSubmit = async (e) => {
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}>
                   <Button
                     type="submit"
-                    className="w-full rounded-lg text-base font-semibold bg-linear-to-br from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg text-white"
+                    className="w-full rounded-lg text-base font-semibold bg-linear-to-br from-blue-600 to-indigo-600 hover:from-blue-700  hover:cursor-pointer hover:to-indigo-700 transition-all duration-200 shadow-lg text-white"
                     disabled={loading}
                   >
                     {loading ? (

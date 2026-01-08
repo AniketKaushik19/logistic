@@ -193,7 +193,7 @@ export default function SignupPage() {
                 >
                   <Button
                       type="submit"
-                      className="w-full rounded-lg text-base font-semibold bg-linear-to-br from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                      className="w-full rounded-lg text-base font-semibold hover:cursor-pointer bg-linear-to-br from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl"
                       disabled={loading}
                   >
                       {loading ? (
@@ -216,7 +216,7 @@ export default function SignupPage() {
  Access to profit-and-loss data is strictly limited and must be granted only to authorized individuals.
               <button
                 type="button"
-                className="text-emerald-600 font-semibold cursor-pointer hover:text-emerald-700 hover:underline transition-colors"
+                className="text-emerald-600 font-semibold hover:cursor-pointer hover:text-emerald-700 hover:underline transition-colors"
                 onClick={() => router.push('/access-dashboard')}
               >
                 View Existing Admins

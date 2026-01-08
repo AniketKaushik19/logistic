@@ -19,6 +19,7 @@ export default function Vehicle({ params }) {
 
       const response = await fetch(`/api/expense?vehicleId=${vehicleId}`, {
         cache: "no-store",
+        credentials: "include",
       });
       const data = await response.json();
       if (data.status === "200") {
@@ -50,6 +51,7 @@ export default function Vehicle({ params }) {
         const res = await fetch("/api/expense", {
           method: "POST",
           cache: "no-store",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },

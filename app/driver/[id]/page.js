@@ -10,7 +10,7 @@ export default function DriverDetailPage() {
   const router = useRouter();
   const [driver, setDriver] = useState(null);
   const [loading, setLoading] = useState(true);
-
+console.log(id)
   useEffect(() => {
     async function load() {
       setLoading(true);
@@ -34,6 +34,7 @@ export default function DriverDetailPage() {
   const handleSuccess = () => {
     router.push("/driver/list");
   };
+        console.log(driver)
 
   if (loading) return <div className="p-4"><Loader className="transition-all animate-spin"/> Loading...</div>;
   if (!driver) return <div className="p-4">Driver not found</div>;
