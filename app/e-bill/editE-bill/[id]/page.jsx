@@ -25,6 +25,7 @@ import { useRouter } from 'next/navigation';
 export default function EditInvoice({params}) {
 
    const [_id, setId] = useState(null);
+
    useEffect(() => {
     const getParams = async () => {
       const resolvedParams = await params;
@@ -58,7 +59,8 @@ export default function EditInvoice({params}) {
     grandTotal: 0,
     amountInWord: '',
   });
-
+  
+  
   const handleConsignmentChange = (index, field, value) => {
     const updated = [...form.consignments];
     updated[index][field] = value;
@@ -221,7 +223,6 @@ export default function EditInvoice({params}) {
         <h1 className="text-3xl font-bold text-gray-800 mb-8 mt-12">
           Edit Transport Invoice
         </h1>
-
         <div className="bg-white rounded-2xl shadow-xl p-8 space-y-8">
 
           {/* Bill no */}

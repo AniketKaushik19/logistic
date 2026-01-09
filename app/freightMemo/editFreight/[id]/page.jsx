@@ -179,6 +179,7 @@ export default function EditFreight({params}) {
             icon={<FileText size={16} />}
             label="Challan No"
             name="challanNo"
+            disabled
             value={form.challanNo}
             onChange={handleChange}
           />
