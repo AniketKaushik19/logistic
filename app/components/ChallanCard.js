@@ -8,10 +8,20 @@ export default function ChallanCard({ data }) {
   const f=data.freight
   const id=f._id
   return (
-    <div className="w-76">
 
-   
-    <Card className="rounded-xl shadow-sm flex">
+
+
+<Card
+  className="
+    w-76
+    rounded-2xl
+    border-0 ring-0
+    bg-white
+    shadow-[0_8px_24px_rgba(0,0,0,0.12)]
+    transition-all duration-300
+    md:hover:shadow-[0_24px_48px_rgba(0,0,0,0.18)]
+  "
+>
       {/* Header */}
       <CardHeader className="pb-2">
         <div className="flex justify-between items-center">
@@ -65,7 +75,7 @@ export default function ChallanCard({ data }) {
         <div className="flex justify-end gap-2 mt-4">
           <Link href={`/freightMemo/editFreight/${id}`}>
             <button
-              className="rounded-xl bg-amber-100 text-amber-700 px-3 py-2 hover:bg-amber-200 transition flex items-center gap-1"
+              className="rounded-xl bg-amber-100 text-amber-700 px-3 py-2 hover:bg-amber-200 transition flex items-center gap-1 hover:cursor-pointer"
               title="Edit"
             >
               <Edit size={16} />
@@ -75,7 +85,7 @@ export default function ChallanCard({ data }) {
 
           <button
             onClick={() =>data.handlePrint(f) }
-            className="rounded-xl bg-blue-100 text-blue-700 px-3 py-2 hover:bg-blue-200 transition flex items-center gap-1"
+            className="rounded-xl bg-blue-100 text-blue-700 px-3 py-2 hover:bg-blue-200 transition flex items-center gap-1 hover:cursor-pointer"
             title="Print"
           >
             <Printer size={16} />
@@ -84,7 +94,7 @@ export default function ChallanCard({ data }) {
 
           <button
             onClick={() =>data.handleDelete(f._id) }
-            className="rounded-xl bg-red-100 text-red-700 px-3 py-2 hover:bg-red-200 transition flex items-center gap-1"
+            className="rounded-xl bg-red-100 text-red-700 px-3 py-2 hover:bg-red-200 transition flex items-center gap-1 hover:cursor-pointer"
             title="Delete"
           >
             <Trash2 size={16} />
@@ -93,6 +103,5 @@ export default function ChallanCard({ data }) {
         </div>
       </CardContent>
     </Card>
-     </div>
   );
 }

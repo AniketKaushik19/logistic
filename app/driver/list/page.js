@@ -4,7 +4,7 @@ import DriverForm from "@/components/DriverForm";
 import DriverCard from "@/components/DriverCard";
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Loader, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import ConfirmToast from "@/app/components/ConfirmToast";
 import Navbar from "@/app/_components/Navbar";
@@ -134,7 +134,7 @@ export default function DriverListPage() {
       {/* ===== Page Content ===== */}
       <div className="p-4 mt-20">
         <div className="flex justify-between mb-4">
-          <h1 className="md:text-2xl font-semibold">
+          <h1 className="text-xl md:text-2xl font-semibold">
             Driver Salary Dashboard
           </h1>
 
@@ -168,7 +168,7 @@ export default function DriverListPage() {
         </div>
 
         {loading ? (
-          <div>Loading...</div>
+          <div className="text-3xl flex justify-center items-center text-purple-500 "><Loader className="animate-spin transition-all"/> Loading...</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {drivers.map((d) => (

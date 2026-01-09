@@ -50,6 +50,7 @@ function Navbar() {
               width={42}
               height={42}
               alt="Aniket Logistic Logo"
+               className="w-10 h-auto"
             />
             <span className="hidden md:block font-bold text-lg text-red-500">
               Aniket Logistic

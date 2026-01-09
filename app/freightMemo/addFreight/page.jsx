@@ -20,6 +20,7 @@ import { numberToWords } from "@/utils/numberToWord";
 import toast from "react-hot-toast";
 import FreightMemoPDF from "@/app/components/FreightMemo";
 import { pdf } from "@react-pdf/renderer";
+import incrementBillNo from "@/utils/incrementNumber";
 import { useRouter } from "next/navigation";
 export default function FreightMemo() {
 const router=useRouter()
@@ -136,6 +137,36 @@ router.push('/freightMemo')
     }));
   }, [form.rate, form.weight, form.advance]);
 
+   const lastFreight=async()=>{
+     try {
+        const last=await fetch('/api/freight/lastFreight', {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const res=await last.json()
+      setForm((prev)=>({
+        ...prev,
+        challanNo:res.data.challanNo
+      }))
+      handleNextBill()
+     } catch (error) {
+        console.log("Error in Last Freight")
+        toast.error("Error in Fetching Serial number")
+     }
+  }
+
+  const handleNextBill = () => {
+    console.log("calling handlenext freight")
+    setForm((prev) => ({
+      ...prev,
+      challanNo: incrementBillNo(prev.challanNo)
+    }));
+  };
+
+  useEffect(()=>{
+    lastFreight()
+  },[])
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <Navbar />
@@ -158,6 +189,7 @@ router.push('/freightMemo')
             icon={<FileText size={16} />}
             label="Challan No"
             name="challanNo"
+            disabled
             value={form.challanNo}
             onChange={handleChange}
           />

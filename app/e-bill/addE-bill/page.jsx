@@ -20,6 +20,7 @@ import { pdf } from '@react-pdf/renderer';
 import { BillPDF } from '@/app/components/BillPDF';
 import { Button } from '@/components/ui/button';
 import { Printer } from 'lucide-react';
+import  incrementBillNo from "@/utils/incrementNumber"
 import { useRouter } from 'next/navigation';
 
 export default function InvoiceForm() {
@@ -178,8 +179,36 @@ const router=useRouter();
       toast.error("Error saving E-bill");
     }
   };
+
+  const lastEbill=async()=>{
+     try {
+        const last=await fetch('/api/e-bill/lastEbill', {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const res=await last.json()
+      setForm((prev)=>({
+        ...prev,
+        billNo:res.data.billNo
+      }))
+      handleNextBill()
+     } catch (error) {
+        console.log("Error in lastEbill")
+        toast.error("Error in Fetching Serial number")
+     }
+  }
+
+  const handleNextBill = () => {
+    console.log("calling handlenext bill")
+    setForm((prev) => ({
+      ...prev,
+      billNo: incrementBillNo(prev.billNo)
+    }));
+  };
+
   useEffect(()=>{
-     
+    lastEbill()
   },[])
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -189,15 +218,15 @@ const router=useRouter();
         <h1 className="text-3xl font-bold text-gray-800 mb-8 mt-12">
           Transport Invoice
         </h1>
-
         <div className="bg-white rounded-2xl shadow-xl p-8 space-y-8">
-
+          
           {/* Bill no */}
           <Section title="Bill No">
             <Input
               icon={<File size={18} />}
               name="billNo"
               value={form.billNo}
+              disabled
               onChange={handleChange}
               placeholder="BillNo"
             />
@@ -254,7 +283,6 @@ const router=useRouter();
           </Section>
 
           {/* DATES */}
-
           <div>
             <h2 className='font-bold p-1 text-gray-600 text-xl'>
               Invoice Dates

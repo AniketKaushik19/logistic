@@ -170,12 +170,12 @@ export default function ExpensesPage() {
                   {
                     key: "all",
                     label: "All Time",
-                    color: "bg-gray-100 hover:bg-gray-200 text-gray-700",
+                    color: "bg-gray-100  hover:bg-gray-200 text-gray-700",
                   },
                   {
                     key: "monthly",
                     label: "This Month",
-                    color: "bg-blue-100 hover:bg-blue-200 text-blue-700",
+                    color: "bg-blue-100  hover:bg-blue-200 text-blue-700",
                   },
                   {
                     key: "yearly",
@@ -191,7 +191,7 @@ export default function ExpensesPage() {
                   <Button
                     key={p.key}
                     onClick={() => handlePeriodChange(p.key)}
-                    variant={period === p.key ? "default" : "outline"}
+                    variant={period === p.key ? "default" : "primary"}
                     size="sm"
                     className={`transition-all duration-200 ${
                       period === p.key
@@ -236,7 +236,7 @@ export default function ExpensesPage() {
               <div className="flex justify-center sm:justify-end">
                 <Button
                   onClick={() => setLatestOnly(!latestOnly)}
-                  variant={latestOnly ? "default" : "outline"}
+                  variant={latestOnly ? "default" : "primary"}
                   className={`flex items-center gap-2 transition-all duration-200 ${
                     latestOnly
                       ? "bg-blue-600 hover:bg-blue-700 text-white"

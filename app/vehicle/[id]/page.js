@@ -23,7 +23,6 @@ export default function Vehicle({ params }) {
 
   const getLatestExpenses = async (vehicleId) => {
     try {
-      console.log(vehicleId)
       const response = await fetch(`/api/expense?vehicleId=${vehicleId}`, {
         cache: "no-store",
         credentials: "include",

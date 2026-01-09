@@ -61,6 +61,7 @@ export async function POST(req) {
       licenceNo: licenceNo.toUpperCase(),
 
       through: through.toUpperCase(),
+      createdAt:new Date()
     });
     if (result) {
       return NextResponse.json({

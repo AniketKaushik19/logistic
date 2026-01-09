@@ -79,6 +79,7 @@ export function EditVehicle({ name, driverName, capacity ,fetchVehicles }) {
               <Input
                 id="name-1"
                 value={vehicleName}
+                disabled
                 onChange={(e) => setVehicleName(e.target.value)}
               />
             </div>
@@ -102,7 +103,7 @@ export function EditVehicle({ name, driverName, capacity ,fetchVehicles }) {
           {error && <p className="text-red-500 text-sm">{error}</p>}
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="outline" className="hover:bg-red-200" onClick={()=>setIsOpen(false)}>
+              <Button variant="primary" className=" border-2 hover:bg-red-200 hover:cursor-pointer" onClick={()=>setIsOpen(false)}>
                 Cancel
               </Button>
             </DialogClose>
@@ -110,7 +111,7 @@ export function EditVehicle({ name, driverName, capacity ,fetchVehicles }) {
               type="submit"
               onClick={onEdit}
               disabled={loading}
-              className="border hover:bg-green-300"
+              className="hover:cursor-pointer border hover:bg-green-300"
             >
               {loading ? "Updating..." : "Update changes"}
             </Button>
