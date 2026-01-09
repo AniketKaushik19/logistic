@@ -20,8 +20,9 @@ import { numberToWords } from "@/utils/numberToWord";
 import toast from "react-hot-toast";
 import FreightMemoPDF from "@/app/components/FreightMemo";
 import { pdf } from "@react-pdf/renderer";
+import { useRouter } from "next/navigation";
 export default function FreightMemo() {
-
+const router=useRouter()
   const initialFormState = {
     challanNo: "CH-",
     date: "",
@@ -63,6 +64,8 @@ export default function FreightMemo() {
 
   const handlePrint = async (freight) => {
     saveFreight()
+router.push('/freightMemo')
+
     const blob = await pdf(<FreightMemoPDF data={freight} />).toBlob();
     const url = URL.createObjectURL(blob);
     const win = window.open(url);
@@ -83,6 +86,7 @@ export default function FreightMemo() {
       if (data.success) {
         toast.success("Save successfully")
         setForm(initialFormState)
+        router.push('/freightMemo')
       }
 
     } catch (error) {
@@ -210,7 +214,7 @@ export default function FreightMemo() {
                 <button
                   type="button"
                   onClick={() => removeGrNo(index)}
-                  className="text-red-500 text-sm"
+                  className="hover:cursor-pointer text-red-500 text-sm"
                 >
                   ✕
                 </button>
@@ -221,7 +225,7 @@ export default function FreightMemo() {
           <button
             type="button"
             onClick={addGrNo}
-            className="text-indigo-600 text-xs font-medium"
+            className="hover:cursor-pointer text-indigo-600 text-xs font-medium"
           >
             + Add GR No
           </button>
@@ -360,7 +364,7 @@ export default function FreightMemo() {
         <div className="flex justify-end gap-4 pt-2">
           <button
             onClick={() =>handlePrint(form) }
-            className="rounded-xl bg-blue-100 text-blue-700 px-3 py-2 hover:bg-blue-200 transition flex items-center gap-1"
+            className="rounded-xl bg-blue-100 text-blue-700 px-3 py-2 hover:bg-blue-200 transition flex items-center gap-1 hover:cursor-pointer"
             title="Print"
           >
             <Printer size={16} />
@@ -368,7 +372,7 @@ export default function FreightMemo() {
           </button>
           <button
             onClick={() =>saveFreight() }
-            className="rounded-xl bg-blue-100 text-blue-700 px-3 py-2 hover:bg-blue-200 transition flex items-center gap-1"
+            className="rounded-xl bg-blue-100 text-blue-700 px-3 py-2 hover:bg-blue-200 transition flex items-center gap-1 hover:cursor-pointer"
             title="Save"
           >
             <Save size={16} />

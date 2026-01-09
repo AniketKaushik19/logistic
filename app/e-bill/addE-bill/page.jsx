@@ -20,6 +20,7 @@ import { pdf } from '@react-pdf/renderer';
 import { BillPDF } from '@/app/components/BillPDF';
 import { Button } from '@/components/ui/button';
 import { Printer } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function InvoiceForm() {
   const [form, setForm] = useState({
@@ -61,6 +62,8 @@ export default function InvoiceForm() {
 
     setForm({ ...form, consignments: updated });
   };
+
+const router=useRouter();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -165,6 +168,7 @@ export default function InvoiceForm() {
 
       if (data) {
         toast.success("Save  successfully")
+        router.push('/e-bill')
         handlePrint(form)
         clearForm()
         

@@ -178,7 +178,7 @@ export default function EditInvoice({params}) {
       if (data) {
         toast.success("Save  successfully!!!")
         router.push('/e-bill')
-        clearForm()
+        clearForm();
       }
 
     } catch (error) {
