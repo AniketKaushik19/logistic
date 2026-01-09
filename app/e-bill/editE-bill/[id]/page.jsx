@@ -23,10 +23,17 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 
 export default function EditInvoice({params}) {
+
+   const [_id, setId] = useState(null);
+   useEffect(() => {
+    const getParams = async () => {
+      const resolvedParams = await params;
+      setId(resolvedParams._id);
+    };
+    getParams();
+  }, [params]);
   const router =useRouter()
   
-  const _id = use(params).id;
-  console.log(_id)
 
   const [form, setForm] = useState({
     customer: '',

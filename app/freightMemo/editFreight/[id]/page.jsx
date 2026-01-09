@@ -19,7 +19,14 @@ import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 
 export default function EditFreight() {
-  const _id = useParams().id
+  const [_id, setId] = useState(null);
+   useEffect(() => {
+    const getParams = async () => {
+      const resolvedParams = await params;
+      setId(resolvedParams._id);
+    };
+    getParams();
+  }, [params]);
   const router=useRouter()
   const initialFormState = {
     challanNo: "CH-",
