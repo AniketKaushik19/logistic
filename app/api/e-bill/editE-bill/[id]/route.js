@@ -12,12 +12,12 @@ export async function POST(req) {
     );
   }
   try {
-    const _id=await req.json()
+    const id=await req.json()
     const client = await clientPromise;
     const db = client.db("logisticdb");
     const collection = db.collection("E-bill");
     const data = await collection
-      .findOne({_id:new ObjectId(_id)})
+      .findOne({_id:new ObjectId(id)})
     console.log(data)
     return NextResponse.json({msg:"Edit E-bill data",data});
   } catch (error) {

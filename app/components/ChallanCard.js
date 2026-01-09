@@ -6,6 +6,7 @@ import { Truck, User, MapPin, IndianRupee , Edit , Printer , Trash2 } from "luci
 import Link from "next/link";
 export default function ChallanCard({ data }) {
   const f=data.freight
+  const id=f._id
   return (
     <div className="w-76">
 
@@ -62,7 +63,7 @@ export default function ChallanCard({ data }) {
 
         {/* Actions */}
         <div className="flex justify-end gap-2 mt-4">
-          <Link href={`/freightMemo/editFreight/${f._id}`}>
+          <Link href={`/freightMemo/editFreight/${id}`}>
             <button
               className="rounded-xl bg-amber-100 text-amber-700 px-3 py-2 hover:bg-amber-200 transition flex items-center gap-1"
               title="Edit"

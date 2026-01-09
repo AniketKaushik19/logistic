@@ -28,12 +28,11 @@ export default function EditInvoice({params}) {
    useEffect(() => {
     const getParams = async () => {
       const resolvedParams = await params;
-      setId(resolvedParams._id);
+      setId(resolvedParams.id);
     };
     getParams();
   }, [params]);
   const router =useRouter()
-  
 
   const [form, setForm] = useState({
     customer: '',
@@ -187,12 +186,12 @@ export default function EditInvoice({params}) {
     }
   };
 
-  const getEbill=async()=>{
+  const getEbill=async(id)=>{
     try {
-      const res = await fetch(`/api/e-bill/editE-bill/${_id}`, {
+      const res = await fetch(`/api/e-bill/editE-bill/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(_id),
+        body: JSON.stringify(id),
       });
 
       const data = await res.json();
@@ -210,8 +209,10 @@ export default function EditInvoice({params}) {
     }
   }
   useEffect(()=>{
-     getEbill()
-  },[])
+   if(_id){
+     getEbill(_id)
+   }
+  },[_id])
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <Navbar />

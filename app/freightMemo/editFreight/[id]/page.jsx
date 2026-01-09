@@ -15,15 +15,14 @@ import { useState, useEffect } from "react";
 import Navbar from "@/app/_components/Navbar";
 import { numberToWords } from "@/utils/numberToWord";
 import toast from "react-hot-toast";
-import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 
-export default function EditFreight() {
+export default function EditFreight({params}) {
   const [_id, setId] = useState(null);
    useEffect(() => {
     const getParams = async () => {
       const resolvedParams = await params;
-      setId(resolvedParams._id);
+      setId(resolvedParams.id);
     };
     getParams();
   }, [params]);
@@ -58,8 +57,9 @@ export default function EditFreight() {
   };
   const [form, setForm] = useState(initialFormState);
 
-  const getFreight = async () => {
+  const getFreight = async (_id) => {
     try {
+      console.log(_id)
       const res = await fetch(`/api/freight/editFreight/${_id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -152,9 +152,11 @@ export default function EditFreight() {
     }));
   }, [form.rate, form.weight, form.advance]);
 
-  useEffect(() => {
-    getFreight()
-  }, [])
+ useEffect(()=>{
+   if(_id){
+     getFreight(_id)
+   }
+  },[_id])
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <Navbar />
