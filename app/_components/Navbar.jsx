@@ -93,7 +93,7 @@ function Navbar() {
             </li>
             <button
               onClick={logout}
-              className="p-2 rounded-full hover:bg-red-100 text-red-500"
+              className="p-2 rounded-full hover:cursor-pointerhover:bg-red-100 text-red-500"
             >
               <LogOut size={18} />
             </button>
@@ -102,7 +102,7 @@ function Navbar() {
           {/* Hamburger */}
           <button
             onClick={() => setOpen(!open)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100"
+            className="md:hidden p-2 rounded-lg hover:cursor-pointer hover:bg-gray-100"
           >
             {open ? <X size={26} /> : <Menu size={26} />}
           </button>
@@ -140,7 +140,7 @@ Security              </Link>
                   setOpen(false);
                   logout();
                 }}
-                className="flex items-center gap-2 text-red-500"
+                className="flex items-center gap-2 text-red-500 hover:cursor-pointer"
               >
                 <LogOut size={18} /> Logout
               </button>
@@ -169,7 +169,7 @@ Security              </Link>
 
         <button
           onClick={() => setOpen(!open)}
-          className="md:hidden p-2"
+          className="md:hidden p-2 hover:cursor-pointer"
         >
           {open ? <X size={26} /> : <Menu size={26} />}
         </button>

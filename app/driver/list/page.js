@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import DriverForm from "@/components/DriverForm";
 import DriverCard from "@/components/DriverCard";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import toast from "react-hot-toast";
@@ -10,6 +10,7 @@ import ConfirmToast from "@/app/components/ConfirmToast";
 import Navbar from "@/app/_components/Navbar";
 import SalaryActions from "@/app/_components/SalaryActions";
 import SalaryHistoryModal from "@/app/_components/SalaryHistoryModal";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 export default function DriverListPage() {
   const [drivers, setDrivers] = useState([]);
@@ -96,6 +97,11 @@ export default function DriverListPage() {
       {/* ===== Salary Modal ===== */}
       <Dialog open={!!salaryDriver} onOpenChange={() => setSalaryDriver(null)}>
         <DialogContent className="sm:max-w-[600px] bg-white">
+             <DialogHeader>
+            <DialogTitle>
+              Salary – {salaryDriver?.name}
+            </DialogTitle>
+          </DialogHeader>
           <h3 className="text-lg font-semibold">
             Salary – {salaryDriver?.name}
           </h3>
@@ -110,12 +116,19 @@ export default function DriverListPage() {
 
       {/* ===== History Modal ===== */}
       <Dialog open={!!historyDriver} onOpenChange={() => setHistoryDriver(null)}>
+         <DialogContent className="sm:max-w-[700px] bg-white">
+          <DialogHeader>
+            <DialogTitle>
+              Salary History – {historyDriver?.name}
+            </DialogTitle>
+          </DialogHeader>
         {historyDriver && (
           <SalaryHistoryModal
             driver={historyDriver}
             onClose={() => setHistoryDriver(null)}
           />
         )}
+        </DialogContent>
       </Dialog>
 
       {/* ===== Page Content ===== */}
@@ -133,10 +146,11 @@ export default function DriverListPage() {
             </DialogTrigger>
 
             <DialogContent className="sm:max-w-[720px] bg-white">
-              <h3 className="text-lg font-semibold mb-2">
-                {editing ? "Edit Driver" : "Add Driver"}
-              </h3>
-
+            <DialogHeader>
+                <DialogTitle>
+                  {editing ? "Edit Driver" : "Add Driver"}
+                </DialogTitle>
+              </DialogHeader>
               <DriverForm
                 initialData={editing}
                 onSuccess={() => {

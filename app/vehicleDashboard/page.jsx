@@ -14,13 +14,9 @@ export default function Dashboard() {
   const fetchVehicles = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("auth_token");
-
       const response = await fetch("/api/vehicle", {
         cache: "no-store",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: "include",
       });
       const data = await response.json();
       setVehicles(data);
@@ -36,14 +32,12 @@ export default function Dashboard() {
     const confirmed = await ConfirmToast({ msg: "Delete this Vehicle?" });
     if (!confirmed) return;
     try {
-      const token = localStorage.getItem("auth_token");
-
       const response = await fetch("/api/vehicle", {
         method: "DELETE",
         cache: "no-store",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ truckNumber }),
       });

@@ -44,12 +44,12 @@ function CeoVerifyModal({ open, onClose, onConfirm }) {
         />
 
         <div className="flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 rounded bg-gray-200">
+          <button onClick={onClose} className="px-4 py-2 rounded bg-gray-200 hover:cursor-pointer">
             Cancel
           </button>
           <button
             onClick={() => onConfirm({ adminEmail: email, adminPassword: password })}
-            className="px-4 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700"
+            className="px-4 py-2 rounded bg-indigo-600 text-white hover:cursor-pointer hover:bg-indigo-700"
           >
             Verify
           </button>
@@ -83,7 +83,7 @@ function PasswordModal({ open, onClose, onSave }) {
         />
 
         <div className="flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 bg-gray-200 rounded">
+          <button onClick={onClose} className="px-4 py-2 hover:cursor-pointer bg-gray-200 rounded">
             Cancel
           </button>
           <button
@@ -120,14 +120,9 @@ export default function AccessDashboard() {
   /* ================= FETCH ADMINS ================= */
   const fetchAdmins = async () => {
     try {
-      const token = localStorage.getItem("auth_token");
-
       const res = await fetch("/api/admin/access", {
         credentials: "include",
         cache: "no-store",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       });
 
       const data = await res.json();
@@ -237,7 +232,7 @@ const handleCeoConfirm = async (ceo) => {
         <div className="flex gap-4 md:justify-between items-center mt-15 mb-5 md:my-15">
           <h1 className="md:text-3xl font-bold">Admin Access Control</h1>
           <Link href="/adminAccess">
-            <button className="px-2 md:px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold">
+            <button className="px-2 md:px-5 py-2 rounded-xl hover:cursor-pointer bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold">
               + Access
             </button>
           </Link>
@@ -254,7 +249,7 @@ const handleCeoConfirm = async (ceo) => {
                 {admin._id === currentAdminId && (
                   <button
                     onClick={() => setPasswordModal(true)}
-                    className="p-2 rounded-full bg-blue-100 hover:bg-blue-200"
+                    className="p-2 rounded-full bg-blue-100 hover:bg-blue-200 hover:cursor-pointer"
                   >
                     <Pencil size={16} />
                   </button>
@@ -267,7 +262,7 @@ const handleCeoConfirm = async (ceo) => {
                       setSelectedId(admin._id);
                       setCeoModal(true);
                     }}
-                    className="p-2 rounded-full bg-red-100 hover:bg-red-200"
+                    className="p-2 rounded-full hover:cursor-pointer  bg-red-100 hover:bg-red-200"
                   >
                     <Trash2 size={16} />
                   </button>

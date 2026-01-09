@@ -5,7 +5,8 @@ import { DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 import { generateSalaryPDF } from "@/utils/generateSalaryPDF";
-import { PrinterIcon } from "lucide-react";
+import { Download } from "lucide-react";
+import { generateSalaryHistoryPDF } from "@/utils/generateSalaryHistoryPDF";
 
 export default function SalaryHistoryModal({ driver }) {
   const [history, setHistory] = useState([]);
@@ -95,9 +96,24 @@ export default function SalaryHistoryModal({ driver }) {
       <h3 className="text-lg font-semibold mb-4">
         Salary History – {driver.name}
       </h3>
-
       {/* ===== FILTER BAR ===== */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <Button
+  variant="secondary"
+  size="sm"
+  className="flex items-center gap-2 hover:cursor-pointer"
+  onClick={() =>
+    generateSalaryHistoryPDF({
+      driver,
+      filters: { year, month, fromDate, toDate },
+      data: filteredHistory,
+    })
+  }
+>
+  <Download size={16} />
+  Print Report
+</Button>
+
         <select
           value={year}
           onChange={(e) => setYear(e.target.value)}
@@ -189,7 +205,7 @@ export default function SalaryHistoryModal({ driver }) {
                       })
                     }
                   >
-                    <PrinterIcon/>
+                    <Download/>
                   </button>
                 </div>
               </div>

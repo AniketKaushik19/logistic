@@ -29,13 +29,9 @@ export default function TrackClient() {
     setData(null);
 
     try {
-      const token = localStorage.getItem("auth_token");
-
       const res = await fetch(`/api/track/${encodeURIComponent(query)}`, {
         cache: "no-store",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: "include",
       });
         if (!res.ok) {
       throw new Error("API failed");

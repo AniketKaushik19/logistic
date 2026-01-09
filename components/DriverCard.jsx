@@ -8,13 +8,14 @@ import {
   Truck,
   CheckCircle,
   Clock,
-  Printer,
   History,
   ArrowDownCircle,
   ArrowUpCircle,
   MinusCircle,
+  Download,
 } from "lucide-react";
 import { generateSalaryPDF } from "@/utils/generateSalaryPDF";
+import { Button } from "./ui/button";
 
 export default function DriverCard({
   driver,
@@ -28,9 +29,8 @@ export default function DriverCard({
      NORMALIZE SALARY DATA
      =============================== */
   const salary = driver.salaryDetails || {};
-
-  const salaryStatus = salary.status || "Unpaid";
-  const baseSalary = Number(salary.baseSalary ?? driver.salary ?? 0);
+  const salaryStatus = salary?.status || "Unpaid";
+  const baseSalary = Number(driver?.salary?? 0);
   const advance = Number(salary.advance ?? 0);
   const bonus = Number(salary.bonus ?? 0);
   const penalty = Number(salary.penalty ?? 0);
@@ -43,7 +43,7 @@ export default function DriverCard({
       {/* Delete */}
       <button
         onClick={() => onDelete(driver)}
-        className="absolute top-3 right-3 rounded-md border border-slate-300 p-1.5 text-slate-600 hover:bg-slate-100"
+        className="absolute top-3 right-3 rounded-md border border-slate-300 p-1.5 text-slate-600 hover:bg-slate-100 hover:cursor-pointer"
         title="Delete Driver"
       >
         <Trash2 className="size-4" />
@@ -63,13 +63,13 @@ export default function DriverCard({
           )}
 
           {/* Vehicle */}
+
           <div className="mt-2 inline-flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
             <Truck className="size-4" />
             {driver.vehicleNumber || "No Vehicle Assigned"}
           </div>
         </div>
       </div>
-
       {/* Salary Summary */}
       <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
         <div>
@@ -126,25 +126,26 @@ export default function DriverCard({
         {/* Salary */}
         <button
           onClick={() => onSalary(driver)}
-          className="flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          className="flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 hover:cursor-pointer"
         >
           <Wallet className="size-4" />
           Salary
         </button>
 
         {/* History */}
-        <button
+        <Button
+        variant="secondary"
           onClick={() => onHistory(driver)}
-          className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-slate-100"
+          className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-slate-100 hover:cursor-pointer"
         >
           <History className="size-4" />
           History
-        </button>
+        </Button>
 
         {/* Right actions */}
         <div className="ml-auto flex gap-2">
           {/* Print */}
-       <button
+       <Button
   onClick={() =>
     generateSalaryPDF({
       month: driver.salaryDetails?.month,
@@ -159,21 +160,21 @@ export default function DriverCard({
         : "-",
     })
   }
-  className="rounded-md border p-2 hover:bg-slate-100"
+  variant="secondary"
+  className="p-2  hover:bg-slate-100 hover:cursor-pointer"
   title="Download Salary Slip"
 >
-  <Printer className="size-4" />
-</button>
+  <Download className="size-4" />
+</Button>
 
 
           {/* Edit */}
           <button
             onClick={() => onEdit(driver)}
-            className="rounded-md border border-red-200 p-2 text-red-600 hover:bg-red-50 flex items-center gap-1"
+            className="rounded-md border border-red-200 p-2 text-red-600 hover:bg-red-50 flex items-center gap-1 hover:cursor-pointer"
             title="Edit Driver"
           >
             <Edit2 className="size-4" />
-            Edit
           </button>
         </div>
       </div>

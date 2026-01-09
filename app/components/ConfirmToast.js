@@ -27,14 +27,14 @@ const ConfirmToast = ({ msg }) => {
           <div className="mt-3 flex justify-end gap-2">
             <button
               onClick={() => safeResolve(false, toastId)}
-              className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 transition"
+              className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 transition hover:cursor-pointer"
             >
               Cancel
             </button>
 
             <button
               onClick={() => safeResolve(true, toastId)}
-              className="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700 transition"
+              className="px-3 py-1 rounded bg-red-600 text-white hover:cursor-pointer hover:bg-red-700 transition"
             >
               Delete
             </button>
