@@ -1,22 +1,29 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { use } from "react";
 import Link from "next/link";
 import Navbar from "@/app/_components/Navbar";
 import toast from "react-hot-toast";
 
 export default function Vehicle({ params }) {
-  const id = use(params).id;
+  const [id, setId] = useState(null);
   const [Expenses, setExpenses] = useState([]);
   const [Amount, setAmount] = useState("");
   const [eDate, setEDate] = useState("");
   const [title, setTitle] = useState("");
   const [response, setResponse] = useState("");
 
+  useEffect(() => {
+    const getParams = async () => {
+      const resolvedParams = await params;
+      setId(resolvedParams.id);
+    };
+    getParams();
+  }, [params]);
+
   const getLatestExpenses = async (vehicleId) => {
     try {
-
+      console.log(vehicleId)
       const response = await fetch(`/api/expense?vehicleId=${vehicleId}`, {
         cache: "no-store",
       });
@@ -82,8 +89,15 @@ export default function Vehicle({ params }) {
       }, 5000);
       return () => clearTimeout(timer);
     }
-    getLatestExpenses(id);
-  }, [response]);
+    if (id) {
+      getLatestExpenses(id);
+    }
+  }, [response, id]);
+
+  if (!id) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/*Navbar for Vehicle page*/}
