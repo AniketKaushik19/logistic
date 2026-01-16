@@ -60,10 +60,10 @@ export default function EditFreight({params}) {
   const getFreight = async (_id) => {
     try {
       console.log(_id)
-      const res = await fetch(`/api/freight/editFreight/${_id}`, {
-        method: "POST",
+      const res = await fetch(`/api/freight/editFreight?id=${_id}`, {
+        method: "GET",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(_id),
+        // body: JSON.stringify(_id),
       });
 
       const data = await res.json();
