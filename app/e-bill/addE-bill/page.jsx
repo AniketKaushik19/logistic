@@ -21,6 +21,8 @@ import { BillPDF } from '@/app/components/BillPDF';
 import { Button } from '@/components/ui/button';
 import { Printer } from 'lucide-react';
 import  incrementBillNo from "@/utils/incrementNumber"
+import { useRouter } from 'next/navigation';
+
 export default function InvoiceForm() {
   const [form, setForm] = useState({
     customer: '',
@@ -61,6 +63,8 @@ export default function InvoiceForm() {
 
     setForm({ ...form, consignments: updated });
   };
+
+const router=useRouter();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -165,7 +169,10 @@ export default function InvoiceForm() {
 
       if (data) {
         toast.success("Save  successfully")
-        handlePrint(form)    
+        router.push('/e-bill')
+        handlePrint(form)
+        clearForm()
+        
       }
 
     } catch (error) {

@@ -177,9 +177,9 @@ export default function EditFreight({params}) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Input
             icon={<FileText size={16} />}
+            disabled
             label="Challan No"
             name="challanNo"
-            disabled
             value={form.challanNo}
             onChange={handleChange}
           />
