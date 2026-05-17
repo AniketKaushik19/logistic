@@ -16,6 +16,8 @@ import Navbar from "@/app/_components/Navbar";
 export default function ExpensesPage() {
   const { id } = useParams();
   const [totalAmount, setTotalAmount] = useState(0);
+  const [totalExpense, setTotalExpense] = useState(0);
+  const [netProfit, setNetProfit] = useState(0);
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [totalLoading, setTotalLoading] = useState(false);
@@ -46,9 +48,13 @@ export default function ExpensesPage() {
         credentials: "include",
       });
       const data = await response.json();
-
+     console.log(data);
+     
+      
       if (data.success) {
         setTotalAmount(data.totalAmount);
+        setTotalExpense(data.totalExpense);
+        setNetProfit(data.netProfit);
       }
     } catch (error) {
       console.error("Error fetching total expenses:", error);
@@ -68,12 +74,18 @@ export default function ExpensesPage() {
           latest: latestOnly.toString(),
           period,
         });
+
+        if (period === "custom" && customStartDate && customEndDate) {
+          params.append("startDate", customStartDate);
+          params.append("endDate", customEndDate);
+        }
+
         const response = await fetch(`/api/expense?${params}`, {
           cache: "no-store",
           credentials: "include",
         });
         const data = await response.json();
-
+        
         if (data.status === "200") {
           setExpenses((prev) =>
             reset ? data.expenses : [...prev, ...data.expenses]
@@ -87,7 +99,7 @@ export default function ExpensesPage() {
         setLoading(false);
       }
     },
-    [latestOnly, skip, limit]
+    [latestOnly, skip, limit, id, period, customStartDate, customEndDate]
   );
 
   useEffect(() => {
@@ -97,7 +109,7 @@ export default function ExpensesPage() {
   useEffect(() => {
     setSkip(0);
     fetchExpenses(true);
-  }, [latestOnly, fetchExpenses]);
+  }, [latestOnly, period, customStartDate, customEndDate, fetchExpenses]);
 
   const loadMore = () => {
     if (!latestOnly && hasMore && !loading) {
@@ -129,8 +141,33 @@ export default function ExpensesPage() {
               </p>
             </div>
 
-            {/* Total Cost Card */}
-            <Card className="bg-linear-to-br from-green-500 to-emerald-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+            {/* Total lorry hire Card */}
+            <Card className="bg-linear-to-br from-green-500 to-blue-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-white/20 rounded-lg">
+                      <IndianRupee size={20} className="text-white" />
+                    </div>
+                    <div>
+                      <p className="text-white/80 text-sm font-medium">
+                        Total Lorry Hire
+                      </p>
+                      <p className="text-white text-xl sm:text-2xl font-bold">
+                        {totalLoading ? (
+                          <Loader2 size={20} className="animate-spin" />
+                        ) : (
+                          `₹${totalAmount.toLocaleString("en-IN")}`
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Total Expense Card */}
+            <Card className="bg-linear-to-br from-orange-500 to-yellow-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -145,7 +182,31 @@ export default function ExpensesPage() {
                         {totalLoading ? (
                           <Loader2 size={20} className="animate-spin" />
                         ) : (
-                          `₹${totalAmount.toLocaleString("en-IN")}`
+                          `₹${totalExpense.toLocaleString("en-IN")}`
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            {/* Total Expense Card */}
+            <Card className="bg-linear-to-br from-blue-500 to-orange-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-white/20 rounded-lg">
+                      <IndianRupee size={20} className="text-white" />
+                    </div>
+                    <div>
+                      <p className="text-white/80 text-sm font-medium">
+                        Total Net Profit
+                      </p>
+                      <p className="text-white text-xl sm:text-2xl font-bold">
+                        {totalLoading ? (
+                          <Loader2 size={20} className="animate-spin" />
+                        ) : (
+                          `₹${netProfit.toLocaleString("en-IN")}`
                         )}
                       </p>
                     </div>
@@ -276,12 +337,40 @@ export default function ExpensesPage() {
                   <div className="flex items-center gap-2 text-sm text-gray-500">
                     <Calendar size={14} />
                     <span>
-                      {new Date(expense.createdAt).toLocaleDateString("en-IN", {
+                      {new Date(expense.date).toLocaleDateString("en-IN", {
                         day: "numeric",
                         month: "short",
                         year: "numeric",
                       })}
                     </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-orange-100 rounded-lg">
+                      <IndianRupee size={16} className="text-orange-600" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs text-gray-500 font-medium">Total Expense</span>
+                      <span className="text-sm font-semibold text-gray-900">
+                        ₹{parseFloat(expense.totalExpense || 0).toLocaleString("en-IN")}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-blue-100 rounded-lg">
+                      <IndianRupee size={16} className="text-blue-600" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs text-gray-500 font-medium">Net Profit</span>
+                      <span className={`text-sm font-semibold ${
+                        (parseFloat(expense.Amount || 0) - parseFloat(expense.totalExpense || 0)) >= 0
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}>
+                        ₹{(parseFloat(expense.Amount || 0) - parseFloat(expense.totalExpense || 0)).toLocaleString("en-IN")}
+                      </span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

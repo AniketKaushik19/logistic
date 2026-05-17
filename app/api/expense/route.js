@@ -6,24 +6,34 @@ function buildDateFilter(period, startDate, endDate) {
   const now = new Date();
 
   if (period === "monthly") {
-   const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
     const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59));
 
-    return { createdAt: { $gte: start, $lte: end } };
+    return {
+      date: {
+        $gte: start.toISOString().split('T')[0],
+        $lte: end.toISOString().split('T')[0],
+      }
+    };
   }
 
   if (period === "yearly") {
     const start = new Date(Date.UTC(now.getUTCFullYear(), 0, 1));
     const end = new Date(Date.UTC(now.getUTCFullYear(), 11, 31, 23, 59, 59));
 
-    return { createdAt: { $gte: start, $lte: end } };
+    return {
+      date: {
+        $gte: start.toISOString().split('T')[0],
+        $lte: end.toISOString().split('T')[0],
+      }
+    };
   }
 
   if (period === "custom" && startDate && endDate) {
-  return {
-      createdAt: {
-        $gte: new Date(`${startDate}T00:00:00.000Z`),
-        $lte: new Date(`${endDate}T23:59:59.999Z`),
+    return {
+      date: {
+        $gte: startDate,
+        $lte: endDate,
       },
     };
   }

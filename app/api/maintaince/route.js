@@ -1,0 +1,82 @@
+import clientPromise from "@/lib/mongodb";
+import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/auth";
+
+export async function GET(req) {
+  const auth = await requireAuth(req);
+  if (!auth.authenticated) {
+    return NextResponse.json({ error: auth.error || "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { searchParams } = new URL(req.url);
+    const vehicleId = searchParams.get("vehicleId");
+
+    if (!vehicleId) {
+      return NextResponse.json(
+        { error: "vehicleId is required" },
+        { status: 400 }
+      );
+    }
+
+    const client = await clientPromise;
+    const db = client.db("logisticdb");
+    const records = await db
+      .collection("maintenance")
+      .find({ vehicleId })
+      .sort({ date: -1 })
+      .toArray();
+
+    return NextResponse.json({ status: "200", records });
+  } catch (error) {
+    console.error("Maintenance list error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch maintenance records" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(req) {
+  const auth = await requireAuth(req);
+  if (!auth.authenticated) {
+    return NextResponse.json({ error: auth.error || "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { vehicleId, description, amount, date } = await req.json();
+
+    if (!vehicleId || !description || !amount || !date) {
+      return NextResponse.json(
+        { error: "vehicleId, description, amount, and date are required" },
+        { status: 400 }
+      );
+    }
+
+    const client = await clientPromise;
+    const db = client.db("logisticdb");
+    const collection = db.collection("maintenance");
+
+    const record = {
+      vehicleId,
+      description,
+      amount: parseFloat(amount),
+      date,
+      createdAt: new Date(),
+      createdBy: auth.user.email,
+    };
+
+    const result = await collection.insertOne(record);
+
+    return NextResponse.json(
+      { success: true, message: "Maintenance record saved successfully", recordId: result.insertedId },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Maintenance save error:", error);
+    return NextResponse.json(
+      { error: "Failed to save maintenance record" },
+      { status: 500 }
+    );
+  }
+}
