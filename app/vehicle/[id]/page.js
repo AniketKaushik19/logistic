@@ -9,8 +9,9 @@ export default function Vehicle({ params }) {
   const [id, setId] = useState(null);
   const [Expenses, setExpenses] = useState([]);
   const [Amount, setAmount] = useState("");
+  const [TotalExpense, setTotalExpense] = useState("");
   const [eDate, setEDate] = useState("");
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState("Total Lorry Hire");
   const [response, setResponse] = useState("");
 
   useEffect(() => {
@@ -48,6 +49,7 @@ export default function Vehicle({ params }) {
         date: eDate,
         title: title,
         vehicleId: id,
+        totalExpense:TotalExpense,
         createdAt: new Date().toISOString(),
       };
 
@@ -73,6 +75,7 @@ export default function Vehicle({ params }) {
           setAmount("");
           setEDate("");
           setTitle("");
+          setTotalExpense("Total Lorry Hire");
           getLatestExpenses(id);
         } else {
           toast.error(`Error: ${data.error}`);
@@ -125,9 +128,16 @@ export default function Vehicle({ params }) {
                 />
                 <input
                   type="number"
-                  placeholder="Amount (₹)"
+                  placeholder="Total Lorry hire (₹)"
                   value={Amount}
                   onChange={(e) => setAmount(e.target.value)}
+                  className="flex-1 p-3 border-2 border-green-300 rounded-lg focus:border-green-500 focus:outline-none transition-colors placeholder-green-400 text-gray-800"
+                />
+                <input
+                  type="number"
+                  placeholder="Total Expense (₹)"
+                  value={TotalExpense}
+                  onChange={(e) => setTotalExpense(e.target.value)}
                   className="flex-1 p-3 border-2 border-green-300 rounded-lg focus:border-green-500 focus:outline-none transition-colors placeholder-green-400 text-gray-800"
                 />
                 <input

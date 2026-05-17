@@ -14,7 +14,12 @@ function buildDateFilter(period, startDate, endDate) {
       23, 59, 59, 999
     ));
 
-    return { createdAt: { $gte: start, $lte: end } };
+    return {
+      date: {
+        $gte: start.toISOString().split('T')[0],
+        $lte: end.toISOString().split('T')[0],
+      }
+    };
   }
 
   if (period === "yearly") {
@@ -26,14 +31,19 @@ function buildDateFilter(period, startDate, endDate) {
       23, 59, 59, 999
     ));
 
-    return { createdAt: { $gte: start, $lte: end } };
+    return {
+      date: {
+        $gte: start.toISOString().split('T')[0],
+        $lte: end.toISOString().split('T')[0],
+      }
+    };
   }
 
   if (period === "custom" && startDate && endDate) {
     return {
-      createdAt: {
-        $gte: new Date(`${startDate}T00:00:00.000Z`),
-        $lte: new Date(`${endDate}T23:59:59.999Z`),
+      date: {
+        $gte: startDate,
+        $lte: endDate,
       },
     };
   }
@@ -79,14 +89,17 @@ export async function GET(req) {
           $group: {
             _id: null,
             totalAmount: { $sum: { $toDouble: "$Amount" } },
+            totalExpense: { $sum: { $toDouble: "$totalExpense" } },
           },
         },
       ])
       .toArray();
-
+    
     return NextResponse.json({
       success: true,
       totalAmount: result[0]?.totalAmount || 0,
+      totalExpense: result[0]?.totalExpense || 0,
+      netProfit: (result[0]?.totalAmount || 0) - (result[0]?.totalExpense || 0),
     });
   } catch (error) {
     console.error("Expense total error:", error);

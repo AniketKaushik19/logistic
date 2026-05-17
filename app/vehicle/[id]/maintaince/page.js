@@ -1,0 +1,231 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { useParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import Navbar from "@/app/_components/Navbar";
+
+export default function Maintaince() {
+  const { id } = useParams();
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
+  const [date, setDate] = useState("");
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  const fetchRecords = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({ vehicleId: id });
+      const response = await fetch(`/api/maintaince?${params}`, {
+        cache: "no-store",
+        credentials: "include",
+      });
+      const data = await response.json();
+      if (data.status === "200") {
+        setRecords(data.records || []);
+      }
+    } catch (err) {
+      console.error("Error fetching maintenance records:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (id) fetchRecords();
+  }, [id, fetchRecords]);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setSubmitting(true);
+    setError("");
+    setMessage("");
+
+    if (!description || !amount || !date) {
+      setError("Please fill in description, amount, and date.");
+      setSubmitting(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/maintaince", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          vehicleId: id,
+          description,
+          amount,
+          date,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error || "Unable to save record.");
+        return;
+      }
+
+      setMessage(data.message || "Maintenance record saved.");
+      setDescription("");
+      setAmount("");
+      setDate("");
+      fetchRecords();
+    } catch (err) {
+      console.error("Error saving maintenance record:", err);
+      setError("Failed to save record. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-slate-50 py-8 my-12">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <div className="space-y-2">
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-blue-600">
+              Vehicle Maintenance
+            </p>
+            <h1 className="text-3xl font-bold text-slate-900">
+              Maintaince for {id}
+            </h1>
+            <p className="max-w-2xl text-slate-600">
+              Add new maintenance costs for this vehicle and review recent maintenance records.
+            </p>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+            <Card className="bg-white shadow-lg border border-slate-200">
+              <CardHeader>
+                <CardTitle>New Maintenance Record</CardTitle>
+                <CardDescription>
+                  Enter the description, amount, and date of work performed.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {error && (
+                  <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {error}
+                  </div>
+                )}
+                {message && (
+                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                    {message}
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Description</label>
+                    <Textarea
+                      value={description}
+                      onChange={(event) => setDescription(event.target.value)}
+                      placeholder="Enter maintenance description"
+                      rows={4}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Amount</label>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={amount}
+                      onChange={(event) => setAmount(event.target.value)}
+                      placeholder="Enter amount"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700">Date</label>
+                    <Input
+                      type="date"
+                      value={date}
+                      onChange={(event) => setDate(event.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+
+                  <div className="flex justify-end">
+                    <Button type="submit" disabled={submitting}>
+                      {submitting ? "Saving..." : "Save Record"}
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white shadow-lg border border-slate-200">
+              <CardHeader>
+                <CardTitle>Maintenance Summary</CardTitle>
+                <CardDescription>
+                  Recent records are automatically loaded from the API.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="rounded-2xl bg-slate-50 p-4">
+                  <p className="text-sm text-slate-600">
+                    Total records: <span className="font-semibold text-slate-900">{records.length}</span>
+                  </p>
+                  <p className="text-sm text-slate-600 mt-2">
+                    Latest maintenance entries appear below after save.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-4 max-h-[420px] overflow-y-auto">
+                  {loading ? (
+                    <div className="text-sm text-slate-500">Loading maintenance records...</div>
+                  ) : records.length === 0 ? (
+                    <div className="text-sm text-slate-500">No maintenance records yet.</div>
+                  ) : (
+                    records.map((record) => (
+                      <div
+                        key={record._id}
+                        className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="space-y-1">
+                            <p className="text-sm font-semibold text-slate-900">{record.description}</p>
+                            <p className="text-xs text-slate-500">
+                              {new Date(record.date).toLocaleDateString("en-IN", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })}
+                            </p>
+                          </div>
+                          <p className="text-sm font-semibold text-slate-900">
+                            ₹{parseFloat(record.amount || 0).toLocaleString("en-IN")}
+                          </p>
+                        </div>
+                        <p className="mt-3 text-xs text-slate-500">
+                          Added by {record.createdBy || "system"}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
