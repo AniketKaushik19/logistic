@@ -31,9 +31,9 @@ export default function DriverCard({
   const salary = driver.salaryDetails || {};
   const salaryStatus = salary?.status || "Unpaid";
   const baseSalary = Number(driver?.salary?? 0);
-  const advance = Number(salary.advance ?? 0);
+  // show pending/unsettled advance balance (not settled advances)
+  const advance = Number(salary.pendingAdvance ?? 0);
   const bonus = Number(salary.bonus ?? 0);
-  const penalty = Number(salary.penalty ?? 0);
 
   const salaryPaid = salaryStatus === "Paid";
 
@@ -102,7 +102,7 @@ export default function DriverCard({
       {/* Advance / Bonus / Penalty */}
       <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
         <Info
-          label="Advance"
+          label="Pending Advance"
           value={advance}
           icon={<ArrowDownCircle className="size-4 text-red-500" />}
           color="text-red-600"
@@ -113,12 +113,7 @@ export default function DriverCard({
           icon={<ArrowUpCircle className="size-4 text-green-500" />}
           color="text-green-600"
         />
-        <Info
-          label="Penalty"
-          value={penalty}
-          icon={<MinusCircle className="size-4 text-orange-500" />}
-          color="text-orange-600"
-        />
+      
       </div>
 
       {/* Actions */}
@@ -154,7 +149,6 @@ export default function DriverCard({
       baseSalary: driver.salaryDetails?.baseSalary || driver.salary,
       advance: driver.salaryDetails?.advance || 0,
       bonus: driver.salaryDetails?.bonus || 0,
-      penalty: driver.salaryDetails?.penalty || 0,
       paidAt: driver.salaryDetails?.paidAt
         ? new Date(driver.salaryDetails.paidAt).toLocaleString()
         : "-",

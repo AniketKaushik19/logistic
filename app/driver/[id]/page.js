@@ -42,10 +42,7 @@ console.log(id)
   return (
     <>
       <div className="p-4">
-        <h2 className="text-xl font-semibold mb-3">
-          Edit Driver: {driver.name}
-        </h2>
-        <DriverForm
+            <DriverForm
           initialData={driver}
           onSuccess={handleSuccess}
           onCancel={() => router.push("/driver/list")}

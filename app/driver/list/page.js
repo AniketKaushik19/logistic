@@ -102,11 +102,7 @@ export default function DriverListPage() {
               Salary – {salaryDriver?.name}
             </DialogTitle>
           </DialogHeader>
-          <h3 className="text-lg font-semibold">
-            Salary – {salaryDriver?.name}
-          </h3>
-
-          <SalaryActions
+        <SalaryActions
             driver={salaryDriver}
             onClose={() => setSalaryDriver(null)}
             onUpdated={handleSalaryUpdated}

@@ -27,7 +27,7 @@ export async function GET(req) {
       { projection: { salary: 1, name: 1 } }
     );
 
-  const baseSalary = driver?.salary || 0;
+  const salary = driver?.salary || 0;
 
   // Fetch salary history
   const history = await db
@@ -36,18 +36,21 @@ export async function GET(req) {
     .sort({ createdAt: -1 })
     .toArray();
 
-  // Remove note and amount fields, and add baseSalary to each record
+  // Remove note and amount fields, and add salary to each record
   const cleanedHistory = history.map((h) => ({
     _id: h._id,
     driverId: h.driverId,
     month: h.month,
+    salary: h.salary || 0,
     advance: h.advance || 0,
     bonus: h.bonus || 0,
-    penalty: h.penalty || 0,
+    pendingAdvance: h.pendingAdvance || 0,
+    netPay: h.netPay || 0,
+    transactionType: h.transactionType || "SALARY_PAID",
+    status: h.status || "Paid",
     markPaid: !!h.markPaid,
     createdBy: h.createdBy || null,
     createdAt: h.createdAt,
-    baseSalary, // add base salary from driver
   }));
 
   return NextResponse.json(cleanedHistory);

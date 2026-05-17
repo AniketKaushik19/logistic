@@ -24,7 +24,7 @@ export default function SalaryHistoryModal({ driver }) {
     try {
       const res = await fetch(
         `/api/driver/salary/history?driverId=${driver._id}`,
-        { credentials: "include" }
+        { credentials: "include" },
       );
       if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
@@ -42,7 +42,7 @@ export default function SalaryHistoryModal({ driver }) {
   /* ===== YEARS & MONTHS ===== */
   const years = useMemo(() => {
     return Array.from(
-      new Set(history.map((h) => h.month?.split("-")[0]).filter(Boolean))
+      new Set(history.map((h) => h.month?.split("-")[0]).filter(Boolean)),
     );
   }, [history]);
 
@@ -52,8 +52,8 @@ export default function SalaryHistoryModal({ driver }) {
         history
           .filter((h) => year === "all" || h.month?.startsWith(year))
           .map((h) => h.month?.split("-")[1])
-          .filter(Boolean)
-      )
+          .filter(Boolean),
+      ),
     );
   }, [history, year]);
 
@@ -76,21 +76,19 @@ export default function SalaryHistoryModal({ driver }) {
 
   /* ===== NET PAY ===== */
   const netPay = (item) => {
-    if (item.markPaid)
-      return (
-        Number(item.bonus || 0) -
-        Number(item.advance || 0) -
-        Number(item.penalty || 0)
-      );
+    // Use stored netPay if available (from SALARY_PAID transactions)
+    if (item.netPay) return item.netPay;
 
+    // For ADVANCE_GIVEN, no net pay calculation
+    if (item.transactionType === "ADVANCE_GIVEN") return 0;
+
+    // Fallback: Net Pay = Salary + Bonus - Advance
     return (
-      Number(item.baseSalary || 0) +
+      Number(item.salary || 0) +
       Number(item.bonus || 0) -
-      Number(item.advance || 0) -
-      Number(item.penalty || 0)
+      Number(item.advance || 0)
     );
   };
-
   return (
     <DialogContent className="sm:max-w-[780px] bg-white p-5">
       <h3 className="text-lg font-semibold mb-4">
@@ -99,20 +97,20 @@ export default function SalaryHistoryModal({ driver }) {
       {/* ===== FILTER BAR ===== */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <Button
-  variant="secondary"
-  size="sm"
-  className="flex items-center gap-2 hover:cursor-pointer"
-  onClick={() =>
-    generateSalaryHistoryPDF({
-      driver,
-      filters: { year, month, fromDate, toDate },
-      data: filteredHistory,
-    })
-  }
->
-  <Download size={16} />
-  Print Report
-</Button>
+          variant="secondary"
+          size="sm"
+          className="flex items-center gap-2 hover:cursor-pointer"
+          onClick={() =>
+            generateSalaryHistoryPDF({
+              driver,
+              filters: { year, month, fromDate, toDate },
+              data: filteredHistory,
+            })
+          }
+        >
+          <Download size={16} />
+          Print Report
+        </Button>
 
         <select
           value={year}
@@ -162,82 +160,113 @@ export default function SalaryHistoryModal({ driver }) {
         <p className="text-sm text-slate-500">No salary history found</p>
       ) : (
         <div className="space-y-3 max-h-[500px] overflow-y-auto">
-          {filteredHistory.map((item, idx) => (
-            <div
-              key={idx}
-              className="rounded-lg bg-slate-50 p-4 shadow-sm hover:shadow-md transition"
-            >
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-semibold">{item.month}</span>
+          {filteredHistory.map((item, idx) => {
+            const isAdvanceGiven = item.transactionType === "ADVANCE_GIVEN";
+            const isSalaryPaid = item.transactionType === "SALARY_PAID";
 
-                <div className="flex gap-2 items-center">
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded ${
-                      item.markPaid
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-amber-100 text-amber-700"
-                    }`}
-                  >
-                    {item.markPaid ? "Paid" : "Unpaid"}
-                  </span>
+            return (
+              <div
+                key={idx}
+                className={`rounded-lg p-4 shadow-sm hover:shadow-md transition ${
+                  isAdvanceGiven ? "bg-orange-50" : "bg-slate-50"
+                }`}
+              >
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-semibold">
+                     {new Date(item.month).toLocaleString("en-IN", {
+                      month: "short",
+                      year: "numeric",
+                    })}
+                    </span>
 
-                  <button
-                  className="hover:cursor-pointer"
-                    onClick={() =>
-                      generateSalaryPDF({
-                        month: item.month,
-                        driverName: driver.name,
-                        status: item.markPaid ? "Paid" : "Unpaid",
-                        baseSalary: item.baseSalary,
-                        advance: item.advance,
-                        bonus: item.bonus,
-                        penalty: item.penalty,
-                        paidAt: item.createdAt
-                          ? new Date(item.createdAt).toLocaleDateString(
-                              "en-IN",
-                              {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                              }
-                            )
-                          : "-",
-                      })
-                    }
-                  >
-                    <Download/>
-                  </button>
+                  <div className="flex gap-2 items-center">
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded ${
+                        isAdvanceGiven
+                          ? "bg-orange-100 text-orange-700"
+                          : "bg-emerald-100 text-emerald-700"
+                      }`}
+                    >
+                      {isAdvanceGiven ? "💰 Advance Given" : "✓ Salary Paid"}
+                    </span>
+
+                    {isSalaryPaid && (
+                      <button
+                        className="hover:cursor-pointer"
+                        onClick={() =>
+                          generateSalaryPDF({
+                            month: item.month,
+                            driverName: driver.name,
+                            status: "Paid",
+                            salary: item.salary,
+                            advance: item.advance,
+                            bonus: item.bonus,
+                            paidAt: item.createdAt
+                              ? new Date(item.createdAt).toLocaleDateString(
+                                  "en-IN",
+                                  {
+                                    day: "2-digit",
+                                    month: "short",
+                                    year: "numeric",
+                                  },
+                                )
+                              : "-",
+                          })
+                        }
+                      >
+                        <Download />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  {/* For ADVANCE_GIVEN */}
+                  {isAdvanceGiven && (
+                    <>
+                      <p>
+                        <strong>Advance Given:</strong> ₹ {item.advance}
+                      </p>
+                    </>
+                  )}
+
+                  {/* For SALARY_PAID */}
+                  {isSalaryPaid && (
+                    <>
+                      {item.salary > 0 && (
+                        <p>
+                          <strong>Salary:</strong> ₹ {item.salary}
+                        </p>
+                      )}
+                      {item.advance > 0 && (
+                        <p>
+                          <strong>Advance Settled:</strong> ₹ {item.advance}
+                        </p>
+                      )}
+                      {item.bonus > 0 && (
+                        <p>
+                          <strong>Bonus:</strong> ₹ {item.bonus}
+                        </p>
+                      )}
+                      <p className="font-semibold text-emerald-600">
+                        <strong>Net Pay:</strong> ₹ {netPay(item)}
+                      </p>
+                    </>
+                  )}
+
+                  <p className="text-xs text-slate-500">
+                    {new Date(item.createdAt).toLocaleString("en-IN", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
                 </div>
               </div>
-
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <p>
-                  <strong>Base:</strong> ₹ {item.baseSalary}
-                </p>
-                <p>
-                  <strong>Advance:</strong> ₹ {item.advance}
-                </p>
-                <p>
-                  <strong>Bonus:</strong> ₹ {item.bonus}
-                </p>
-                <p>
-                  <strong>Penalty:</strong> ₹ {item.penalty}
-                </p>
-                <p className="font-semibold">
-                  <strong>Net Pay:</strong> ₹ {netPay(item)}
-                </p>
-                <p className="text-xs text-slate-500">
-                  {new Date(item.createdAt).toLocaleString("en-IN", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </DialogContent>
