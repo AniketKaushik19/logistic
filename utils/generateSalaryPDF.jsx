@@ -176,7 +176,7 @@ export async function generateSalaryPDF(
     14,
     currentY - 5,
     pageWidth - 28,
-    30,
+    52,
     3,
     3,
     "F"
@@ -188,8 +188,18 @@ export async function generateSalaryPDF(
 
   doc.setTextColor(...dark);
 
+  const salaryAmount = Number(
+    salary.salary ?? salary.baseSalary ?? 0
+  );
+  const advanceAmount = Number(salary.advance || 0);
+  const bonusAmount = Number(salary.bonus || 0);
+  const contactNumber =
+    salary.contactNumber || "-";
+  const vehicleNumber =
+    salary.vehicleNumber || "-";
+
   doc.text(
-    `Month:${formatDate(
+    `Month: ${formatDate(
       salary.month || "-"
     )}`,
     20,
@@ -205,28 +215,42 @@ export async function generateSalaryPDF(
   );
 
   doc.text(
-    `Salary Amount: ₹ ${
-      salary.salary || 0
-    }`,
+    `Contact: ${contactNumber}`,
+    20,
+    currentY + 18
+  );
+
+  doc.text(
+    `Vehicle: ${vehicleNumber}`,
+    20,
+    currentY + 26
+  );
+
+  doc.text(
+    `Vehicle: ${vehicleNumber}`,
+    20,
+    currentY + 34
+  );
+
+  doc.text(
+    `Salary Amount: ₹ ${salaryAmount}`,
     pageWidth - 70,
     currentY + 2
   );
 
   doc.text(
-    `Advance: ₹ ${
-      salary.advance || 0
-    }`,
+    `Advance: ₹ ${advanceAmount}`,
     pageWidth - 70,
     currentY + 10
   );
 
   doc.text(
-    `Bonus: ₹ ${salary.bonus || 0}`,
+    `Bonus: ₹ ${bonusAmount}`,
     pageWidth - 70,
     currentY + 18
   );
 
-  currentY += 38;
+  currentY += 58;
 
   /* =====================================================
      TRANSACTION TABLE
@@ -241,17 +265,17 @@ export async function generateSalaryPDF(
     body: [
       [
         "Salary Amount",
-        `₹ ${salary.salary || 0}`,
+        `₹ ${salaryAmount}`,
       ],
 
       [
         "Advance Deduction",
-        `₹ ${salary.advance || 0}`,
+        `₹ ${advanceAmount}`,
       ],
 
       [
         "Bonus",
-        `₹ ${salary.bonus || 0}`,
+        `₹ ${bonusAmount}`,
       ],
     ],
 
@@ -292,8 +316,7 @@ export async function generateSalaryPDF(
   ===================================================== */
 
   const net =
-    Number(salary.salary || 0) -
-    Number(salary.advance || 0);
+    salaryAmount + bonusAmount - advanceAmount;
 
   doc.setFillColor(239, 246, 255);
 

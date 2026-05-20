@@ -58,11 +58,7 @@ export default function DriverCard({
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-slate-800">{driver.name}</h3>
           <p className="text-sm text-slate-500">{driver.contactNumber}</p>
-          {driver.emailAddress && (
-            <p className="text-xs text-slate-400 mt-0.5">{driver.emailAddress}</p>
-          )}
-
-          {/* Vehicle */}
+                   {/* Vehicle */}
 
           <div className="mt-2 inline-flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700">
             <Truck className="size-4" />
@@ -145,8 +141,10 @@ export default function DriverCard({
     generateSalaryPDF({
       month: driver.salaryDetails?.month,
       driverName: driver.name,
+      contactNumber: driver.contactNumber,
+      vehicleNumber: driver.vehicleNumber,
       status: driver.salaryDetails?.status ? "Paid" : "Unpaid",
-      baseSalary: driver.salaryDetails?.baseSalary || driver.salary,
+      salary: driver.salaryDetails?.salary || driver.salary,
       advance: driver.salaryDetails?.advance || 0,
       bonus: driver.salaryDetails?.bonus || 0,
       paidAt: driver.salaryDetails?.paidAt

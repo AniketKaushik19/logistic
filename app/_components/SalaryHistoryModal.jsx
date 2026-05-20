@@ -197,6 +197,8 @@ export default function SalaryHistoryModal({ driver }) {
                           generateSalaryPDF({
                             month: item.month,
                             driverName: driver.name,
+                            contactNumber: driver.contactNumber,
+                            vehicleNumber: driver.vehicleNumber,
                             status: "Paid",
                             salary: item.salary,
                             advance: item.advance,
