@@ -7,6 +7,22 @@ import autoTable from "jspdf-autotable";
 function formatDate(date) {
   if (!date) return "-";
 
+  // For month values like 2026-05
+  if (
+    typeof date === "string" &&
+    /^\d{4}-\d{2}$/.test(date)
+  ) {
+    const [year, month] = date.split("-");
+
+    return new Date(
+      Number(year),
+      Number(month) - 1
+    ).toLocaleDateString("en-IN", {
+      month: "short",
+      year: "numeric",
+    });
+  }
+
   return new Date(date).toLocaleDateString(
     "en-IN",
     {
@@ -26,7 +42,7 @@ export const generateSalaryHistoryPDF = ({
   data,
 }) => {
   const doc = new jsPDF(
-    "p",
+    "landscape",
     "mm",
     "a4"
   );
@@ -44,7 +60,7 @@ export const generateSalaryHistoryPDF = ({
   const dark = [15, 23, 42];
   const gray = [100, 116, 139];
 
-  let currentY = 18;
+  let currentY = 16;
 
   /* =====================================================
      HEADER
@@ -64,14 +80,14 @@ export const generateSalaryHistoryPDF = ({
     }
   );
 
-  currentY += 10;
+  currentY += 8;
 
   doc.setDrawColor(220);
 
   doc.line(
-    14,
+    12,
     currentY,
-    pageWidth - 14,
+    pageWidth - 12,
     currentY
   );
 
@@ -80,13 +96,14 @@ export const generateSalaryHistoryPDF = ({
   /* =====================================================
      DRIVER INFO CARD
   ===================================================== */
+
   doc.setFillColor(248, 250, 252);
 
   doc.roundedRect(
-    14,
+    12,
     currentY - 4,
-    pageWidth - 28,
-    28,
+    pageWidth - 24,
+    30,
     3,
     3,
     "F"
@@ -99,19 +116,33 @@ export const generateSalaryHistoryPDF = ({
   doc.setTextColor(...dark);
 
   doc.text(
-    `Driver Name: ${
-      driver.name || "-"
+    `Driver Name: ${driver.name || "-"}`,
+    18,
+    currentY + 3
+  );
+
+  doc.text(
+    `Contact: ${
+      driver.contactNumber || "-"
     }`,
-    20,
-    currentY + 4
+    18,
+    currentY + 11
+  );
+
+  doc.text(
+    `Vehicle: ${
+      driver.vehicleNumber || "-"
+    }`,
+    pageWidth / 2,
+    currentY + 3
   );
 
   doc.text(
     `Generated On: ${formatDate(
       new Date()
     )}`,
-    20,
-    currentY + 12
+    pageWidth / 2,
+    currentY + 11
   );
 
   /* =====================================================
@@ -155,63 +186,99 @@ export const generateSalaryHistoryPDF = ({
       appliedFilters.join(" | ");
   }
 
-  doc.setTextColor(...gray);
-
   doc.setFontSize(10);
+
+  doc.setTextColor(...gray);
 
   doc.text(
     `Filters: ${filterText}`,
-    20,
-    currentY + 20
+    18,
+    currentY + 22
   );
 
-  currentY += 38;
+  currentY += 36;
 
   /* =====================================================
      TABLE DATA
   ===================================================== */
-  const rows = data.map(
-    (item, index) => {
-      const netPay =
-        Number(item.salary || 0) -
-        Number(item.advance || 0);
 
-      return [
-        index + 1,
+  const rows = data.map((item) => {
+    const isAdvanceGiven =
+      item.transactionType ===
+      "ADVANCE_GIVEN";
 
-        item.month || "-",
+    const isSalaryPaid =
+      item.transactionType ===
+      "SALARY_PAID";
 
-        ` ${
-          item.salary || 0
-        }`,
+    const salaryAmount =
+      isSalaryPaid
+        ? Number(item.salary || 0)
+        : 0;
 
-        ` ${
-          item.advance || 0
-        }`,
+    const advanceGiven =
+      isAdvanceGiven
+        ? Number(item.advance || 0)
+        : 0;
 
-        ` ${
-          item.bonus || 0
-        }`,
+    const advanceSettled =
+      isSalaryPaid
+        ? Number(item.advance || 0)
+        : 0;
 
-        ` ${netPay}`,
+    const bonusAmount = Number(
+      item.bonus || 0
+    );
 
-        formatDate(item.createdAt),
-      ];
-    }
-  );
+    const netPay = isSalaryPaid
+      ? Number(item.netPay || 0)
+      : 0;
+
+    return [
+      formatDate(item.month),
+
+      isAdvanceGiven
+        ? "Advance Given"
+        : "Salary Paid",
+
+      salaryAmount.toLocaleString(
+        "en-IN"
+      ),
+
+      advanceGiven.toLocaleString(
+        "en-IN"
+      ),
+
+      advanceSettled.toLocaleString(
+        "en-IN"
+      ),
+
+      bonusAmount.toLocaleString(
+        "en-IN"
+      ),
+
+      netPay.toLocaleString(
+        "en-IN"
+      ),
+
+      formatDate(item.createdAt),
+    ];
+  });
 
   /* =====================================================
      TABLE
   ===================================================== */
+
   autoTable(doc, {
     startY: currentY,
 
     head: [
       [
-        "#",
         "Month",
+        "Transaction Type",
         "Salary",
-        "Advance",
+        "Advance Given",
+        "Advance Settled",
         "Bonus",
         "Net Pay",
         "Date",
@@ -224,56 +291,71 @@ export const generateSalaryHistoryPDF = ({
 
     styles: {
       fontSize: 10,
-
       cellPadding: 4,
-
       valign: "middle",
+      halign: "center",
+      overflow: "linebreak",
+      lineColor: [220, 220, 220],
+      lineWidth: 0.2,
+      textColor: dark,
     },
 
     headStyles: {
       fillColor: primary,
-
       textColor: 255,
-
       fontStyle: "bold",
-
+      fontSize: 10,
       halign: "center",
     },
 
-    bodyStyles: {
-      textColor: dark,
+    alternateRowStyles: {
+      fillColor: [248, 250, 252],
     },
 
     columnStyles: {
       0: {
-        halign: "center",
-        cellWidth: 10,
+        cellWidth: 32,
       },
 
       1: {
-        halign: "center",
+        cellWidth: 48,
+        halign: "left",
       },
 
       2: {
+        cellWidth: 32,
         halign: "right",
       },
 
       3: {
+        cellWidth: 36,
         halign: "right",
       },
 
       4: {
+        cellWidth: 36,
         halign: "right",
       },
 
       5: {
+        cellWidth: 32,
+        halign: "right",
+      },
+
+      6: {
+        cellWidth: 36,
         halign: "right",
         fontStyle: "bold",
       },
 
-      6: {
-        halign: "center",
+      7: {
+        cellWidth: 40,
       },
+    },
+
+    margin: {
+      left: 12,
+      right: 12,
     },
   });
 
@@ -284,37 +366,59 @@ export const generateSalaryHistoryPDF = ({
   const totalSalary = data.reduce(
     (sum, item) =>
       sum +
-      Number(item.salary || 0),
+      (item.transactionType ===
+      "SALARY_PAID"
+        ? Number(item.salary || 0)
+        : 0),
     0
   );
 
   const totalAdvance = data.reduce(
     (sum, item) =>
       sum +
-      Number(item.advance || 0),
+      (item.transactionType ===
+      "ADVANCE_GIVEN"
+        ? Number(item.advance || 0)
+        : 0),
+    0
+  );
+
+  const totalAdvanceSettled = data.reduce(
+    (sum, item) =>
+      sum +
+      (item.transactionType ===
+      "SALARY_PAID"
+        ? Number(item.advance || 0)
+        : 0),
     0
   );
 
   const totalBonus = data.reduce(
     (sum, item) =>
-      sum +
-      Number(item.bonus || 0),
+      sum + Number(item.bonus || 0),
     0
   );
 
-  const totalNet =
-    totalSalary - totalAdvance;
+  const totalNet = data.reduce(
+    (sum, item) =>
+      sum +
+      (item.transactionType ===
+      "SALARY_PAID"
+        ? Number(item.netPay || 0)
+        : 0),
+    0
+  );
 
   currentY =
-    doc.lastAutoTable.finalY + 12;
+    doc.lastAutoTable.finalY + 10;
 
   doc.setFillColor(239, 246, 255);
 
   doc.roundedRect(
-    14,
-    currentY - 3,
-    pageWidth - 28,
-    28,
+    12,
+    currentY - 2,
+    pageWidth - 24,
+    24,
     3,
     3,
     "F"
@@ -327,27 +431,53 @@ export const generateSalaryHistoryPDF = ({
   doc.setTextColor(...primary);
 
   doc.text(
-    `Total Salary:  ${totalSalary}`,
-    20,
+    `Total Salary: ${totalSalary.toLocaleString(
+      "en-IN"
+    )}`,
+    18,
     currentY + 6
   );
 
   doc.text(
-    `Total Advance:  ${totalAdvance}`,
-    20,
+    `Total Advance Given: ${totalAdvance.toLocaleString(
+      "en-IN"
+    )}`,
+    90,
+    currentY + 6
+  );
+
+  doc.text(
+    `Total Advance Settled: ${totalAdvanceSettled.toLocaleString(
+      "en-IN"
+    )}`,
+    175,
+    currentY + 6
+  );
+
+  doc.text(
+    `Total Bonus: ${totalBonus.toLocaleString(
+      "en-IN"
+    )}`,
+    18,
     currentY + 14
   );
 
   doc.text(
-    `Total Bonus:  ${totalBonus}`,
-    pageWidth - 80,
-    currentY + 6
+    `Total Net Pay: ${totalNet.toLocaleString(
+      "en-IN"
+    )}`,
+    90,
+    currentY + 14
   );
 
-   /* =====================================================
+  /* =====================================================
      FOOTER
   ===================================================== */
-  doc.setFont("helvetica", "italic");
+
+  doc.setFont(
+    "helvetica",
+    "italic"
+  );
 
   doc.setFontSize(9);
 
@@ -356,7 +486,7 @@ export const generateSalaryHistoryPDF = ({
   doc.text(
     "This is a system generated salary history report.",
     pageWidth / 2,
-    pageHeight - 10,
+    pageHeight - 8,
     {
       align: "center",
     }
@@ -365,6 +495,7 @@ export const generateSalaryHistoryPDF = ({
   /* =====================================================
      SAVE
   ===================================================== */
+
   doc.save(
     `Salary_Report_${driver.name}.pdf`
   );

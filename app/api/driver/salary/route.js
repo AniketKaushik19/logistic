@@ -111,10 +111,6 @@ export async function GET(req) {
 
             contactNumber:
               "$driver.contactNumber",
-
-            emailAddress:
-              "$driver.emailAddress",
-
             vehicleNumber:
               "$driver.vehicleNumber",
 
@@ -339,17 +335,27 @@ export async function POST(req) {
         (pendingAgg[0]?.totalAdvanceSettled || 0)
     );
 
-    // Net Pay = Salary + Bonus - PendingAdvance
-    const netPay =
-      Number(salary) + Number(bonus) - pendingAdvance 
+    const salaryAmount = Number(salary);
+    const bonusAmount = Number(bonus);
+    const advanceSettled = Math.min(
+      pendingAdvance,
+      salaryAmount
+    );
+    const remainingPendingAdvance =
+      pendingAdvance - advanceSettled;
+
+    const netPay = Math.max(
+      0,
+      salaryAmount - advanceSettled + bonusAmount
+    );
 
     const salaryPayload = {
       driverId: new ObjectId(driverId),
       month,
-      salary: Number(salary),
-      advance: pendingAdvance,
-      bonus: Number(bonus),
-      pendingAdvance: 0, // Reset after settlement
+      salary: salaryAmount,
+      advance: advanceSettled,
+      bonus: bonusAmount,
+      pendingAdvance: remainingPendingAdvance,
       transactionType: "SALARY_PAID",
       netPay,
       status: "Paid",
@@ -382,7 +388,8 @@ export async function POST(req) {
       success: true,
       message: "Salary paid",
       netPay,
-      advanceSettled: pendingAdvance,
+      advanceSettled,
+      pendingAdvance: remainingPendingAdvance,
     });
   }
 }

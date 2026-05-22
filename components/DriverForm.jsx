@@ -25,7 +25,6 @@ export default function DriverForm({
     address: "",
     bloodGroup: "",
     contactNumber: "",
-    emailAddress: "",
     permanentLocal: "",
     vehicleNumber: "",
     salary: "",
@@ -45,8 +44,6 @@ export default function DriverForm({
         bloodGroup: initialData.bloodGroup || "",
         contactNumber:
           initialData.contactNumber || "",
-        emailAddress:
-          initialData.emailAddress || "",
         permanentLocal:
           initialData.permanentLocal || "",
         vehicleNumber:
@@ -204,20 +201,6 @@ export default function DriverForm({
             onChange={handleChange}
             placeholder="Enter contact number"
             required
-            className="h-11"
-          />
-        </FieldWrapper>
-
-        {/* EMAIL */}
-        <FieldWrapper
-          icon={<Mail className="size-4" />}
-          label="Email Address"
-        >
-          <Input
-            name="emailAddress"
-            value={form.emailAddress}
-            onChange={handleChange}
-            placeholder="Enter email address"
             className="h-11"
           />
         </FieldWrapper>

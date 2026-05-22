@@ -27,8 +27,6 @@ export default function SalaryActions({
   const [bonus, setBonus] = useState(salary?.bonus || "");
 
   const pendingAdvance = salary?.pendingAdvance || 0;
-  const baseSalary = driver?.salary || 0;
-
   const submit = async () => {
     if (action === "GIVE_ADVANCE") {
       if (!advanceAmount || Number(advanceAmount) <= 0) {
@@ -77,6 +75,12 @@ export default function SalaryActions({
       : `Salary paid! Advance settled: ₹${json.advanceSettled}, Net Pay: ₹${json.netPay}`;
     
     toast.success(message);
+
+  /* ================= RESET FORM ================= */
+
+  setAdvanceAmount("");
+  setBonus("");
+  setAction("PAY_SALARY");
 
     onUpdated?.();
     onClose();
@@ -136,6 +140,7 @@ export default function SalaryActions({
             onChange={(e) => setAdvanceAmount(e.target.value)}
             className="w-full border rounded p-2"
             placeholder="Enter advance amount"
+            min={0}
           />
           {pendingAdvance > 0 && (
             <p className="text-xs text-amber-600 mt-2">
@@ -173,6 +178,7 @@ export default function SalaryActions({
               onChange={(e) => setSalaryAmount(e.target.value)}
               className="w-full border-2 border-blue-300 rounded p-2 text-lg font-semibold"
               placeholder="e.g., 20000"
+              min={0}
             />
             <p className="text-xs text-slate-500 mt-1">
               Enter the full monthly salary for this driver
@@ -189,6 +195,7 @@ export default function SalaryActions({
               onChange={(e) => setBonus(e.target.value)}
               className="w-full border rounded p-2"
               placeholder="Bonus amount (optional)"
+              min={0}
             />
           </div>
 
@@ -258,12 +265,12 @@ export default function SalaryActions({
       )}
 
       <div className="flex justify-end gap-2 pt-2">
-        <Button onClick={onClose}>
+        <Button variant="secondary" onClick={onClose}>
           Cancel
         </Button>
 
         <Button onClick={submit}>
-          {action === "GIVE_ADVANCE" ? "Give Advance" : "Pay Remaining Amount"}
+          {action === "GIVE_ADVANCE" ? "Give Advance" : "Pay"}
         </Button>
       </div>
     </div>
