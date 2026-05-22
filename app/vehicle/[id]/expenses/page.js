@@ -17,6 +17,10 @@ export default function ExpensesPage() {
   const { id } = useParams();
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalExpense, setTotalExpense] = useState(0);
+  const [totalMaintenance, setTotalMaintenance] = useState(0);
+  const [maintenanceCount, setMaintenanceCount] = useState(0);
+  const [latestMaintenanceDate, setLatestMaintenanceDate] = useState("");
+  const [maintenanceRecords, setMaintenanceRecords] = useState([]);
   const [netProfit, setNetProfit] = useState(0);
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -24,11 +28,20 @@ export default function ExpensesPage() {
   const [skip, setSkip] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [latestOnly, setLatestOnly] = useState(false);
-  const [period, setPeriod] = useState("all");
+  const [period, setPeriod] = useState("monthly");
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
 
   const limit = 10;
+
+  const formatDate = (value) => {
+    if (!value) return "No records";
+    return new Date(value).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
   const fetchTotalExpenses = useCallback(async () => {
     setTotalLoading(true);
@@ -54,6 +67,9 @@ export default function ExpensesPage() {
       if (data.success) {
         setTotalAmount(data.totalAmount);
         setTotalExpense(data.totalExpense);
+        setTotalMaintenance(data.totalMaintenance || 0);
+        setMaintenanceCount(data.maintenanceCount || 0);
+        setLatestMaintenanceDate(data.latestMaintenanceDate || "");
         setNetProfit(data.netProfit);
       }
     } catch (error) {
@@ -102,6 +118,32 @@ export default function ExpensesPage() {
     [latestOnly, skip, limit, id, period, customStartDate, customEndDate]
   );
 
+  const fetchMaintenanceRecords = useCallback(async () => {
+    try {
+      const params = new URLSearchParams({
+        vehicleId: id,
+        period,
+      });
+
+      if (period === "custom" && customStartDate && customEndDate) {
+        params.append("startDate", customStartDate);
+        params.append("endDate", customEndDate);
+      }
+
+      const response = await fetch(`/api/maintaince?${params}`, {
+        cache: "no-store",
+        credentials: "include",
+      });
+      const data = await response.json();
+
+      if (data.status === "200") {
+        setMaintenanceRecords(data.records || []);
+      }
+    } catch (error) {
+      console.error("Error fetching maintenance records:", error);
+    }
+  }, [id, period, customStartDate, customEndDate]);
+
   useEffect(() => {
     fetchTotalExpenses();
   }, [fetchTotalExpenses]);
@@ -109,7 +151,8 @@ export default function ExpensesPage() {
   useEffect(() => {
     setSkip(0);
     fetchExpenses(true);
-  }, [latestOnly, period, customStartDate, customEndDate, fetchExpenses]);
+    fetchMaintenanceRecords();
+  }, [latestOnly, period, customStartDate, customEndDate, fetchExpenses, fetchMaintenanceRecords]);
 
   const loadMore = () => {
     if (!latestOnly && hasMore && !loading) {
@@ -137,7 +180,8 @@ export default function ExpensesPage() {
                 Expenses Dashboard
               </h1>
               <p className="text-gray-600 text-sm sm:text-base">
-                Track and manage your vehicle spending for {id}
+                Track and manage your vehicle spending for <span className="text-black font-bold text-xl">
+                  {id} </span>
               </p>
             </div>
 
@@ -190,7 +234,36 @@ export default function ExpensesPage() {
                 </div>
               </CardContent>
             </Card>
-            {/* Total Expense Card */}
+
+            {/* Total Maintenance Card */}
+            <Card className="bg-linear-to-br from-purple-500 to-fuchsia-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-white/20 rounded-lg">
+                      <TrendingUp size={20} className="text-white" />
+                    </div>
+                    <div>
+                      <p className="text-white/80 text-sm font-medium">
+                        Total Maintenance
+                      </p>
+                      <p className="text-white text-xl sm:text-2xl font-bold">
+                        {totalLoading ? (
+                          <Loader2 size={20} className="animate-spin" />
+                        ) : (
+                          `₹${totalMaintenance.toLocaleString("en-IN")}`
+                        )}
+                      </p>
+                      <p className="text-white/70 text-xs mt-1">
+                        {maintenanceCount} records · Latest: {formatDate(latestMaintenanceDate)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Total Net Profit Card */}
             <Card className="bg-linear-to-br from-blue-500 to-orange-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
@@ -421,6 +494,81 @@ export default function ExpensesPage() {
               </div>
             </div>
           )}
+
+          {/* Maintenance Grid */}
+          <div className="mt-10">
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-semibold text-gray-900">Maintenance Records</h2>
+                <p className="text-sm text-gray-500">
+                  Recent maintenance entries for this vehicle.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {maintenanceRecords.map((record, index) => (
+                <Card
+                  key={`${record._id || index}`}
+                  className="group bg-white/80 backdrop-blur-sm border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1"
+                >
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base sm:text-lg font-semibold text-gray-800 group-hover:text-purple-600 transition-colors duration-200 truncate">
+                      {record.description || "Maintenance"}
+                    </CardTitle>
+                  </CardHeader>
+
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-purple-100 rounded-lg">
+                        <IndianRupee size={16} className="text-purple-600" />
+                      </div>
+                      <span className="text-lg sm:text-xl font-bold text-gray-900">
+                        ₹{parseFloat(record.amount || 0).toLocaleString("en-IN")}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <Calendar size={14} />
+                      <span>
+                        {new Date(record.date).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </div>
+
+                    <div className="text-sm text-gray-500">
+                      <div>
+                        <span className="font-medium text-gray-700">By:</span> {record.createdBy || "Unknown"}
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">Created:</span>{" "}
+                        {new Date(record.createdAt).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+
+              {!loading && maintenanceRecords.length === 0 && (
+                <div className="col-span-full text-center py-12">
+                  <div className="text-5xl sm:text-6xl mb-4">🛠️</div>
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-700 mb-2">
+                    No maintenance records yet
+                  </h3>
+                  <p className="text-gray-500 text-sm sm:text-base">
+                    Add maintenance entries to see them here.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </>

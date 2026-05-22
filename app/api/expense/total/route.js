@@ -94,12 +94,46 @@ export async function GET(req) {
         },
       ])
       .toArray();
-    
+
+    const maintenanceResult = await db
+      .collection("maintenance")
+      .aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: null,
+            totalMaintenance: { $sum: { $toDouble: "$amount" } },
+            maintenanceCount: { $sum: 1 },
+            latestMaintenanceDate: {
+              $max: {
+                $cond: [
+                  { $eq: [{ $type: "$date" }, "date"] },
+                  "$date",
+                  { $toDate: "$date" }
+                ]
+              }
+            }
+          },
+        },
+      ])
+      .toArray();
+
+    const totalAmount = result[0]?.totalAmount || 0;
+    const totalExpense = result[0]?.totalExpense || 0;
+    const totalMaintenance = maintenanceResult[0]?.totalMaintenance || 0;
+    const maintenanceCount = maintenanceResult[0]?.maintenanceCount || 0;
+    const latestMaintenanceDate = maintenanceResult[0]?.latestMaintenanceDate
+      ? maintenanceResult[0].latestMaintenanceDate.toISOString()
+      : null;
+
     return NextResponse.json({
       success: true,
-      totalAmount: result[0]?.totalAmount || 0,
-      totalExpense: result[0]?.totalExpense || 0,
-      netProfit: (result[0]?.totalAmount || 0) - (result[0]?.totalExpense || 0),
+      totalAmount,
+      totalExpense,
+      totalMaintenance,
+      maintenanceCount,
+      latestMaintenanceDate,
+      netProfit: totalAmount - totalExpense - totalMaintenance,
     });
   } catch (error) {
     console.error("Expense total error:", error);
