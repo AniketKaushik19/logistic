@@ -68,8 +68,8 @@ export async function generatePDF(cn, payload) {
         styles: { fontSize: 9, fontStyle: "bold" },
         body: [[
           `Consignor's Name & Address\n${payload.consignorName || ""}\n${payload.consignorAddress || ""}`,
-          `Consignor C.S.T. No\n ${payload.consignorCSTNo || ""}`,
-          `Consignee C.S.T. No\n${payload.consigneeCSTNo || ""}`,
+          `Consignor C.S.T. No\n ${payload.consignorGSTNo || ""}`,
+          `Consignee C.S.T. No\n${payload.consigneeGSTNo || ""}`,
           `Sales Tax / Permit / Declaration\nApplicable as per rule`,
           `Valid up to\n ${payload.validUpTo || ""}`,
           `Date\n ${payload.declarationDate || ""}`
@@ -127,7 +127,6 @@ export async function generatePDF(cn, payload) {
         styles: { fontSize: 9, fontStyle: "bold" },
         body: [[
           `Phone\n${payload.consignorPhone || ""}`,
-          "Fax\n—",
           `From\n${payload.fromLocation || ""}`,
           `To\n${payload.toLocation || ""}`
         ]],

@@ -300,6 +300,7 @@ export default function EditInvoice({params}) {
               icon={<Calendar size={18} />}
               name="billDate"
               type="date"
+              placeholder="Select bill date"
               value={form.billDate}
               onChange={handleChange}
             />
@@ -331,6 +332,7 @@ export default function EditInvoice({params}) {
                   <Input
                     icon={<Calendar size={18} />}
                     type="date"
+                    placeholder="Consignment date"
                     value={c.cnDate}
                     onChange={(e) =>
                       handleConsignmentChange(index, "cnDate", e.target.value)
@@ -458,19 +460,30 @@ const Section = ({ title, children }) => (
   </div>
 );
 
-const Input = ({ icon, ...props }) => (
-  <div className="relative">
-    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-      {icon}
-    </span>
-    <input
-      {...props}
-      className="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3
-                 focus:outline-none focus:ring-2 focus:ring-indigo-500
-                 bg-gray-50 read-only:bg-gray-100"
-    />
-  </div>
-);
+const Input = ({ icon, type, placeholder, value, ...props }) => {
+  const showDatePlaceholder = type === "date" && !value && placeholder;
+  return (
+    <div className="relative">
+      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+        {icon}
+      </span>
+      <input
+        {...props}
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        className="w-full border border-gray-300 rounded-lg py-2.5 pl-10 pr-3
+                   focus:outline-none focus:ring-2 focus:ring-indigo-500
+                   bg-gray-50 read-only:bg-gray-100"
+      />
+      {showDatePlaceholder && (
+        <span className="pointer-events-none absolute left-10 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+          {placeholder}
+        </span>
+      )}
+    </div>
+  );
+};
 
 const Textarea = ({ icon, ...props }) => (
   <div className="relative">

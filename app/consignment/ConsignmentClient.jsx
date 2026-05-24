@@ -20,12 +20,12 @@ const INITIAL_FORM = {
   consignorName: "",
   consignorAddress: "",
   consignorPhone: "",
-  consignorCSTNo: "",
+  consignorGSTNo: "",
 
   consigneeName: "",
   consigneeAddress: "",
   consigneePhone: "",
-  consigneeCSTNo: "",
+  consigneeGSTNo: "",
   deliveryAddress: "",
 
   fromLocation: "",
@@ -35,7 +35,6 @@ const INITIAL_FORM = {
   goodsDescription: "",
   packageCount: "",
   packageMethod: "",
-  fax: "",
 
   amountType: "fixed",
   weightActual: "fixed",
@@ -248,10 +247,10 @@ export default function Page() {
             />
 
             <input
-              name="consignorCSTNo"
-              value={form.consignorCSTNo}
+              name="consignorGSTNo"
+              value={form.consignorGSTNo}
               onChange={handleChange}
-              placeholder="Consignor CST No (optional)"
+              placeholder="Consignor GST No (optional)"
               className="input mt-3"
             />
           </section>
@@ -298,10 +297,10 @@ export default function Page() {
             />
 
             <input
-              name="consigneeCSTNo"
-              value={form.consigneeCSTNo}
+              name="consigneeGSTNo"
+              value={form.consigneeGSTNo}
               onChange={handleChange}
-              placeholder="Consignee CST No (optional)"
+              placeholder="Consignee GST No (optional)"
               className="input mt-3"
             />
           </section>
@@ -325,13 +324,21 @@ export default function Page() {
                 placeholder="To"
                 className="input"
               />
-              <input
-                name="consignmentDate"
-                type="date"
-                value={form.consignmentDate?.split("T")[0] || ""}
-                onChange={handleChange}
-                className="input"
-              />
+              <div className="relative">
+                <input
+                  name="consignmentDate"
+                  type="date"
+                  placeholder="Consignment date"
+                  value={form.consignmentDate?.split("T")[0] || ""}
+                  onChange={handleChange}
+                  className="input"
+                />
+                {!form.consignmentDate && (
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                    Consignment date
+                  </span>
+                )}
+              </div>
             </div>
           </section>
 
@@ -348,13 +355,6 @@ export default function Page() {
             />
 
             <div className="grid sm:grid-cols-4 gap-4 mt-3">
-              <input
-                name="fax"
-                value={form.fax}
-                onChange={handleChange}
-                placeholder="Fax"
-                className="input"
-              />
               <input
                 name="packageCount"
                 type="number"
@@ -481,7 +481,7 @@ export default function Page() {
                   {...numberOnlyProps}
                   value={form.tempAmount}
                   onChange={handleChange}
-                  placeholder="Enter Base Amount"
+                  placeholder="Base Amount"
                   className="input"
                 />
 
@@ -521,7 +521,7 @@ export default function Page() {
               <input
                 type="text"
                 name="invoiceNo"
-                placeholder="Enter Invoice No"
+                placeholder="Invoice No"
                 value={form.invoiceNo}
                 onChange={handleChange}
                 className="input"
@@ -530,7 +530,7 @@ export default function Page() {
               <input
                 type="text"
                 name="invoiceValue"
-                placeholder="Enter Invoice Value"
+                placeholder="Value"
                 value={form.invoiceValue}
                 onChange={handleChange}
                 className="input"
@@ -539,7 +539,7 @@ export default function Page() {
               <input
                 type="text"
                 name="freight"
-                placeholder="Enter Freight"
+                placeholder="Freight"
                 {...numberOnlyProps}
                 value={form.freight}
                 onChange={handleChange}
@@ -550,7 +550,7 @@ export default function Page() {
                 type="text"
                 name="riskCharge"
                 {...numberOnlyProps}
-                placeholder="Enter Risk Charge"
+                placeholder="Risk Charge"
                 value={form.riskCharge}
                 onChange={handleChange}
                 className="input"
@@ -560,7 +560,7 @@ export default function Page() {
                 type="text"
                 name="surcharge"
                 {...numberOnlyProps}
-                placeholder="Enter Surcharge"
+                placeholder="Surcharge"
                 value={form.surcharge}
                 onChange={handleChange}
                 className="input"
@@ -570,7 +570,7 @@ export default function Page() {
                 type="text"
                 name="hamali"
                 {...numberOnlyProps}
-                placeholder="Enter Hamali"
+                placeholder="Hamali"
                 value={form.hamali}
                 onChange={handleChange}
                 className="input"
@@ -579,7 +579,7 @@ export default function Page() {
               <input
                 type="text"
                 name="serviceCharge"
-                placeholder="Enter Service Charge"
+                placeholder="Service Charge"
                 {...numberOnlyProps}
                 value={form.serviceCharge}
                 onChange={handleChange}
@@ -588,7 +588,7 @@ export default function Page() {
               <input
                 type="text"
                 name="measurement"
-                placeholder="Enter Measurement"
+                placeholder="Measurement"
                 {...numberOnlyProps}
                 value={form.measurement}
                 onChange={handleChange}
@@ -604,16 +604,20 @@ export default function Page() {
                   className="input"
                 />
               </div>
-              <div>
+              <div className="relative w-full">
                 <input
                   type="date"
                   name="billedAt"
-                  placeholder="Select Billed Date"
+                  placeholder="Billed date"
                   value={form.billedAt}
                   onChange={handleChange}
                   className="input"
                 />
-                <small className="px-2 text-gray-500">Select Billed Date</small>
+                {!form.billedAt && (
+                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-gray-500">
+                    Billed date
+                  </span>
+                )}
               </div>
             </div>
           </section>
@@ -622,7 +626,7 @@ export default function Page() {
           <section>
             <h2 className="font-semibold text-lg mb-3">Tax / Declaration</h2>
             <div className="grid grid-cols-2 gap-4">
-=                <input
+               <input
                   type="number"
                   name="ebayBill"
                   placeholder="E-BayBill"
@@ -631,18 +635,21 @@ export default function Page() {
                   className="input"
                   pattern="\d{12}"
                 />
-              <div>
+              <div className="relative w-full">
                 <input
                   type="date"
                   name="declarationDate"
-                  placeholder="Select Declaration Date"
+                  placeholder="Declaration date"
                   value={form.declarationDate}
                   onChange={handleChange}
-                  className="input"
+                  className="input p-3"
                 />
-                <small className="px-2 text-gray-500">
-                  Select Declaration Date
-                </small>
+                {!form.declarationDate && (
+                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-gray-500">
+                    Declaration date
+                  </span>
+                )}
+                
               </div>
             </div>
           </section>
@@ -660,14 +667,21 @@ export default function Page() {
                 className="input"
               />
 
-              <input
-                type="date"
-                name="deliveryDate"
-                placeholder="Select Delivery Date"
-                value={form.deliveryDate}
-                onChange={handleChange}
-                className="input"
-              />
+              <div className="relative w-full">
+                <input
+                  type="date"
+                  name="deliveryDate"
+                  placeholder="Delivery date"
+                  value={form.deliveryDate}
+                  onChange={handleChange}
+                  className="input"
+                />
+                {!form.deliveryDate && (
+                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-gray-500">
+                    Delivery date
+                  </span>
+                )}
+              </div>
             </div>
           </section>
           {/* ================= PAYMENT ================= */}

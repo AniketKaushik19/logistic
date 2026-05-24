@@ -56,22 +56,16 @@ export default function VehicleCard({
       </div>
 
       {/* Actions */}
-      <div className="mt-6 flex justify-center gap-4">
+      <div className="mt-6 text-center">
         {/* <button className="bg-linear-to-r from-green-500 to-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-green-600 hover:to-blue-600 transition-all">
           Track Vehicle
         </button> */}
-
-        <Link href={`/vehicle/${id}`}>
+          <Link href={`/vehicle/${id}/expenses`}>
           <button className="bg-linear-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-blue-600 cursor-pointer hover:to-purple-600 transition-all">
-            Manage Vehicle
+           Dashboard
           </button>
         </Link>
-        <Link href={`/vehicle/${id}/maintaince`}>
-          <button className="bg-linear-to-r from-red-500 to-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer hover:from-red-600 hover:to-blue-600 transition-all">
-            Maintaince
-          </button>
-        </Link>
-      </div>
+        </div>
     </div>
   );
 }
