@@ -72,6 +72,13 @@ export default function VehicleCard({
           </button>
         </Link>
       </div>
+      <div className="mt-6 text-center">
+          <Link href={`/vehicle/${id}/expenses`}>
+          <button className="bg-linear-to-r from-green-500 to-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-green-600 cursor-pointer hover:to-blue-600 transition-all">
+           Dashboard
+          </button>
+        </Link>
+        </div>
     </div>
   );
 }

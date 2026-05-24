@@ -481,7 +481,7 @@ export default function Page() {
                   {...numberOnlyProps}
                   value={form.tempAmount}
                   onChange={handleChange}
-                  placeholder="Enter Base Amount"
+                  placeholder="Base Amount"
                   className="input"
                 />
 
@@ -521,7 +521,7 @@ export default function Page() {
               <input
                 type="text"
                 name="invoiceNo"
-                placeholder="Enter Invoice No"
+                placeholder="Invoice No"
                 value={form.invoiceNo}
                 onChange={handleChange}
                 className="input"
@@ -530,7 +530,7 @@ export default function Page() {
               <input
                 type="text"
                 name="invoiceValue"
-                placeholder="Enter Invoice Value"
+                placeholder="Value"
                 value={form.invoiceValue}
                 onChange={handleChange}
                 className="input"
@@ -539,7 +539,7 @@ export default function Page() {
               <input
                 type="text"
                 name="freight"
-                placeholder="Enter Freight"
+                placeholder="Freight"
                 {...numberOnlyProps}
                 value={form.freight}
                 onChange={handleChange}
@@ -550,7 +550,7 @@ export default function Page() {
                 type="text"
                 name="riskCharge"
                 {...numberOnlyProps}
-                placeholder="Enter Risk Charge"
+                placeholder="Risk Charge"
                 value={form.riskCharge}
                 onChange={handleChange}
                 className="input"
@@ -560,7 +560,7 @@ export default function Page() {
                 type="text"
                 name="surcharge"
                 {...numberOnlyProps}
-                placeholder="Enter Surcharge"
+                placeholder="Surcharge"
                 value={form.surcharge}
                 onChange={handleChange}
                 className="input"
@@ -570,7 +570,7 @@ export default function Page() {
                 type="text"
                 name="hamali"
                 {...numberOnlyProps}
-                placeholder="Enter Hamali"
+                placeholder="Hamali"
                 value={form.hamali}
                 onChange={handleChange}
                 className="input"
@@ -579,7 +579,7 @@ export default function Page() {
               <input
                 type="text"
                 name="serviceCharge"
-                placeholder="Enter Service Charge"
+                placeholder="Service Charge"
                 {...numberOnlyProps}
                 value={form.serviceCharge}
                 onChange={handleChange}
@@ -588,7 +588,7 @@ export default function Page() {
               <input
                 type="text"
                 name="measurement"
-                placeholder="Enter Measurement"
+                placeholder="Measurement"
                 {...numberOnlyProps}
                 value={form.measurement}
                 onChange={handleChange}
@@ -608,7 +608,7 @@ export default function Page() {
                 <input
                   type="date"
                   name="billedAt"
-                  placeholder="Select Billed Date"
+                  placeholder="Billed Date"
                   value={form.billedAt}
                   onChange={handleChange}
                   className="input"
@@ -635,7 +635,7 @@ export default function Page() {
                 <input
                   type="date"
                   name="declarationDate"
-                  placeholder="Select Declaration Date"
+                  placeholder="Declaration Date"
                   value={form.declarationDate}
                   onChange={handleChange}
                   className="input"
@@ -663,7 +663,7 @@ export default function Page() {
               <input
                 type="date"
                 name="deliveryDate"
-                placeholder="Select Delivery Date"
+                placeholder="Delivery Date"
                 value={form.deliveryDate}
                 onChange={handleChange}
                 className="input"
