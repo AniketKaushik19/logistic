@@ -157,6 +157,7 @@ export default function Maintaince() {
                     <Input
                       type="date"
                       value={date}
+                      placeholder="Select maintenance date"
                       onChange={(event) => setDate(event.target.value)}
                       className="w-full"
                     />

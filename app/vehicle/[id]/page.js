@@ -140,12 +140,20 @@ export default function Vehicle({ params }) {
                   onChange={(e) => setTotalExpense(e.target.value)}
                   className="flex-1 p-3 border-2 border-green-300 rounded-lg focus:border-green-500 focus:outline-none transition-colors placeholder-green-400 text-gray-800"
                 />
+                <div className="relative">
                 <input
                   type="date"
                   value={eDate}
+                  placeholder="Select the date"
                   onChange={(e) => setEDate(e.target.value)}
                   className="p-3 border-2 border-green-300 rounded-lg focus:border-green-500 focus:outline-none transition-colors placeholder-green-400 text-green-700"
                 />
+                 {!eDate && (
+                        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+                          Select  Date
+                        </span>
+                      )}
+                      </div>
                 <div>
                   <button
                     onClick={addExpense}

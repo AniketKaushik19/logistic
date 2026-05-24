@@ -199,6 +199,7 @@ router.push('/freightMemo')
             label="Date"
             type="date"
             name="date"
+            placeholder="Select date"
             value={form.date}
             onChange={handleChange}
           />

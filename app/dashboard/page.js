@@ -219,25 +219,39 @@ useEffect(() => {
             </button>
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full">
               {/* Start Date */}
-              <input
-                type="date"
-                value={customStart}
-                onChange={(e) => setCustomStart(e.target.value)}
-                className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg
-                      focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              <div className="relative w-full sm:w-auto">
+                <input
+                  type="date"
+                  value={customStart}
+                  placeholder="Start date"
+                  onChange={(e) => setCustomStart(e.target.value)}
+                  className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                {!customStart && (
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                    Start date
+                  </span>
+                )}
+              </div>
 
               {/* Separator */}
               <span className="hidden sm:block text-gray-600">to</span>
 
               {/* End Date */}
-              <input
-                type="date"
-                value={customEnd}
-                onChange={(e) => setCustomEnd(e.target.value)}
-                className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg
-                       focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              <div className="relative w-full sm:w-auto">
+                <input
+                  type="date"
+                  value={customEnd}
+                  placeholder="End date"
+                  onChange={(e) => setCustomEnd(e.target.value)}
+                  className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                {!customEnd && (
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                    End date
+                  </span>
+                )}
+              </div>
 
               {/* Button */}
               <button

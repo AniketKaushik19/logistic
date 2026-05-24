@@ -325,13 +325,21 @@ export default function Page() {
                 placeholder="To"
                 className="input"
               />
-              <input
-                name="consignmentDate"
-                type="date"
-                value={form.consignmentDate?.split("T")[0] || ""}
-                onChange={handleChange}
-                className="input"
-              />
+              <div className="relative">
+                <input
+                  name="consignmentDate"
+                  type="date"
+                  placeholder="Consignment date"
+                  value={form.consignmentDate?.split("T")[0] || ""}
+                  onChange={handleChange}
+                  className="input"
+                />
+                {!form.consignmentDate && (
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                    Consignment date
+                  </span>
+                )}
+              </div>
             </div>
           </section>
 
@@ -604,16 +612,20 @@ export default function Page() {
                   className="input"
                 />
               </div>
-              <div>
+              <div className="relative w-full">
                 <input
                   type="date"
                   name="billedAt"
-                  placeholder="Billed Date"
+                  placeholder="Billed date"
                   value={form.billedAt}
                   onChange={handleChange}
                   className="input"
                 />
-                <small className="px-2 text-gray-500">Select Billed Date</small>
+                {!form.billedAt && (
+                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-gray-500">
+                    Billed date
+                  </span>
+                )}
               </div>
             </div>
           </section>
@@ -622,7 +634,7 @@ export default function Page() {
           <section>
             <h2 className="font-semibold text-lg mb-3">Tax / Declaration</h2>
             <div className="grid grid-cols-2 gap-4">
-=                <input
+               <input
                   type="number"
                   name="ebayBill"
                   placeholder="E-BayBill"
@@ -631,18 +643,21 @@ export default function Page() {
                   className="input"
                   pattern="\d{12}"
                 />
-              <div>
+              <div className="relative w-full">
                 <input
                   type="date"
                   name="declarationDate"
-                  placeholder="Declaration Date"
+                  placeholder="Declaration date"
                   value={form.declarationDate}
                   onChange={handleChange}
-                  className="input"
+                  className="input p-3"
                 />
-                <small className="px-2 text-gray-500">
-                  Select Declaration Date
-                </small>
+                {!form.declarationDate && (
+                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-gray-500">
+                    Declaration date
+                  </span>
+                )}
+                
               </div>
             </div>
           </section>
@@ -660,14 +675,21 @@ export default function Page() {
                 className="input"
               />
 
-              <input
-                type="date"
-                name="deliveryDate"
-                placeholder="Delivery Date"
-                value={form.deliveryDate}
-                onChange={handleChange}
-                className="input"
-              />
+              <div className="relative w-full">
+                <input
+                  type="date"
+                  name="deliveryDate"
+                  placeholder="Delivery date"
+                  value={form.deliveryDate}
+                  onChange={handleChange}
+                  className="input"
+                />
+                {!form.deliveryDate && (
+                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-gray-500">
+                    Delivery date
+                  </span>
+                )}
+              </div>
             </div>
           </section>
           {/* ================= PAYMENT ================= */}
