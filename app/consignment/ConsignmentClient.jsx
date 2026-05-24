@@ -20,12 +20,12 @@ const INITIAL_FORM = {
   consignorName: "",
   consignorAddress: "",
   consignorPhone: "",
-  consignorCSTNo: "",
+  consignorGSTNo: "",
 
   consigneeName: "",
   consigneeAddress: "",
   consigneePhone: "",
-  consigneeCSTNo: "",
+  consigneeGSTNo: "",
   deliveryAddress: "",
 
   fromLocation: "",
@@ -247,10 +247,10 @@ export default function Page() {
             />
 
             <input
-              name="consignorCSTNo"
-              value={form.consignorCSTNo}
+              name="consignorGSTNo"
+              value={form.consignorGSTNo}
               onChange={handleChange}
-              placeholder="Consignor CST No (optional)"
+              placeholder="Consignor GST No (optional)"
               className="input mt-3"
             />
           </section>
@@ -297,10 +297,10 @@ export default function Page() {
             />
 
             <input
-              name="consigneeCSTNo"
-              value={form.consigneeCSTNo}
+              name="consigneeGSTNo"
+              value={form.consigneeGSTNo}
               onChange={handleChange}
-              placeholder="Consignee CST No (optional)"
+              placeholder="Consignee GST No (optional)"
               className="input mt-3"
             />
           </section>

@@ -9,10 +9,11 @@ import {
   TrendingUp,
   Filter,
   Loader2,
+  Plus,
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import Navbar from "@/app/_components/Navbar";
-
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 export default function ExpensesPage() {
   const { id } = useParams();
   const [totalAmount, setTotalAmount] = useState(0);
@@ -187,6 +188,49 @@ export default function ExpensesPage() {
               </p>
             </div>
 
+            <div className="flex items-center gap-4">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="inline-flex items-center gap-2 bg-linear-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-all">
+                    <Plus size={18} className="text-white" />
+                    Manage Vehicle
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden bg-white">
+                  <DialogHeader>
+                    <DialogTitle>Manage Vehicle</DialogTitle>
+                  </DialogHeader>
+                  <div className="h-[75vh] overflow-hidden rounded-xl border border-slate-200">
+                    <iframe
+                      src={`/vehicle/${id}`}
+                      title={`Manage Vehicle ${id}`}
+                      className="w-full h-full"
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="inline-flex items-center gap-2 bg-linear-to-r from-red-500 to-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-red-600 hover:to-blue-600 transition-all">
+                    <Plus size={18} className="text-white" />
+                    Maintaince
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden bg-white">
+                  <DialogHeader>
+                    <DialogTitle>Maintaince</DialogTitle>
+                  </DialogHeader>
+                  <div className="h-[75vh] overflow-hidden rounded-xl border border-slate-200">
+                    <iframe
+                      src={`/vehicle/${id}/maintaince`}
+                      title={`Maintaince ${id}`}
+                      className="w-full h-full"
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
             {/* Total lorry hire Card */}
             <Card className="bg-linear-to-br from-green-500 to-blue-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
               <CardContent className="p-4 sm:p-6">

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Navbar from "@/app/_components/Navbar";
 import toast from "react-hot-toast";
 
 export default function Vehicle({ params }) {
@@ -104,17 +103,13 @@ export default function Vehicle({ params }) {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50">
-      {/*Navbar for Vehicle page*/}
-      <Navbar />
-      <main className="container px-4 py-8 mt-12">
+      <main className="container px-4 ">
         <div className="grid grid-cols-1 gap-8">
           {/* Expenses Section */}
-          <div className="bg-linear-to-br from-white to-blue-50 shadow-xl rounded-xl p-6 border border-blue-200 lg:w-250 lg:mx-auto">
-            <h2 className="text-center text-xl font-semibold p-1">{id}</h2>
-
+            <h2 className="text-center text-xl font-bold mt-2  p-1">{id}</h2>
             {/*  Expenses */}
-            <div className="mb-8 bg-linear-to-br from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
-              <h3 className="text-lg font-semibold mb-3 text-green-800 flex items-center">
+            <div className="mb-6 bg-linear-to-br from-green-50 to-emerald-50 p-2 rounded-lg border border-green-200">
+              <h3 className="text-lg font-semibold mb-6 text-green-800 flex items-center">
                 <span className="mr-2">💵</span> Expenses
               </h3>
               {/* //form  */}
@@ -163,33 +158,8 @@ export default function Vehicle({ params }) {
                   </button>
                 </div>
               </div>
-
-              {/* //expense list  */}
-              <div className="space-y-2 max-h-40 overflow-y-auto">
-                <span className="p-2 text-green-500 flex justify-end-safe hover:cursor-pointer hover:text-green-600">
-                  <Link href={`/vehicle/${id}/expenses`}>View all</Link>
-                </span>
-                {Expenses?.map((expense, index) => (
-                  <div
-                    key={index}
-                    className="bg-white p-3 rounded-md shadow-sm border border-green-100"
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium text-green-700">
-                        ₹{expense.Amount}
-                      </span>
-                      <span className="font-medium text-orange-600">
-                        {expense.title}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        {expense.date}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
-          </div>
+        
         </div>
       </main>
     </div>
