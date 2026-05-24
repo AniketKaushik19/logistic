@@ -35,7 +35,6 @@ const INITIAL_FORM = {
   goodsDescription: "",
   packageCount: "",
   packageMethod: "",
-  fax: "",
 
   amountType: "fixed",
   weightActual: "fixed",
@@ -356,13 +355,6 @@ export default function Page() {
             />
 
             <div className="grid sm:grid-cols-4 gap-4 mt-3">
-              <input
-                name="fax"
-                value={form.fax}
-                onChange={handleChange}
-                placeholder="Fax"
-                className="input"
-              />
               <input
                 name="packageCount"
                 type="number"

@@ -127,7 +127,6 @@ export async function generatePDF(cn, payload) {
         styles: { fontSize: 9, fontStyle: "bold" },
         body: [[
           `Phone\n${payload.consignorPhone || ""}`,
-          "Fax\n—",
           `From\n${payload.fromLocation || ""}`,
           `To\n${payload.toLocation || ""}`
         ]],
