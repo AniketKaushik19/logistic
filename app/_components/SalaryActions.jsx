@@ -9,6 +9,7 @@ export default function SalaryActions({
   onClose,
   onUpdated,
 }) {
+  const [loading,setLoading]=useState(false);
   const salary = driver?.salaryDetails || {};
 
   const currentMonth = new Date().toISOString().slice(0, 7);
@@ -28,6 +29,8 @@ export default function SalaryActions({
 
   const pendingAdvance = salary?.pendingAdvance || 0;
   const submit = async () => {
+        setLoading(true);
+
     if (action === "GIVE_ADVANCE") {
       if (!advanceAmount || Number(advanceAmount) <= 0) {
         toast.error("Enter valid advance amount");
@@ -67,8 +70,10 @@ export default function SalaryActions({
 
     if (!res.ok) {
       toast.error(json.error || "Failed");
+          setLoading(false);
       return;
     }
+              setLoading(false);
 
     const message = action === "GIVE_ADVANCE" 
       ? `Advance ₹${advanceAmount} given. Pending balance: ₹${json.pendingAdvance}`
@@ -269,7 +274,7 @@ export default function SalaryActions({
           Cancel
         </Button>
 
-        <Button onClick={submit}>
+        <Button onClick={submit} disabled={loading}>
           {action === "GIVE_ADVANCE" ? "Give Advance" : "Pay"}
         </Button>
       </div>
