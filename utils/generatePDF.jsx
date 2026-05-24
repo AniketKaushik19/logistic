@@ -21,7 +21,22 @@ function addLogo(doc, base64) {
 
 /* ================= CHECKBOX ================= */
 function checkbox(doc, x, y, checked) {
+  doc.setDrawColor(0);
+  doc.setLineWidth(0.5);
   doc.rect(x, y, 4, 4);
+
+  if (checked) {
+    doc.setDrawColor(0);
+    const startX = x + 1;
+    const startY = y + 2.2;
+    const midX = x + 1.7;
+    const midY = y + 3.4;
+    const endX = x + 3.6;
+    const endY = y + 1.2;
+
+    doc.line(startX, startY, midX, midY);
+    doc.line(midX, midY, endX, endY);
+  }
 }
 
 /* ================= GENERATE PDF ================= */
@@ -67,17 +82,16 @@ export async function generatePDF(cn, payload) {
         theme: "grid",
         styles: { fontSize: 9, fontStyle: "bold" },
         body: [[
-          `Consignor's Name & Address\n${payload.consignorName || ""}\n${payload.consignorAddress || ""}`,
-          `Consignor C.S.T. No\n ${payload.consignorGSTNo || ""}`,
-          `Consignee C.S.T. No\n${payload.consigneeGSTNo || ""}`,
-          `Sales Tax / Permit / Declaration\nApplicable as per rule`,
-          `Valid up to\n ${payload.validUpTo || ""}`,
-          `Date\n ${payload.declarationDate || ""}`
+          `Consignor's Name & Address\n\n${payload.consignorName || ""}\n${payload.consignorAddress || ""}`,
+          `Consignor G.S.T. No\n\n ${payload.consignorGSTNo || ""}`,
+          `Consignee G.S.T. No\n\n${payload.consigneeGSTNo || ""}`,
+          `E-Way Bill\n\n${Array.isArray(payload.ewaybill) ? payload.ewaybill.filter(e => e).join(", ") : payload.ewaybill || ""}`,
+          `Valid up to\n\n ${payload.validUpTo || ""}`,
         ]],
         columnStyles: {
           0: { cellWidth: 60 },
-          1: { cellWidth: 30 },
-          2: { cellWidth: 30 },
+          1: { cellWidth: 40 },
+          2: { cellWidth: 40 },
           3: { cellWidth: 30 },
           4: { cellWidth: 20 },
           5: { cellWidth: 20 }
@@ -97,8 +111,8 @@ export async function generatePDF(cn, payload) {
         theme: "grid",
         styles: { fontSize: 9, fontStyle: "bold" },
         body: [[
-          `Consignee's Name & Address\n${payload.consigneeName || ""}\n${payload.consigneeAddress || ""}`,
-          `Delivery Address\n${payload.deliveryAddress || ""}`
+          `Consignee's Name & Address\n\n${payload.consigneeName || ""}\n${payload.consigneeAddress || ""}`,
+          `Delivery Address\n\n${payload.deliveryAddress || ""}`
         ]],
         columnStyles: { 0: { cellWidth: 95 }, 1: { cellWidth: 95 } }
       });
@@ -218,6 +232,8 @@ doc.line(175, sigY + 6, 205, sigY + 6);
     drawCopy("CONSIGNEE COPY");
     doc.addPage();
     drawCopy("LORRY COPY");
+    doc.addPage();
+    drawCopy("CONSIGNER COPY");
 
     return doc.output("blob");
 }

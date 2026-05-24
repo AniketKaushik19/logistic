@@ -5,7 +5,7 @@ import {
   View,
   StyleSheet,
   Image,
-  Font
+  Font,
 } from "@react-pdf/renderer";
 
 /* ---------------- FONT (Hindi) ---------------- */
@@ -18,7 +18,6 @@ export default function FreightMemoPDF({ data }) {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-
         {/* HEADER */}
         <View style={styles.header}>
           <Image src="/logo.png" style={styles.logo} />
@@ -26,7 +25,8 @@ export default function FreightMemoPDF({ data }) {
             <Text style={styles.memo}>FREIGHT MEMO</Text>
             <Text style={styles.title}>ANIKET LOGISTIC</Text>
             <Text style={styles.sub}>
-              7/A Buddh Vihar Colony, Phase-2 Kotwali Road Chinhat, Lucknow-226028
+              7/A Buddh Vihar Colony, Phase-2 Kotwali Road Chinhat,
+              Lucknow-226028
             </Text>
           </View>
         </View>
@@ -43,10 +43,10 @@ export default function FreightMemoPDF({ data }) {
 
         {/* ROW 2 */}
         <Row
+          left="G.R. No."
+          leftValue={data.grNos.join(" / ").toUpperCase()}
           right="From"
           rightValue={data.from.toUpperCase()}
-          value="G.R. No."
-          leftValue={data.grNos.join(" / ").toUpperCase()}
         />
 
         {/* ROW 3 */}
@@ -108,11 +108,18 @@ export default function FreightMemoPDF({ data }) {
 
         {/* NOTES (Hindi) */}
         <View style={styles.notes}>
-          <Text>1. माल भरने के बाद हर किस्म के नुकसान की जिम्मेदारी गाड़ी मालिक की होगी।</Text>
+          <Text>
+            1. माल भरने के बाद हर किस्म के नुकसान की जिम्मेदारी गाड़ी मालिक की
+            होगी।
+          </Text>
           <Text>2. यदि गाड़ी (Direct) न जाये तो बाकी किराया नहीं मिलेगा।</Text>
-          <Text>3. माल हमारे (Destination Office) या पार्टी के मुताबिक खाली होगा।</Text>
+          <Text>
+            3. माल हमारे (Destination Office) या पार्टी के मुताबिक खाली होगा।
+          </Text>
           <Text>4. रविवार व अन्य छुट्टी के दिन माल खाली नहीं होगा।</Text>
-          <Text>5. माल का भाड़ा (Destination Office) कांटे के मुताबिक मिलेगा।</Text>
+          <Text>
+            5. माल का भाड़ा (Destination Office) कांटे के मुताबिक मिलेगा।
+          </Text>
         </View>
 
         {/* SIGNATURE */}
@@ -120,7 +127,6 @@ export default function FreightMemoPDF({ data }) {
           <Text>Signature of Driver / Owner / Agent Clerk</Text>
           <Text>Signature of Challan</Text>
         </View>
-
       </Page>
     </Document>
   );
