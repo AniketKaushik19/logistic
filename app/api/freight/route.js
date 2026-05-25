@@ -61,6 +61,7 @@ export async function POST(req) {
       licenceNo: licenceNo.toUpperCase(),
 
       through: through.toUpperCase(),
+      status: "Pending",
       createdAt:new Date()
     });
     if (result) {
@@ -167,6 +168,60 @@ export async function PUT(req) {
   } catch (error) {
     return NextResponse.json(
       { success: false, message: "Error saving Freight" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(req) {
+  const auth = await requireAuth(req);
+  if (!auth.authenticated) {
+    return NextResponse.json(
+      { error: auth.error || "Unauthorized" },
+      { status: 401 }
+    );
+  }
+  try {
+    const { freightId, status } = await req.json();
+
+    if (!freightId || !status) {
+      return NextResponse.json(
+        { error: "Freight ID and status are required" },
+        { status: 400 }
+      );
+    }
+
+    if (!ObjectId.isValid(freightId)) {
+      return NextResponse.json(
+        { error: "Invalid freight ID" },
+        { status: 400 }
+      );
+    }
+
+    const client = await clientPromise;
+    const db = client.db("logisticdb");
+    const result = await db.collection("Freight").findOneAndUpdate(
+      { _id: new ObjectId(freightId) },
+      { $set: { status, updatedAt: new Date() } },
+      { returnDocument: "after" }
+    );
+
+    if (!result) {
+      return NextResponse.json(
+        { error: "Freight not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Freight status updated successfully",
+      data: result,
+    });
+  } catch (error) {
+    console.error("Error updating freight status:", error);
+    return NextResponse.json(
+      { error: "Failed to update freight status" },
       { status: 500 }
     );
   }

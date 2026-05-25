@@ -4,9 +4,46 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Truck, User, MapPin, IndianRupee , Edit , Printer , Trash2 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
+import { Loader2 as LoadingIcon } from "lucide-react";
+
 export default function ChallanCard({ data }) {
   const f=data.freight
   const id=f._id
+  const [isPaid, setIsPaid] = useState(f?.status === "Paid");
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handlePaymentToggle = async (checked) => {
+    try {
+      setIsUpdating(true);
+      const newStatus = checked ? "Paid" : "Pending";
+      
+      const response = await fetch("/api/freight", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          freightId: id,
+          status: newStatus,
+        }),
+      });
+
+      if (response.ok) {
+        setIsPaid(checked);
+      } else {
+        console.error("Failed to update payment status");
+        alert("Failed to update payment status. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error updating payment status:", error);
+      alert("Error updating payment status");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+  
   return (
 
 
@@ -58,12 +95,32 @@ export default function ChallanCard({ data }) {
         {/* Amount */}
         <div className="flex justify-between items-center pt-2 border-t">
           <div className="text-xs">
-            Advance: ₹{f.advance || 0}
+            {isPaid ? (
+              <span className="text-green-600 font-semibold">✓ Paid</span>
+            ) : (
+              <>Advance: ₹{f.advance || 0}</>
+            )}
           </div>
           <div className="flex items-center gap-1 font-bold">
             <IndianRupee size={16} />
-            {f.netBalance}
+            {isPaid ? f.total : f.netBalance}
           </div>
+        </div>
+
+        {/* Payment Checkbox */}
+        <div className="flex items-center gap-2 py-2 px-3 bg-gray-50 rounded-lg">
+          <input
+            type="checkbox"
+            id={`payment-${id}`}
+            checked={isPaid}
+            onChange={(e) => handlePaymentToggle(e.target.checked)}
+            disabled={isUpdating}
+            className="w-4 h-4 cursor-pointer accent-green-600 disabled:opacity-50"
+          />
+          <label htmlFor={`payment-${id}`} className="text-xs font-medium text-gray-700 cursor-pointer flex items-center gap-1">
+            {isUpdating && <LoadingIcon size={12} className="animate-spin" />}
+            Mark as Payment Done
+          </label>
         </div>
 
         {/* Payable */}

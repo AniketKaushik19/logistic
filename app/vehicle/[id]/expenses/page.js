@@ -188,7 +188,7 @@ export default function ExpensesPage() {
               </p>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 ">
               <Dialog>
                 <DialogTrigger asChild>
                   <button className="inline-flex items-center gap-2 bg-linear-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-all">
@@ -224,6 +224,26 @@ export default function ExpensesPage() {
                   <div className="h-[75vh] overflow-hidden rounded-xl border border-slate-200">
                     <iframe
                       src={`/vehicle/${id}/maintaince`}
+                      title={`Maintaince ${id}`}
+                      className="w-full h-full"
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="inline-flex items-center gap-2 bg-linear-to-r from-red-500 to-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-red-600 hover:to-blue-600 transition-all">
+                    <Plus size={18} className="text-white" />
+                    Balance
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden bg-white">
+                  <DialogHeader>
+                    <DialogTitle>Balance</DialogTitle>
+                  </DialogHeader>
+                  <div className="h-[75vh] overflow-hidden rounded-xl border border-slate-200">
+                    <iframe
+                      src={`/vehicle/${id}/balance`}
                       title={`Maintaince ${id}`}
                       className="w-full h-full"
                     />
