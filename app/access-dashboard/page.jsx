@@ -244,9 +244,9 @@ const handleCeoConfirm = async (ceo) => {
               key={admin._id}
               className="relative bg-white rounded-3xl p-6 shadow-xl"
             >
-              <div className="absolute top-4 right-4 flex gap-2">
-                {/* ✅ Edit ONLY self */}
-                {admin._id === currentAdminId && (
+              <div className="absolute top-4 right-4 flex gap-2">{console.log(admin.email)}
+                {/* ✅ Edit ONLY self and main admin */}
+                {((admin._id === currentAdminId) || (currentAdminId == null)) && (
                   <button
                     onClick={() => setPasswordModal(true)}
                     className="p-2 rounded-full bg-blue-100 hover:bg-blue-200 hover:cursor-pointer"

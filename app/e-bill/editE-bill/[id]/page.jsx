@@ -477,7 +477,7 @@ const Input = ({ icon, type, placeholder, value, ...props }) => {
                    bg-gray-50 read-only:bg-gray-100"
       />
       {showDatePlaceholder && (
-        <span className="pointer-events-none absolute left-10 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+        <span className="md:hidden pointer-events-none absolute left-10 top-1/2 -translate-y-1/2 text-sm text-gray-400">
           {placeholder}
         </span>
       )}

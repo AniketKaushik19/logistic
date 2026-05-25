@@ -147,7 +147,7 @@ export default function SalaryHistoryModal({ driver }) {
             className="border rounded px-2 py-1"
           />
           {!fromDate && (
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+            <span className="md:hidden pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
               From date
             </span>
           )}
@@ -162,7 +162,7 @@ export default function SalaryHistoryModal({ driver }) {
             className="border rounded px-2 py-1"
           />
           {!toDate && (
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+            <span className="md:hidden pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
               To date
             </span>
           )}

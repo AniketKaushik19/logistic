@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
 import Navbar from "../_components/Navbar";
 import { printPDF } from "@/utils/printPDF";
+import { Trash2 } from "lucide-react";
 
 /* ========= NUMBER VALIDATION ========= */
 const numberOnlyProps = {
@@ -53,9 +54,10 @@ const INITIAL_FORM = {
   paidAt: "",
   billedAt: "",
   measurement: "",
+  doorDelivery: "NO",
 
-  ebayBill: "",
-  declarationDate: "",
+  ewaybill: [],
+  validUpTo: "",
 
   deliveryRemarks: "",
   deliveryDate: "",
@@ -163,6 +165,29 @@ export default function Page() {
     }));
   };
 
+  /* ========= E-WAYBILL HANDLERS ========= */
+  const handleAddEwaybill = () => {
+    setForm((p) => ({
+      ...p,
+      ewaybill: [...(p.ewaybill || []), ""],
+    }));
+  };
+
+  const handleRemoveEwaybill = (index) => {
+    setForm((p) => ({
+      ...p,
+      ewaybill: p.ewaybill.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleEwaybillChange = (index, value) => {
+    setForm((p) => {
+      const updated = [...(p.ewaybill || [])];
+      updated[index] = value;
+      return { ...p, ewaybill: updated };
+    });
+  };
+
   /* ========= SUBMIT ========= */
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -218,41 +243,53 @@ export default function Page() {
             <h2 className="font-semibold text-lg mb-3">Consignor Details</h2>
 
             <div className="grid sm:grid-cols-2 gap-4">
-              <input
-                name="consignorName"
-                value={form.consignorName}
-                onChange={handleChange}
-                placeholder="Consignor Name"
-                className="input"
-              />
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Consignor Name</label>
+                <input
+                  name="consignorName"
+                  value={form.consignorName}
+                  onChange={handleChange}
+                  placeholder="Consignor Name"
+                  className="input"
+                />
+              </div>
 
-              <input
-                name="consignorPhone"
-                type="tel"
-                pattern="[0-9]{10}"
-                maxLength={10}
-                value={form.consignorPhone}
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Phone (10 digits)</label>
+                <input
+                  name="consignorPhone"
+                  type="tel"
+                  pattern="[0-9]{10}"
+                  maxLength={10}
+                  value={form.consignorPhone}
+                  onChange={handleChange}
+                  placeholder="Phone (10 digits)"
+                  className="input"
+                />
+              </div>
+            </div>
+
+            <div className="mt-3">
+              <label className="text-xs font-semibold text-gray-600 mb-1 block">Consignor Address</label>
+              <textarea
+                name="consignorAddress"
+                value={form.consignorAddress}
                 onChange={handleChange}
-                placeholder="Phone (10 digits)"
+                placeholder="Consignor Address"
                 className="input"
               />
             </div>
 
-            <textarea
-              name="consignorAddress"
-              value={form.consignorAddress}
-              onChange={handleChange}
-              placeholder="Consignor Address"
-              className="input mt-3"
-            />
-
-            <input
-              name="consignorGSTNo"
-              value={form.consignorGSTNo}
-              onChange={handleChange}
-              placeholder="Consignor GST No (optional)"
-              className="input mt-3"
-            />
+            <div className="mt-3">
+              <label className="text-xs font-semibold text-gray-600 mb-1 block">Consignor GST No (optional)</label>
+              <input
+                name="consignorGSTNo"
+                value={form.consignorGSTNo}
+                onChange={handleChange}
+                placeholder="Consignor GST No (optional)"
+                className="input"
+              />
+            </div>
           </section>
 
           {/* ================= CONSIGNEE ================= */}
@@ -260,84 +297,120 @@ export default function Page() {
             <h2 className="font-semibold text-lg mb-3">Consignee Details</h2>
 
             <div className="grid sm:grid-cols-2 gap-4">
-              <input
-                name="consigneeName"
-                value={form.consigneeName}
-                onChange={handleChange}
-                placeholder="Consignee Name"
-                className="input"
-              />
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Consignee Name</label>
+                <input
+                  name="consigneeName"
+                  value={form.consigneeName}
+                  onChange={handleChange}
+                  placeholder="Consignee Name"
+                  className="input"
+                />
+              </div>
 
-              <input
-                name="consigneePhone"
-                type="tel"
-                pattern="[0-9]{10}"
-                maxLength={10}
-                value={form.consigneePhone}
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Phone (optional)</label>
+                <input
+                  name="consigneePhone"
+                  type="tel"
+                  pattern="[0-9]{10}"
+                  maxLength={10}
+                  value={form.consigneePhone}
+                  onChange={handleChange}
+                  placeholder="Phone (optional)"
+                  className="input"
+                />
+              </div>
+            </div>
+
+            <div className="mt-3">
+              <label className="text-xs font-semibold text-gray-600 mb-1 block">Consignee Address</label>
+              <textarea
+                name="consigneeAddress"
+                value={form.consigneeAddress}
                 onChange={handleChange}
-                placeholder="Phone (optional)"
+                placeholder="Consignee Address"
                 className="input"
               />
             </div>
 
-            <textarea
-              name="consigneeAddress"
-              value={form.consigneeAddress}
-              onChange={handleChange}
-              placeholder="Consignee Address"
-              className="input mt-3"
-            />
+            <div className="mt-3">
+              <label className="text-xs font-semibold text-gray-600 mb-1 block">Delivery Address (if different)</label>
+              <textarea
+                name="deliveryAddress"
+                value={form.deliveryAddress}
+                onChange={handleChange}
+                placeholder="Delivery Address (if different)"
+                className="input"
+              />
+            </div>
 
-            <textarea
-              name="deliveryAddress"
-              value={form.deliveryAddress}
-              onChange={handleChange}
-              placeholder="Delivery Address (if different)"
-              className="input mt-3"
-            />
-
-            <input
-              name="consigneeGSTNo"
-              value={form.consigneeGSTNo}
-              onChange={handleChange}
-              placeholder="Consignee GST No (optional)"
-              className="input mt-3"
-            />
+            <div className="mt-3">
+              <label className="text-xs font-semibold text-gray-600 mb-1 block">Consignee GST No (optional)</label>
+              <input
+                name="consigneeGSTNo"
+                value={form.consigneeGSTNo}
+                onChange={handleChange}
+                placeholder="Consignee GST No (optional)"
+                className="input"
+              />
+            </div>
           </section>
 
           {/* ================= ROUTE ================= */}
           <section>
             <h2 className="font-semibold text-lg mb-3">Route & Date</h2>
 
-            <div className="grid sm:grid-cols-3 gap-4">
-              <input
-                name="fromLocation"
-                value={form.fromLocation}
-                onChange={handleChange}
-                placeholder="From"
-                className="input"
-              />
-              <input
-                name="toLocation"
-                value={form.toLocation}
-                onChange={handleChange}
-                placeholder="To"
-                className="input"
-              />
-              <div className="relative">
+            <div className="grid sm:grid-cols-4 gap-4">
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">From Location</label>
                 <input
-                  name="consignmentDate"
-                  type="date"
-                  placeholder="Consignment date"
-                  value={form.consignmentDate?.split("T")[0] || ""}
+                  name="fromLocation"
+                  value={form.fromLocation}
                   onChange={handleChange}
+                  placeholder="From"
                   className="input"
                 />
-                {!form.consignmentDate && (
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
-                    Consignment date
-                  </span>
-                )}
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">To Location</label>
+                <input
+                  name="toLocation"
+                  value={form.toLocation}
+                  onChange={handleChange}
+                  placeholder="To"
+                  className="input"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Consignment Date</label>
+                <div className="relative">
+                  <input
+                    name="consignmentDate"
+                    type="date"
+                    placeholder="Consignment date"
+                    value={form.consignmentDate?.split("T")[0] || ""}
+                    onChange={handleChange}
+                    className="input"
+                  />
+                  {!form.consignmentDate && (
+                    <span className="md:hidden pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                      Consignment date
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Door Delivery</label>
+                <select
+                  name="doorDelivery"
+                  value={form.doorDelivery}
+                  onChange={handleChange}
+                  className="input"
+                >
+                  <option value="YES">YES</option>
+                  <option value="NO">NO</option>
+                </select>
               </div>
             </div>
           </section>
@@ -346,37 +419,46 @@ export default function Page() {
           <section>
             <h2 className="font-semibold text-lg mb-3">Goods Details</h2>
 
-            <input
-              name="goodsDescription"
-              value={form.goodsDescription}
-              onChange={handleChange}
-              placeholder="Description (Said to contain)"
-              className="input"
-            />
-
-            <div className="grid sm:grid-cols-4 gap-4 mt-3">
+            <div>
+              <label className="text-xs font-semibold text-gray-600 mb-1 block">Goods Description</label>
               <input
-                name="packageCount"
-                type="number"
-                {...numberOnlyProps}
-                value={form.packageCount}
+                name="goodsDescription"
+                value={form.goodsDescription}
                 onChange={handleChange}
-                placeholder="Packages"
+                placeholder="Description (Said to contain)"
                 className="input"
               />
+            </div>
 
-              <select
-                name="packageMethod"
-                value={form.packageMethod}
-                onChange={handleChange}
-                className="input"
-              >
-                <option value="">Method</option>
-                <option value="Carton">Carton</option>
-                <option value="Bag">Bag</option>
-                <option value="Drum">Drum</option>
-                <option value="Loose">Loose</option>
-              </select>
+            <div className="grid sm:grid-cols-4 gap-4 mt-3">
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Package Count</label>
+                <input
+                  name="packageCount"
+                  type="number"
+                  {...numberOnlyProps}
+                  value={form.packageCount}
+                  onChange={handleChange}
+                  placeholder="Packages"
+                  className="input"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Package Method</label>
+                <select
+                  name="packageMethod"
+                  value={form.packageMethod}
+                  onChange={handleChange}
+                  className="input"
+                >
+                  <option value="">Method</option>
+                  <option value="Carton">Carton</option>
+                  <option value="Bag">Bag</option>
+                  <option value="Drum">Drum</option>
+                  <option value="Loose">Loose</option>
+                </select>
+              </div>
             </div>
           </section>
 
@@ -385,20 +467,26 @@ export default function Page() {
             <h2 className="font-semibold text-lg mb-3">Vehicle</h2>
 
             <div className="grid sm:grid-cols-3 gap-4">
-              <input
-                name="vehicleNo"
-                value={form.vehicleNo}
-                onChange={handleChange}
-                placeholder="Vehicle No"
-                className="input"
-              />
-              <input
-                name="driverName"
-                value={form.driverName}
-                onChange={handleChange}
-                placeholder="Driver Name"
-                className="input"
-              />
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Vehicle No</label>
+                <input
+                  name="vehicleNo"
+                  value={form.vehicleNo}
+                  onChange={handleChange}
+                  placeholder="Vehicle No"
+                  className="input"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Driver Name</label>
+                <input
+                  name="driverName"
+                  value={form.driverName}
+                  onChange={handleChange}
+                  placeholder="Driver Name"
+                  className="input"
+                />
+              </div>
             </div>
           </section>
           <section>
@@ -420,74 +508,94 @@ export default function Page() {
 
             {form.amountType === "not-fixed" ? (
               <div className="grid sm:grid-cols-4 gap-4">
-                <input
-                  name="weightActual"
-                  type="number"
-                  step="0.01"
-                  {...numberOnlyProps}
-                  value={form.weightActual}
-                  onChange={handleChange}
-                  placeholder="Weight (Actual)"
-                  className="input"
-                />
+                <div>
+                  <label className="text-xs font-semibold text-gray-600 mb-1 block">Weight (Actual)</label>
+                  <input
+                    name="weightActual"
+                    type="number"
+                    step="0.01"
+                    {...numberOnlyProps}
+                    value={form.weightActual}
+                    onChange={handleChange}
+                    placeholder="Weight (Actual)"
+                    className="input"
+                  />
+                </div>
 
-                <input
-                  name="weightCharged"
-                  type="number"
-                  step="0.01"
-                  {...numberOnlyProps}
-                  value={form.weightCharged}
-                  onChange={handleChange}
-                  placeholder="Weight (Charged)"
-                  className="input"
-                />
-                <input
-                  name="rateperkg"
-                  type="number"
-                  step="0.01"
-                  {...numberOnlyProps}
-                  value={form.rateperkg}
-                  onChange={handleChange}
-                  placeholder="Rate / Kg"
-                  className="input"
-                />
+                <div>
+                  <label className="text-xs font-semibold text-gray-600 mb-1 block">Weight (Charged)</label>
+                  <input
+                    name="weightCharged"
+                    type="number"
+                    step="0.01"
+                    {...numberOnlyProps}
+                    value={form.weightCharged}
+                    onChange={handleChange}
+                    placeholder="Weight (Charged)"
+                    className="input"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-600 mb-1 block">Rate / Kg</label>
+                  <input
+                    name="rateperkg"
+                    type="number"
+                    step="0.01"
+                    {...numberOnlyProps}
+                    value={form.rateperkg}
+                    onChange={handleChange}
+                    placeholder="Rate / Kg"
+                    className="input"
+                  />
+                </div>
 
-                <input
-                  name="amount"
-                  value={form.amount}
-                  disabled
-                  placeholder="Auto Calculated Amount"
-                  className="input bg-gray-100"
-                />
+                <div>
+                  <label className="text-xs font-semibold text-gray-600 mb-1 block">Amount</label>
+                  <input
+                    name="amount"
+                    value={form.amount}
+                    disabled
+                    placeholder="Auto Calculated Amount"
+                    className="input bg-gray-100"
+                  />
+                </div>
 
-                <input
-                  name="freight"
-                  type="number"
-                  step="0.01"
-                  {...numberOnlyProps}
-                  value={form.freight}
-                  onChange={handleChange}
-                  placeholder="Freight"
-                  className="input"
-                />
+                <div>
+                  <label className="text-xs font-semibold text-gray-600 mb-1 block">Freight</label>
+                  <input
+                    name="freight"
+                    type="number"
+                    step="0.01"
+                    {...numberOnlyProps}
+                    value={form.freight}
+                    onChange={handleChange}
+                    placeholder="Freight"
+                    className="input"
+                  />
+                </div>
               </div>
             ) : (
               <div className="grid sm:grid-cols-2 gap-4">
                 {/* Manual base amount */}
-                <input
-                  name="tempAmount"
-                  type="number"
-                  step="0.01"
-                  {...numberOnlyProps}
-                  value={form.tempAmount}
-                  onChange={handleChange}
-                  placeholder="Base Amount"
-                  className="input"
-                />
+                <div>
+                  <label className="text-xs font-semibold text-gray-600 mb-1 block">Base Amount</label>
+                  <input
+                    name="tempAmount"
+                    type="number"
+                    step="0.01"
+                    {...numberOnlyProps}
+                    value={form.tempAmount}
+                    onChange={handleChange}
+                    placeholder="Base Amount"
+                    className="input"
+                  />
+                </div>
 
                 {/* Auto-calculated with extras */}
-                <input
-                  value={(() => {
+                <div>
+                  <label className="text-xs font-semibold text-gray-600 mb-1 block">Total with Extras</label>
+                  <input
+                    value={(() => {
                     const base = Number(form.tempAmount) || 0;
                     const extras =
                       (Number(form.hamali) || 0) +
@@ -506,10 +614,11 @@ export default function Page() {
                     }
                     return total.toFixed(2);
                   })()}
-                  disabled
-                  placeholder="Total with Extras"
-                  className="input bg-gray-100"
-                />
+                    disabled
+                    placeholder="Total with Extras"
+                    className="input bg-gray-100"
+                  />
+                </div>
               </div>
             )}
           </section>
@@ -518,83 +627,108 @@ export default function Page() {
           <section>
             <h2 className="font-semibold text-lg mb-3">Invoice & Charges</h2>
             <div className="grid grid-cols-2 gap-4">
-              <input
-                type="text"
-                name="invoiceNo"
-                placeholder="Invoice No"
-                value={form.invoiceNo}
-                onChange={handleChange}
-                className="input"
-              />
-
-              <input
-                type="text"
-                name="invoiceValue"
-                placeholder="Value"
-                value={form.invoiceValue}
-                onChange={handleChange}
-                className="input"
-              />
-
-              <input
-                type="text"
-                name="freight"
-                placeholder="Freight"
-                {...numberOnlyProps}
-                value={form.freight}
-                onChange={handleChange}
-                className="input"
-              />
-
-              <input
-                type="text"
-                name="riskCharge"
-                {...numberOnlyProps}
-                placeholder="Risk Charge"
-                value={form.riskCharge}
-                onChange={handleChange}
-                className="input"
-              />
-
-              <input
-                type="text"
-                name="surcharge"
-                {...numberOnlyProps}
-                placeholder="Surcharge"
-                value={form.surcharge}
-                onChange={handleChange}
-                className="input"
-              />
-
-              <input
-                type="text"
-                name="hamali"
-                {...numberOnlyProps}
-                placeholder="Hamali"
-                value={form.hamali}
-                onChange={handleChange}
-                className="input"
-              />
-
-              <input
-                type="text"
-                name="serviceCharge"
-                placeholder="Service Charge"
-                {...numberOnlyProps}
-                value={form.serviceCharge}
-                onChange={handleChange}
-                className="input"
-              />
-              <input
-                type="text"
-                name="measurement"
-                placeholder="Measurement"
-                {...numberOnlyProps}
-                value={form.measurement}
-                onChange={handleChange}
-                className="input"
-              />
               <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Invoice No</label>
+                <input
+                  type="text"
+                  name="invoiceNo"
+                  placeholder="Invoice No"
+                  value={form.invoiceNo}
+                  onChange={handleChange}
+                  className="input"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Value</label>
+                <input
+                  type="text"
+                  name="invoiceValue"
+                  placeholder="Value"
+                  value={form.invoiceValue}
+                  onChange={handleChange}
+                  className="input"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Freight</label>
+                <input
+                  type="text"
+                  name="freight"
+                  placeholder="Freight"
+                  {...numberOnlyProps}
+                  value={form.freight}
+                  onChange={handleChange}
+                  className="input"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Risk Charge</label>
+                <input
+                  type="text"
+                  name="riskCharge"
+                  {...numberOnlyProps}
+                  placeholder="Risk Charge"
+                  value={form.riskCharge}
+                  onChange={handleChange}
+                  className="input"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Surcharge</label>
+                <input
+                  type="text"
+                  name="surcharge"
+                  {...numberOnlyProps}
+                  placeholder="Surcharge"
+                  value={form.surcharge}
+                  onChange={handleChange}
+                  className="input"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Hamali</label>
+                <input
+                  type="text"
+                  name="hamali"
+                  {...numberOnlyProps}
+                  placeholder="Hamali"
+                  value={form.hamali}
+                  onChange={handleChange}
+                  className="input"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Service Charge</label>
+                <input
+                  type="text"
+                  name="serviceCharge"
+                  placeholder="Service Charge"
+                  {...numberOnlyProps}
+                  value={form.serviceCharge}
+                  onChange={handleChange}
+                  className="input"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Measurement</label>
+                <input
+                  type="text"
+                  name="measurement"
+                  placeholder="Measurement"
+                  {...numberOnlyProps}
+                  value={form.measurement}
+                  onChange={handleChange}
+                  className="input"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Paid At Location</label>
                 <input
                   type="text"
                   name="paidAt"
@@ -604,20 +738,23 @@ export default function Page() {
                   className="input"
                 />
               </div>
-              <div className="relative w-full">
-                <input
-                  type="date"
-                  name="billedAt"
-                  placeholder="Billed date"
-                  value={form.billedAt}
-                  onChange={handleChange}
-                  className="input"
-                />
-                {!form.billedAt && (
-                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-gray-500">
-                    Billed date
-                  </span>
-                )}
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Billed Date</label>
+                <div className="relative w-full">
+                  <input
+                    type="date"
+                    name="billedAt"
+                    placeholder="Billed date"
+                    value={form.billedAt}
+                    onChange={handleChange}
+                    className="input"
+                  />
+                  {!form.billedAt && (
+                    <span className="md:hidden pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-gray-500">
+                      Billed date
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </section>
@@ -625,31 +762,54 @@ export default function Page() {
           {/* ================= TAX / DECLARATION ================= */}
           <section>
             <h2 className="font-semibold text-lg mb-3">Tax / Declaration</h2>
-            <div className="grid grid-cols-2 gap-4">
-               <input
-                  type="number"
-                  name="ebayBill"
-                  placeholder="E-BayBill"
-                  value={form.ebayBill}
-                  onChange={handleChange}
-                  className="input"
-                  pattern="\d{12}"
-                />
-              <div className="relative w-full">
-                <input
-                  type="date"
-                  name="declarationDate"
-                  placeholder="Declaration date"
-                  value={form.declarationDate}
-                  onChange={handleChange}
-                  className="input p-3"
-                />
-                {!form.declarationDate && (
-                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-gray-500">
-                    Declaration date
-                  </span>
-                )}
-                
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <div className="flex items-center justify-between my-2">
+                <label className="text-xs font-semibold text-gray-600 mb-2 block">E-Waybill</label>  <button
+                    type="button"
+                    onClick={handleAddEwaybill}
+                    className="p-2 bg-green-500 text-white rounded hover:bg-green-600 font-semibold"
+                  >
+                    + Add E-Way Bill                   </button>
+                                  </div>
+
+                <div className="grid md:grid-cols-2 gap-3 space-y-2">
+                  {Array.isArray(form.ewaybill) && form.ewaybill.map((bill, index) => (
+                    <div key={index} className="flex gap-3">
+                      <input
+                        type="number"
+                        value={bill}
+                        onChange={(e) => handleEwaybillChange(index, e.target.value)}
+                        placeholder="Enter E-Waybill number"
+                        className="input flex-1"
+                        pattern="\d{12}"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveEwaybill(index)}
+                       >
+                        <Trash2 className="text-red-800"/>
+                      </button>
+                    </div>
+                  ))}
+                                 </div>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Valid Upto</label>
+                <div className="relative w-full">
+                  <input
+                    type="date"
+                    name="validUpTo"
+                    value={form.validUpTo}
+                    onChange={handleChange}
+                    className="input p-3"
+                  />
+                  {!form.validUpTo && (
+                    <span className="md:hidden pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-gray-500">
+                      Valid upto date
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </section>
@@ -658,29 +818,35 @@ export default function Page() {
           <section>
             <h2 className="font-semibold text-lg mb-3">Delivery</h2>
             <div className="grid grid-cols-2 gap-4">
-              <input
-                type="text"
-                name="deliveryRemarks"
-                placeholder="Enter Delivery Remarks"
-                value={form.deliveryRemarks}
-                onChange={handleChange}
-                className="input"
-              />
-
-              <div className="relative w-full">
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Delivery Remarks</label>
                 <input
-                  type="date"
-                  name="deliveryDate"
-                  placeholder="Delivery date"
-                  value={form.deliveryDate}
+                  type="text"
+                  name="deliveryRemarks"
+                  placeholder="Enter Delivery Remarks"
+                  value={form.deliveryRemarks}
                   onChange={handleChange}
                   className="input"
                 />
-                {!form.deliveryDate && (
-                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-gray-500">
-                    Delivery date
-                  </span>
-                )}
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Delivery Date</label>
+                <div className="relative w-full">
+                  <input
+                    type="date"
+                    name="deliveryDate"
+                    placeholder="Delivery date"
+                    value={form.deliveryDate}
+                    onChange={handleChange}
+                    className="input"
+                  />
+                  {!form.deliveryDate && (
+                    <span className="md:hidden pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-gray-500">
+                      Delivery date
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </section>
@@ -688,24 +854,30 @@ export default function Page() {
           <section>
             <h2 className="font-semibold text-lg mb-3">Payment</h2>
             <div className="grid grid-cols-2 gap-5">
-              <select
-                name="paymentType"
-                value={form.paymentType}
-                onChange={handleChange}
-                className="input"
-              >
-                <option value="Paid">Paid</option>
-                <option value="To Pay">To Pay</option>
-                <option value="Billing">Billing</option>
-              </select>
-              <input
-                type="text"
-                name="yourName"
-                placeholder="Enter Your Name"
-                value={form.yourName}
-                onChange={handleChange}
-                className="input"
-              />
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Payment Type</label>
+                <select
+                  name="paymentType"
+                  value={form.paymentType}
+                  onChange={handleChange}
+                  className="input"
+                >
+                  <option value="Paid">Paid</option>
+                  <option value="To Pay">To Pay</option>
+                  <option value="Billing">Billing</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">Your Name</label>
+                <input
+                  type="text"
+                  name="yourName"
+                  placeholder="Enter Your Name"
+                  value={form.yourName}
+                  onChange={handleChange}
+                  className="input"
+                />
+              </div>
             </div>
           </section>
 
@@ -715,7 +887,7 @@ export default function Page() {
               type="submit"
               disabled={loadingSave}
               onClick={() => setOnlySave(true)}
-              className="w-full py-3 bg-red-600 text-white rounded-lg font-bold"
+              className="w-full md:py-3 bg-red-600 text-white rounded-lg font-bold"
             >
               {loadingSave ? "Saving..." : "Save"}
             </motion.button>
