@@ -182,7 +182,7 @@ export async function PATCH(req) {
     );
   }
   try {
-    const { freightId, status } = await req.json();
+    const { freightId, status, paidAt } = await req.json();
 
     if (!freightId || !status) {
       return NextResponse.json(
@@ -200,9 +200,15 @@ export async function PATCH(req) {
 
     const client = await clientPromise;
     const db = client.db("logisticdb");
+    const updateData = { status, updatedAt: new Date() };
+    if (status === "Paid") {
+      updateData.paidAt = paidAt ? new Date(paidAt) : new Date();
+    } else {
+      updateData.paidAt = null;
+    }
     const result = await db.collection("Freight").findOneAndUpdate(
       { _id: new ObjectId(freightId) },
-      { $set: { status, updatedAt: new Date() } },
+      { $set: updateData },
       { returnDocument: "after" }
     );
 

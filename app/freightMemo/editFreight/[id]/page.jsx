@@ -17,16 +17,16 @@ import { numberToWords } from "@/utils/numberToWord";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
-export default function EditFreight({params}) {
+export default function EditFreight({ params }) {
   const [_id, setId] = useState(null);
-   useEffect(() => {
+  useEffect(() => {
     const getParams = async () => {
       const resolvedParams = await params;
       setId(resolvedParams.id);
     };
     getParams();
   }, [params]);
-  const router=useRouter()
+  const router = useRouter()
   const initialFormState = {
     challanNo: "CH-",
     date: "",
@@ -56,6 +56,42 @@ export default function EditFreight({params}) {
     through: "",
   };
   const [form, setForm] = useState(initialFormState);
+  const [isFixed, setIsFixed] = useState(false);
+
+  useEffect(() => {
+    if (form.weight === "Fixed" || form.rate === "Fixed") {
+      setIsFixed(true);
+    } else {
+      setIsFixed(false);
+    }
+  }, [form.weight, form.rate]);
+
+  const handleRateTypeChange = (Fixed) => {
+    if (Fixed) {
+      setForm(prev => {
+        const totalVal = parseFloat(prev.total) || 0;
+        const advanceVal = parseFloat(prev.advance) || 0;
+        const netBalanceVal = totalVal - advanceVal;
+        return {
+          ...prev,
+          weight: "Fixed",
+          rate: "Fixed",
+          total: totalVal > 0 ? totalVal : "",
+          netBalance: netBalanceVal,
+          amountInWords: numberToWords(Math.floor(netBalanceVal)),
+        };
+      });
+    } else {
+      setForm(prev => ({
+        ...prev,
+        weight: "",
+        rate: "",
+        total: 0,
+        netBalance: 0,
+        amountInWords: "",
+      }));
+    }
+  };
 
   const getFreight = async (_id) => {
     try {
@@ -126,9 +162,21 @@ export default function EditFreight({params}) {
   };
 
   useEffect(() => {
+    const advance = parseFloat(form.advance) || 0;
+
+    if (form.weight === "Fixed" || form.rate === "Fixed") {
+      const total = parseFloat(form.total) || 0;
+      const netBalance = total - advance;
+      setForm(prev => ({
+        ...prev,
+        netBalance,
+        amountInWords: numberToWords(Math.floor(netBalance)),
+      }));
+      return;
+    }
+
     const rate = parseFloat(form.rate);
     const weight = parseFloat(form.weight);
-    const advance = parseFloat(form.advance) || 0;
 
     // If inputs are empty or invalid → reset safely
     if (isNaN(rate) || isNaN(weight) || rate <= 0 || weight <= 0) {
@@ -150,13 +198,13 @@ export default function EditFreight({params}) {
       netBalance,
       amountInWords: numberToWords(Math.floor(netBalance)),
     }));
-  }, [form.rate, form.weight, form.advance]);
+  }, [form.rate, form.weight, form.advance, form.total]);
 
- useEffect(()=>{
-   if(_id){
-     getFreight(_id)
-   }
-  },[_id])
+  useEffect(() => {
+    if (_id) {
+      getFreight(_id)
+    }
+  }, [_id])
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <Navbar />
@@ -255,6 +303,33 @@ export default function EditFreight({params}) {
         </div>
 
 
+        {/* RATE TYPE TOGGLE */}
+        <div className="flex flex-col gap-2 border-t pt-6">
+          <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">Rate / Freight Type</label>
+          <div className="flex gap-4">
+            <button
+              type="button"
+              onClick={() => handleRateTypeChange(false)}
+              className={`flex-1 py-3 px-4 rounded-xl border text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 hover:cursor-pointer ${!isFixed
+                  ? "bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-100"
+                  : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
+                }`}
+            >
+              Non-Fixed (Calculated by Weight & Rate)
+            </button>
+            <button
+              type="button"
+              onClick={() => handleRateTypeChange(true)}
+              className={`flex-1 py-3 px-4 rounded-xl border text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 hover:cursor-pointer ${isFixed
+                  ? "bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-100"
+                  : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
+                }`}
+            >
+              Fixed (Flat Total Rate)
+            </button>
+          </div>
+        </div>
+
         {/* GOODS INFO */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Input
@@ -271,6 +346,7 @@ export default function EditFreight({params}) {
             name="weight"
             value={form.weight}
             onChange={handleChange}
+            readOnly={isFixed}
           />
 
           <Input
@@ -279,30 +355,38 @@ export default function EditFreight({params}) {
             name="rate"
             value={form.rate}
             onChange={handleChange}
+            readOnly={isFixed}
           />
         </div>
 
 
         {/* PAYMENT */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <input
+          <Input
+            icon={<IndianRupee size={16} />}
+            label="Total Lorry Hire"
+            name="total"
+            type="number"
             value={form.total}
-            readOnly
-            className="border p-2 bg-gray-100 w-full"
+            readOnly={!isFixed}
+            onChange={handleChange}
           />
 
           <Input
             icon={<CreditCard size={16} />}
             label="Advance"
             name="advance"
+            type="number"
             value={form.advance}
             onChange={handleChange}
           />
 
-          <input
+          <Input
+            icon={<IndianRupee size={16} />}
+            label="Net Balance"
+            name="netBalance"
             value={form.netBalance}
             readOnly
-            className="border p-2 bg-gray-100 w-full"
           />
         </div>
 
@@ -388,7 +472,8 @@ export default function EditFreight({params}) {
         <div className="flex justify-end gap-4 pt-2">
           <button
             disabled={form.total <= 0}
-            onClick={() => {saveFreight()
+            onClick={() => {
+              saveFreight()
             }}
             className="px-4 py-2 bg-indigo-600 text-white rounded disabled:opacity-50"
           >
@@ -403,7 +488,7 @@ export default function EditFreight({params}) {
 
 /* ---------- INPUT COMPONENT ---------- */
 
-const Input = ({ label, icon, ...props }) => (
+const Input = ({ label, icon, className = "", ...props }) => (
   <div className="flex flex-col gap-1">
     <label className="text-xs font-medium text-gray-600">
       {label}
@@ -418,7 +503,7 @@ const Input = ({ label, icon, ...props }) => (
         {...props}
         className={`w-full border-b border-dashed border-gray-400 
           focus:outline-none focus:border-indigo-600
-          py-2 ${icon ? "pl-10" : "pl-2"} bg-transparent`}
+          py-2 ${icon ? "pl-10" : "pl-2"} bg-transparent ${props.readOnly ? "text-gray-500 cursor-not-allowed bg-gray-50" : ""} ${className}`}
       />
     </div>
   </div>

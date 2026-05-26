@@ -21,7 +21,7 @@ const Page = () => {
       console.error(err);
     }
   }
-
+ 
   const handleDelete = async (_id) => {
     try {
       const res = await fetch("/api/freight", {

@@ -34,7 +34,7 @@ export default function InvoiceForm() {
     vendorCode: '',
     consignments: [
       {
-        cnNo: '',
+        cnNo: 'ALC-',
         cnDate: '',
         from: '',
         to: '',
@@ -89,7 +89,7 @@ const router=useRouter();
       consignments: [
         ...form.consignments,
         {
-          cnNo: '',
+          cnNo: 'ALC-',
           cnDate: '',
           from: '',
           to: '',
@@ -141,7 +141,7 @@ const router=useRouter();
             vendorCode: '',
             consignments: [
               {
-                cnNo: '',
+                cnNo: 'ALC-',
                 cnDate: '',
                 from: '',
                 to: '',

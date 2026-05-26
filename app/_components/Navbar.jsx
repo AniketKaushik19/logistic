@@ -60,6 +60,11 @@ function Navbar() {
           {/* Desktop Menu */}
           <ul className="hidden md:flex gap-6 text-sm font-medium items-center">
             <li>
+              <Link href="/track" className="hover:text-red-600">
+                Track
+              </Link>
+            </li>
+            <li>
               <Link href="/dashboard" className="hover:text-red-600">
                 Dashboard
               </Link>
@@ -118,6 +123,9 @@ function Navbar() {
             className="md:hidden bg-white border-t"
           >
             <ul className="flex flex-col gap-4 px-6 py-4 text-sm font-medium">
+              <Link onClick={() => setOpen(false)} href="/track">
+                Track
+              </Link>
               <Link onClick={() => setOpen(false)} href="/dashboard">
                 Dashboard
               </Link>
