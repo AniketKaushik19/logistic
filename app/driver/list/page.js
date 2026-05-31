@@ -167,7 +167,7 @@ export default function DriverListPage() {
           <div className="text-3xl flex justify-center items-center text-purple-500 "><Loader className="animate-spin transition-all"/> Loading...</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {drivers.map((d) => (
+            {drivers.length==0?<h2 className="text-center text-2xl text-gray-500">No Driver Available</h2> :drivers.map((d) => (
               <DriverCard
                 key={d._id}
                 driver={d}

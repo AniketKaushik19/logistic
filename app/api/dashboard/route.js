@@ -8,6 +8,28 @@ let cache = {
   timestamp: 0,
 };
 
+const convertNumber = (field) => ({
+  $convert: {
+    input: field,
+    to: "double",
+    onError: 0,
+    onNull: 0,
+  },
+});
+
+const valueOrProfit = (rawField, normalizedField, profitField) => ({
+  $cond: [
+    {
+      $or: [
+        { $in: [{ $type: rawField }, ["missing", "null"]] },
+        { $eq: [rawField, ""] },
+      ],
+    },
+    profitField,
+    normalizedField,
+  ],
+});
+
 const CACHE_TTL = 1000 * 60 * 5; // ⏱ 5 minutes
 
 export async function GET(req) {
@@ -38,14 +60,30 @@ export async function GET(req) {
       .collection("consignments")
       .aggregate([
         {
+          $addFields: {
+            normalizedAmount: convertNumber("$amount"),
+            normalizedExpenses: convertNumber("$expenses"),
+            normalizedProfitAmount: convertNumber("$profit.amount"),
+            normalizedProfitExpenses: convertNumber("$profit.expenses"),
+          },
+        },
+        {
           $group: {
             _id: null,
             totalConsignments: { $sum: 1 },
             totalProfit: {
-              $sum: { $ifNull: ["$profit.amount", 0] },
+              $sum: valueOrProfit(
+                "$amount",
+                "$normalizedAmount",
+                "$normalizedProfitAmount"
+              ),
             },
             totalCost: {
-              $sum: { $ifNull: ["$profit.totalCost", 0] },
+              $sum: valueOrProfit(
+                "$expenses",
+                "$normalizedExpenses",
+                "$normalizedProfitExpenses"
+              ),
             },
           },
         },

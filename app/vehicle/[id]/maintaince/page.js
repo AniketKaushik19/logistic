@@ -126,7 +126,7 @@ export default function Maintaince() {
                     className="input"
                   />
                   {!date && (
-                    <span className="md:hidden pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                    <span className="md:hidden pointer-events-none absolute right-10 top-1/2 -translate-y-1/2 text-sm text-gray-500">
                       Maintaince date
                     </span>
                   )}

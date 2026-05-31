@@ -197,7 +197,6 @@ export async function PUT(req) {
       const amount = Number(
         typeof profit === "object" ? profit.amount : profit
       );
-
       const totalCost =
         typeof profit === "object" ? Number(profit.totalCost || 0) : 0;
 

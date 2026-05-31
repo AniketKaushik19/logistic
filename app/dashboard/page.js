@@ -1,320 +1,948 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Package, TrendingUp, Wallet } from "lucide-react";
+
+import {
+  Package,
+  TrendingUp,
+  Wallet,
+  RefreshCw,
+  IndianRupee,
+  Activity,
+} from "lucide-react";
+
 import Navbar from "../_components/Navbar";
 import ProfitChart from "../_components/ProfitChart";
 import WeeklyTrendChart from "../_components/WeeklyTrendChart";
 import ProfitVsCostChart from "../_components/ProfitVsCostChart";
 
+/* =======================================================
+   KPI CARD COMPONENT
+======================================================= */
+function StatCard({
+  title,
+  value,
+  icon,
+  gradient,
+  subtitle,
+}) {
+  return (
+    <div
+      className={`
+        relative overflow-hidden
+        rounded-3xl
+        p-6
+        shadow-lg
+        text-white
+        ${gradient}
+        transition-all
+        duration-300
+        hover:scale-[1.02]
+        hover:shadow-2xl
+      `}
+    >
+      {/* Background Glow */}
+      <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full" />
+
+      <div className="relative flex justify-between items-start">
+        <div>
+          <p className="text-white/80 text-sm uppercase tracking-wider">
+            {title}
+          </p>
+
+          <h2 className="text-3xl font-bold mt-2 break-words">
+            {value}
+          </h2>
+
+          <p className="text-sm mt-3 text-white/80">
+            {subtitle}
+          </p>
+        </div>
+
+        <div className="bg-white/20 p-3 rounded-2xl">
+          {icon}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
+    /* =======================================================
+     STATES
+  ======================================================= */
   const [totals, setTotals] = useState({
     totalConsignments: 0,
     totalProfit: 0,
     totalCost: 0,
   });
+
   const [analysisData, setAnalysisData] = useState([]);
   const [analysisType, setAnalysisType] = useState("monthly");
+
   const [customStart, setCustomStart] = useState("");
   const [customEnd, setCustomEnd] = useState("");
+
   const [weeklyData, setWeeklyData] = useState([]);
-const [monthlyProfit, setMonthlyProfit] = useState([]);
-const [profitVsCost, setProfitVsCost] = useState([]);
+  const [monthlyProfit, setMonthlyProfit] = useState([]);
+  const [profitVsCost, setProfitVsCost] = useState([]);
 
-  useEffect(() => {
-    fetchTotals();
-    handleAnalysisClick("monthly");
-  }, []);
+  const [loading, setLoading] = useState(false);
 
-const fetchWeekly = async () => {
-  const res = await fetch("/api/dashboard/weekly", {
-    cache: "no-store",
-    credentials: "include",
-  });
+  /* =======================================================
+     CALCULATED METRICS
+  ======================================================= */
 
-  if (!res.ok) return;
-  const data = await res.json();
-  setWeeklyData(data);
-};
+  const revenue = totals.totalProfit || 0;
+  const cost = totals.totalCost || 0;
 
-const fetchProfitVsCost = async () => {
-  const res = await fetch("/api/dashboard/profit-vs-cost", {
-    credentials: "include",
-    cache: "no-store",
-  });
+  const netProfit = revenue - cost;
 
-  if (!res.ok) return;
-  const data = await res.json();
-  setProfitVsCost(data);
-};
+  const profitMargin =
+    revenue > 0
+      ? ((netProfit / revenue) * 100).toFixed(1)
+      : 0;
 
+  const bestMonth =
+    monthlyProfit.length > 0
+      ? monthlyProfit.reduce((prev, current) =>
+          prev.totalProfit > current.totalProfit
+            ? prev
+            : current
+        )
+      : null;
 
-const fetchMonthlyProfit = async () => {
-  const res = await fetch("/api/dashboard/monthly-profit", {
-    credentials: "include",
-    cache: "no-store",
-  });
-
-  if (!res.ok) return;
-  const data = await res.json();
-  setMonthlyProfit(data);
-};
-
+  /* =======================================================
+     FETCH TOTALS
+  ======================================================= */
 
   const fetchTotals = async () => {
     try {
       const res = await fetch("/api/dashboard", {
         cache: "no-store",
+        credentials: "include",
       });
+
       if (!res.ok) {
-        throw new Error("API failed");
+        throw new Error("Failed to fetch totals");
       }
+
       const data = await res.json();
-      setTotals(data);
+
+      setTotals({
+        totalConsignments:
+          data.totalConsignments || 0,
+        totalProfit:
+          data.totalProfit || 0,
+        totalCost:
+          data.totalCost || 0,
+      });
     } catch (error) {
-      console.error("Failed to fetch totals:", error);
+      console.error(
+        "Failed to fetch totals:",
+        error
+      );
     }
   };
 
-  const fetchAnalysis = async (type, start = "", end = "") => {
+  /* =======================================================
+     FETCH MONTHLY PROFIT
+  ======================================================= */
+
+  const fetchMonthlyProfit = async () => {
     try {
-      const params = new URLSearchParams({ type });
-      if (start) params.append("start", start);
-      if (end) params.append("end", end);
-      const res = await fetch(`/api/dashboard/analysis?${params}`, {
-        cache: "no-store",
-      });
+      const res = await fetch(
+        "/api/dashboard/monthly-profit",
+        {
+          cache: "no-store",
+          credentials: "include",
+        }
+      );
+
       if (!res.ok) {
-        throw new Error("API failed");
+        throw new Error(
+          "Failed to fetch monthly profit"
+        );
       }
+
       const data = await res.json();
-      setAnalysisData(data);
+
+      setMonthlyProfit(data || []);
     } catch (error) {
-      console.error("Failed to fetch analysis:", error);
+      console.error(
+        "Monthly profit error:",
+        error
+      );
     }
   };
 
-useEffect(() => {
-  fetchWeekly();
-    fetchMonthlyProfit();
-    fetchProfitVsCost();
+  /* =======================================================
+     FETCH WEEKLY DATA
+  ======================================================= */
 
-}, []);
+  const fetchWeekly = async () => {
+    try {
+      const res = await fetch(
+        "/api/dashboard/weekly",
+        {
+          cache: "no-store",
+          credentials: "include",
+        }
+      );
 
+      if (!res.ok) {
+        throw new Error(
+          "Failed to fetch weekly analytics"
+        );
+      }
 
+      const data = await res.json();
+
+      setWeeklyData(data || []);
+    } catch (error) {
+      console.error(
+        "Weekly analytics error:",
+        error
+      );
+    }
+  };
+
+  /* =======================================================
+     FETCH PROFIT VS COST
+  ======================================================= */
+
+  const fetchProfitVsCost = async () => {
+    try {
+      const res = await fetch(
+        "/api/dashboard/profit-vs-cost",
+        {
+          cache: "no-store",
+          credentials: "include",
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error(
+          "Failed to fetch profit vs cost"
+        );
+      }
+
+      const data = await res.json();
+
+      setProfitVsCost(data || []);
+    } catch (error) {
+      console.error(
+        "Profit vs cost error:",
+        error
+      );
+    }
+  };
+
+  /* =======================================================
+     FETCH ANALYSIS
+  ======================================================= */
+
+  const fetchAnalysis = async (
+    type,
+    start = "",
+    end = ""
+  ) => {
+    try {
+      const params = new URLSearchParams({
+        type,
+      });
+
+      if (start) {
+        params.append("start", start);
+      }
+
+      if (end) {
+        params.append("end", end);
+      }
+
+      const res = await fetch(
+        `/api/dashboard/analysis?${params}`,
+        {
+          cache: "no-store",
+          credentials: "include",
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error(
+          "Failed to fetch analysis"
+        );
+      }
+
+      const data = await res.json();
+
+      setAnalysisData(data || []);
+    } catch (error) {
+      console.error(
+        "Analysis fetch error:",
+        error
+      );
+    }
+  };
+
+  /* =======================================================
+     REFRESH DASHBOARD
+  ======================================================= */
+
+  const refreshDashboard = async () => {
+    try {
+      setLoading(true);
+
+      await Promise.all([
+        fetchTotals(),
+        fetchWeekly(),
+        fetchMonthlyProfit(),
+        fetchProfitVsCost(),
+      ]);
+
+      await fetchAnalysis(analysisType);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* =======================================================
+     INITIAL LOAD
+  ======================================================= */
+
+  useEffect(() => {
+    refreshDashboard();
+  }, []);
+
+  /* =======================================================
+     ANALYSIS HANDLERS
+  ======================================================= */
 
   const handleAnalysisClick = (type) => {
     setAnalysisType(type);
-    if (type === "custom") {
-      // For custom, we'll handle in the button
-    } else {
+
+    if (type !== "custom") {
       fetchAnalysis(type);
     }
   };
 
   const handleCustomAnalysis = () => {
-    if (customStart && customEnd) {
-      fetchAnalysis("custom", customStart, customEnd);
+    if (!customStart || !customEnd) {
+      return;
     }
+
+    setAnalysisType("custom");
+
+    fetchAnalysis(
+      "custom",
+      customStart,
+      customEnd
+    );
   };
-
-  return (
-    <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50">
-      {/* {console.log(totals)} */}
+    return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <Navbar />
-      <main className="container px-4 py-8 mt-8">
-        <h1 className="text-3xl font-bold text-center mt-7 mb-8 text-gray-800">
-          Dashboard
-        </h1>
-        {/* Totals Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Total Consignments */}
-          <div className="group relative overflow-hidden bg-linear-to-br from-blue-500 to-blue-600 text-white p-6 rounded-2xl shadow-lg transition hover:scale-[1.03]">
-            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition" />
 
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm uppercase tracking-wide text-white/80">
-                  Total Consignments
-                </h3>
-                <p className="text-3xl font-bold mt-2">
-                  {totals.totalConsignments}
-                </p>
-              </div>
+      <main className="container mx-auto px-4 py-8 mt-8">
 
-              <div className="p-3 rounded-xl bg-white/20">
-                <Package size={28} />
-              </div>
-            </div>
+        {/* =======================================================
+            HEADER
+        ======================================================= */}
+
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 mt-6">
+          <div>
+            <h1 className="text-4xl font-bold text-slate-800">
+              Consignment Analytics
+            </h1>
+
+            <p className="text-slate-500 mt-2">
+              Monitor consignments, profits and business growth
+            </p>
           </div>
 
-          {/* Total Profit */}
-          <div className="group relative overflow-hidden bg-linear-to-br from-green-500 to-green-600 text-white p-6 rounded-2xl shadow-lg transition hover:scale-[1.03]">
-            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition" />
-
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm uppercase tracking-wide text-white/80">
-                  Total Profit
-                </h3>
-                <p className="text-3xl font-bold mt-2">
-                  ₹{totals.totalProfit.toFixed(2)}
-                </p>
-              </div>
-
-              <div className="p-3 rounded-xl bg-white/20">
-                <TrendingUp size={28} />
-              </div>
+          <div className="flex items-center gap-3 mt-5 lg:mt-0">
+            <div className="bg-white px-4 py-2 rounded-xl shadow border">
+              <span className="text-sm text-slate-600">
+                {new Date().toLocaleString()}
+              </span>
             </div>
-          </div>
 
-          {/* Total Cost */}
-          <div className="group relative overflow-hidden bg-linear-to-br from-purple-500 to-purple-600 text-white p-6 rounded-2xl shadow-lg transition hover:scale-[1.03]">
-            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition" />
+            <button
+              onClick={refreshDashboard}
+              disabled={loading}
+              className="
+                flex items-center gap-2
+                bg-blue-600
+                hover:bg-blue-700
+                text-white
+                px-4 py-2
+                rounded-xl
+                transition
+              "
+            >
+              <RefreshCw
+                size={18}
+                className={loading ? "animate-spin" : ""}
+              />
 
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm uppercase tracking-wide text-white/80">
-                  Total Cost
-                </h3>
-                <p className="text-3xl font-bold mt-2">
-                  ₹{totals.totalCost.toFixed(2)}
-                </p>
-              </div>
-
-              <div className="p-3 rounded-xl bg-white/20">
-                <Wallet size={28} />
-              </div>
-            </div>
+              {loading ? "Refreshing..." : "Refresh"}
+            </button>
           </div>
         </div>
 
-        {/* Analysis Section */}
-        <div className="bg-white shadow-xl rounded-xl p-6 border border-gray-200">
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800">
-            Analysis
-          </h2>
+        {/* =======================================================
+            KPI CARDS
+        ======================================================= */}
 
-          {/* Analysis Buttons */}
-          <div className="flex flex-wrap gap-4 mb-6">
-            <button
-              onClick={() => handleAnalysisClick("monthly")}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                analysisType === "monthly"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => handleAnalysisClick("yearly")}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                analysisType === "yearly"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            >
-              Yearly
-            </button>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full">
-              {/* Start Date */}
-              <div className="relative w-full sm:w-auto">
-                <input
-                  type="date"
-                  value={customStart}
-                  placeholder="Start date"
-                  onChange={(e) => setCustomStart(e.target.value)}
-                  className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
+
+          <StatCard
+            title="Consignments"
+            value={totals.totalConsignments}
+            subtitle="Total shipments"
+            icon={<Package size={28} />}
+            gradient="bg-gradient-to-r from-blue-500 to-blue-700"
+          />
+
+          <StatCard
+            title="Revenue"
+            value={`₹${totals.totalProfit.toLocaleString()}`}
+            subtitle="Generated amount"
+            icon={<IndianRupee size={28} />}
+            gradient="bg-gradient-to-r from-green-500 to-green-700"
+          />
+
+          <StatCard
+            title="Cost"
+            value={`₹${totals.totalCost.toLocaleString()}`}
+            subtitle="Operational expenses"
+            icon={<Wallet size={28} />}
+            gradient="bg-gradient-to-r from-red-500 to-red-700"
+          />
+
+          <StatCard
+            title="Net Profit"
+            value={`₹${netProfit.toLocaleString()}`}
+            subtitle={`${profitMargin}% margin`}
+            icon={<TrendingUp size={28} />}
+            gradient="bg-gradient-to-r from-purple-500 to-purple-700"
+          />
+        </div>
+
+        {/* =======================================================
+            INSIGHTS SECTION
+        ======================================================= */}
+
+        <div className="grid lg:grid-cols-3 gap-6 mb-10">
+
+          {/* Profit Margin */}
+
+          <div className="bg-white rounded-3xl p-6 shadow-lg border border-slate-100">
+            <h3 className="font-semibold text-lg text-slate-800">
+              Profit Margin
+            </h3>
+
+            <div className="mt-6">
+
+              <div className="w-full h-4 bg-slate-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-green-500 transition-all"
+                  style={{
+                    width: `${Math.min(
+                      Number(profitMargin),
+                      100
+                    )}%`,
+                  }}
                 />
-                {!customStart && (
-                  <span className="md:hidden pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
-                    Start date
-                  </span>
-                )}
               </div>
 
-              {/* Separator */}
-              <span className="hidden sm:block text-gray-600">to</span>
+              <p className="mt-4 text-3xl font-bold text-green-600">
+                {profitMargin}%
+              </p>
+            </div>
+          </div>
 
-              {/* End Date */}
-              <div className="relative w-full sm:w-auto">
-                <input
-                  type="date"
-                  value={customEnd}
-                  placeholder="End date"
-                  onChange={(e) => setCustomEnd(e.target.value)}
-                  className="w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {!customEnd && (
-                  <span className="md:hidden pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
-                    End date
-                  </span>
-                )}
-              </div>
+          {/* Best Month */}
 
-              {/* Button */}
+          <div className="bg-white rounded-3xl p-6 shadow-lg border border-slate-100">
+            <h3 className="font-semibold text-lg text-slate-800">
+              Best Performing Month
+            </h3>
+
+            <div className="mt-6">
+
+              <p className="text-2xl font-bold text-slate-800">
+                {bestMonth?.period || "No Data"}
+              </p>
+
+              <p className="text-green-600 text-lg mt-3 font-semibold">
+                ₹
+                {bestMonth?.totalProfit?.toLocaleString() ||
+                  0}
+              </p>
+            </div>
+          </div>
+
+          {/* AI Insights */}
+
+          <div className="bg-white rounded-3xl p-6 shadow-lg border border-slate-100">
+            <div className="flex items-center gap-2">
+              <Activity size={20} />
+              <h3 className="font-semibold text-lg text-slate-800">
+                Business Insights
+              </h3>
+            </div>
+
+            <ul className="mt-5 space-y-3 text-sm text-slate-600">
+
+              <li>
+                Total Consignments:
+                <span className="font-semibold ml-2">
+                  {totals.totalConsignments}
+                </span>
+              </li>
+
+              <li>
+                Revenue:
+                <span className="font-semibold ml-2">
+                  ₹{totals.totalProfit.toLocaleString()}
+                </span>
+              </li>
+
+              <li>
+                Net Profit:
+                <span className="font-semibold ml-2">
+                  ₹{netProfit.toLocaleString()}
+                </span>
+              </li>
+
+              <li>
+                Profit Margin:
+                <span className="font-semibold ml-2">
+                  {profitMargin}%
+                </span>
+              </li>
+
+            </ul>
+          </div>
+
+        </div>
+                {/* =======================================================
+            ANALYSIS SECTION
+        ======================================================= */}
+
+        <div className="bg-white rounded-3xl shadow-lg border border-slate-100 p-6 mb-10">
+
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+
+            <div>
+              <h2 className="text-2xl font-bold text-slate-800">
+                Analytics Overview
+              </h2>
+
+              <p className="text-slate-500 text-sm mt-1">
+                Analyze monthly, yearly and custom business performance
+              </p>
+            </div>
+
+            {/* Filter Buttons */}
+
+            <div className="flex flex-wrap gap-3">
+
               <button
-                onClick={handleCustomAnalysis}
-                className="w-full sm:w-auto px-4 py-2 bg-blue-500 text-white
-                      rounded-lg font-medium hover:bg-blue-600 transition-all"
+                onClick={() =>
+                  handleAnalysisClick("monthly")
+                }
+                className={`px-4 py-2 rounded-xl font-medium transition-all
+                  ${
+                    analysisType === "monthly"
+                      ? "bg-blue-600 text-white"
+                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  }`}
               >
-                Apply
+                Monthly
+              </button>
+
+              <button
+                onClick={() =>
+                  handleAnalysisClick("yearly")
+                }
+                className={`px-4 py-2 rounded-xl font-medium transition-all
+                  ${
+                    analysisType === "yearly"
+                      ? "bg-blue-600 text-white"
+                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  }`}
+              >
+                Yearly
               </button>
             </div>
           </div>
 
-          {/* Analysis Data */}
-          {analysisData.length > 0 && (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse border border-gray-300">
+          {/* =======================================================
+              CUSTOM DATE FILTER
+          ======================================================= */}
+
+          <div className="grid md:grid-cols-4 gap-4 mb-8">
+
+            <div>
+              <label className="block text-sm text-slate-600 mb-2">
+                Start Date
+              </label>
+
+              <input
+                type="date"
+                value={customStart}
+                onChange={(e) =>
+                  setCustomStart(e.target.value)
+                }
+                className="
+                  w-full
+                  px-4
+                  py-3
+                  border
+                  border-slate-300
+                  rounded-xl
+                  focus:outline-none
+                  focus:ring-2
+                  focus:ring-blue-500
+                "
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm text-slate-600 mb-2">
+                End Date
+              </label>
+
+              <input
+                type="date"
+                value={customEnd}
+                onChange={(e) =>
+                  setCustomEnd(e.target.value)
+                }
+                className="
+                  w-full
+                  px-4
+                  py-3
+                  border
+                  border-slate-300
+                  rounded-xl
+                  focus:outline-none
+                  focus:ring-2
+                  focus:ring-blue-500
+                "
+              />
+            </div>
+
+            <div className="flex items-end">
+
+              <button
+                onClick={handleCustomAnalysis}
+                className="
+                  w-full
+                  bg-indigo-600
+                  hover:bg-indigo-700
+                  text-white
+                  px-4
+                  py-3
+                  rounded-xl
+                  font-medium
+                  transition-all
+                "
+              >
+                Apply Filter
+              </button>
+
+            </div>
+
+          </div>
+
+          {/* =======================================================
+              ANALYSIS TABLE
+          ======================================================= */}
+
+          {analysisData.length > 0 ? (
+            <div className="overflow-x-auto rounded-2xl border border-slate-200">
+
+              <table className="w-full">
+
                 <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border border-gray-300 px-4 py-2 text-left">
+
+                  <tr className="bg-slate-100">
+
+                    <th className="px-5 py-4 text-left text-sm font-semibold text-slate-700">
                       Period
                     </th>
-                    <th className="border border-gray-300 px-4 py-2 text-left">
+
+                    <th className="px-5 py-4 text-left text-sm font-semibold text-slate-700">
                       Consignments
                     </th>
-                    <th className="border border-gray-300 px-4 py-2 text-left">
+
+                    <th className="px-5 py-4 text-left text-sm font-semibold text-slate-700">
                       Total Cost
                     </th>
-                    <th className="border border-gray-300 px-4 py-2 text-left">
-                      Total Profit
+
+                    <th className="px-5 py-4 text-left text-sm font-semibold text-slate-700">
+                      Revenue
                     </th>
+
+                    <th className="px-5 py-4 text-left text-sm font-semibold text-slate-700">
+                      Net Profit
+                    </th>
+
                   </tr>
+
                 </thead>
+
                 <tbody>
-                  {analysisData.map((item, index) => (
-                    <tr key={index} className="hover:bg-gray-50">
-                      <td className="border border-gray-300 px-4 py-2">
-                        {item.period}
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        {item.consignments}
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        ₹{item.totalCost.toFixed(2)}
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
-                        ₹{item.totalProfit.toFixed(2)}
-                      </td>
-                    </tr>
-                  ))}
+
+                  {analysisData.map(
+                    (item, index) => {
+                      const rowProfit =
+                        item.totalProfit -
+                        item.totalCost;
+
+                      return (
+                        <tr
+                          key={index}
+                          className="
+                            border-t
+                            border-slate-200
+                            hover:bg-slate-50
+                            transition
+                          "
+                        >
+                          <td className="px-5 py-4 font-medium text-slate-700">
+                            {item.period}
+                          </td>
+
+                          <td className="px-5 py-4">
+                            {item.consignments}
+                          </td>
+
+                          <td className="px-5 py-4 text-red-600 font-medium">
+                            ₹
+                            {item.totalCost.toLocaleString()}
+                          </td>
+
+                          <td className="px-5 py-4 text-blue-600 font-medium">
+                            ₹
+                            {item.totalProfit.toLocaleString()}
+                          </td>
+
+                          <td className="px-5 py-4 text-green-600 font-semibold">
+                            ₹
+                            {rowProfit.toLocaleString()}
+                          </td>
+                        </tr>
+                      );
+                    }
+                  )}
+
                 </tbody>
+
               </table>
+
+            </div>
+          ) : (
+            <div className="text-center py-10 text-slate-500">
+              No analytics data available
             </div>
           )}
+
         </div>
+                {/* =======================================================
+            CHARTS SECTION
+        ======================================================= */}
+
+        <div className="mb-10">
+
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-slate-800">
+              Performance Analytics
+            </h2>
+
+            <span className="text-sm text-slate-500">
+              Visual representation of business growth
+            </span>
+          </div>
+
+          {/* Top Charts */}
+
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+
+            <ProfitChart data={monthlyProfit} />
+
+            <WeeklyTrendChart data={weeklyData} />
+
+          </div>
+
+          {/* Full Width Chart */}
+
+          <div className="mt-6">
+            <ProfitVsCostChart data={profitVsCost} />
+          </div>
+
+        </div>
+
+        {/* =======================================================
+            BUSINESS SUMMARY
+        ======================================================= */}
+
+        <div className="grid lg:grid-cols-3 gap-6 mb-10">
+
+          {/* Revenue Summary */}
+
+          <div className="bg-white rounded-3xl shadow-lg border border-slate-100 p-6">
+
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">
+              Revenue Summary
+            </h3>
+
+            <div className="space-y-4">
+
+              <div className="flex justify-between">
+                <span className="text-slate-500">
+                  Total Revenue
+                </span>
+
+                <span className="font-semibold text-green-600">
+                  ₹{totals.totalProfit.toLocaleString()}
+                </span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-slate-500">
+                  Total Cost
+                </span>
+
+                <span className="font-semibold text-red-600">
+                  ₹{totals.totalCost.toLocaleString()}
+                </span>
+              </div>
+
+              <div className="border-t pt-4 flex justify-between">
+                <span className="font-medium">
+                  Net Profit
+                </span>
+
+                <span className="font-bold text-blue-600">
+                  ₹{netProfit.toLocaleString()}
+                </span>
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* Consignment Summary */}
+
+          <div className="bg-white rounded-3xl shadow-lg border border-slate-100 p-6">
+
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">
+              Consignment Summary
+            </h3>
+
+            <div className="space-y-4">
+
+              <div className="flex justify-between">
+                <span className="text-slate-500">
+                  Total Consignments
+                </span>
+
+                <span className="font-semibold">
+                  {totals.totalConsignments}
+                </span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-slate-500">
+                  Average Revenue
+                </span>
+
+                <span className="font-semibold">
+                  ₹
+                  {totals.totalConsignments > 0
+                    ? (
+                        totals.totalProfit /
+                        totals.totalConsignments
+                      ).toFixed(0)
+                    : 0}
+                </span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-slate-500">
+                  Average Cost
+                </span>
+
+                <span className="font-semibold">
+                  ₹
+                  {totals.totalConsignments > 0
+                    ? (
+                        totals.totalCost /
+                        totals.totalConsignments
+                      ).toFixed(0)
+                    : 0}
+                </span>
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* Growth Card */}
+
+          <div className="bg-white rounded-3xl shadow-lg border border-slate-100 p-6">
+
+            <h3 className="text-lg font-semibold text-slate-800 mb-4">
+              Business Health
+            </h3>
+
+            <div className="space-y-4">
+
+              <div>
+                <p className="text-sm text-slate-500 mb-2">
+                  Profit Margin
+                </p>
+
+                <div className="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-green-500 rounded-full"
+                    style={{
+                      width: `${Math.min(
+                        Number(profitMargin),
+                        100
+                      )}%`,
+                    }}
+                  />
+                </div>
+
+                <p className="mt-2 font-bold text-green-600">
+                  {profitMargin}%
+                </p>
+              </div>
+
+              <div className="border-t pt-4">
+                <p className="text-slate-500 text-sm">
+                  Current Status
+                </p>
+
+                <p className="font-semibold text-green-600 mt-1">
+                  Healthy Business Growth
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
       </main>
-<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-  <ProfitChart data={monthlyProfit} />
-  <WeeklyTrendChart data={weeklyData} />
-  <ProfitVsCostChart data={profitVsCost} />
-</div>
-
-
-
     </div>
   );
 }

@@ -23,7 +23,17 @@ export default function WeeklyTrendChart({ data = [] }) {
   }
 
   return (
-    <div className="bg-white p-4 sm:p-6 rounded-xl shadow">
+    <div className="
+bg-white
+p-6
+rounded-3xl
+shadow-lg
+border
+border-slate-100
+hover:shadow-xl
+transition-all
+duration-300
+">
       <h3 className="text-base sm:text-lg font-semibold mb-4">
         Weekly Profit Trend
       </h3>

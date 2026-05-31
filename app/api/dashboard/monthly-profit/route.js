@@ -2,6 +2,28 @@ import clientPromise from "@/lib/mongodb";
 import { requireAuth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
+const convertNumber = (field) => ({
+  $convert: {
+    input: field,
+    to: "double",
+    onError: 0,
+    onNull: 0,
+  },
+});
+
+const valueOrProfit = (rawField, normalizedField, profitField) => ({
+  $cond: [
+    {
+      $or: [
+        { $in: [{ $type: rawField }, ["missing", "null"]] },
+        { $eq: [rawField, ""] },
+      ],
+    },
+    profitField,
+    normalizedField,
+  ],
+});
+
 export async function GET(req) {
   const auth = await requireAuth(req);
   if (!auth.authenticated) {
@@ -28,13 +50,23 @@ export async function GET(req) {
 
       /* ✅ Group by month */
       {
+        $addFields: {
+          normalizedAmount: convertNumber("$amount"),
+          normalizedProfitAmount: convertNumber("$profit.amount"),
+        }
+      },
+      {
         $group: {
           _id: {
             year: { $year: "$createdAtDate" },
             month: { $month: "$createdAtDate" }
           },
           totalProfit: {
-            $sum: { $ifNull: ["$profit.amount", 0] }
+            $sum: valueOrProfit(
+              "$amount",
+              "$normalizedAmount",
+              "$normalizedProfitAmount"
+            )
           }
         }
       },

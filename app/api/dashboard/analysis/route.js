@@ -2,6 +2,28 @@ import clientPromise from "@/lib/mongodb";
 import { requireAuth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
+const convertNumber = (field) => ({
+  $convert: {
+    input: field,
+    to: "double",
+    onError: 0,
+    onNull: 0,
+  },
+});
+
+const valueOrProfit = (rawField, normalizedField, profitField) => ({
+  $cond: [
+    {
+      $or: [
+        { $in: [{ $type: rawField }, ["missing", "null"]] },
+        { $eq: [rawField, ""] },
+      ],
+    },
+    profitField,
+    normalizedField,
+  ],
+});
+
 export async function GET(req) {
   const auth = await requireAuth(req);
   if (!auth.authenticated) {
@@ -31,6 +53,14 @@ export async function GET(req) {
             },
           },
           {
+            $addFields: {
+              normalizedAmount: convertNumber("$amount"),
+              normalizedExpenses: convertNumber("$expenses"),
+              normalizedProfitAmount: convertNumber("$profit.amount"),
+              normalizedProfitExpenses: convertNumber("$profit.expenses"),
+            }
+          },
+          {
             $group: {
               _id: {
                 year: { $year: "$createdAtDate" },
@@ -38,10 +68,18 @@ export async function GET(req) {
               },
               consignments: { $sum: 1 },
               totalCost: {
-                $sum: { $ifNull: ["$profit.totalCost", 0] },
+                $sum: valueOrProfit(
+                  "$expenses",
+                  "$normalizedExpenses",
+                  "$normalizedProfitExpenses"
+                ),
               },
               totalProfit: {
-                $sum: { $ifNull: ["$profit.amount", 0] },
+                $sum: valueOrProfit(
+                  "$amount",
+                  "$normalizedAmount",
+                  "$normalizedProfitAmount"
+                ),
               },
             },
           },
@@ -70,14 +108,30 @@ export async function GET(req) {
             },
           },
           {
+            $addFields: {
+              normalizedAmount: convertNumber("$amount"),
+              normalizedExpenses: convertNumber("$expenses"),
+              normalizedProfitAmount: convertNumber("$profit.amount"),
+              normalizedProfitExpenses: convertNumber("$profit.expenses"),
+            }
+          },
+          {
             $group: {
               _id: { $year: "$createdAtDate" },
               consignments: { $sum: 1 },
               totalCost: {
-                $sum: { $ifNull: ["$profit.totalCost", 0] },
+                $sum: valueOrProfit(
+                  "$expenses",
+                  "$normalizedExpenses",
+                  "$normalizedProfitExpenses"
+                ),
               },
               totalProfit: {
-                $sum: { $ifNull: ["$profit.amount", 0] },
+                $sum: valueOrProfit(
+                  "$amount",
+                  "$normalizedAmount",
+                  "$normalizedProfitAmount"
+                ),
               },
             },
           },
@@ -114,14 +168,30 @@ export async function GET(req) {
             },
           },
           {
+            $addFields: {
+              normalizedAmount: convertNumber("$amount"),
+              normalizedExpenses: convertNumber("$expenses"),
+              normalizedProfitAmount: convertNumber("$profit.amount"),
+              normalizedProfitExpenses: convertNumber("$profit.expenses"),
+            }
+          },
+          {
             $group: {
               _id: null,
               consignments: { $sum: 1 },
               totalCost: {
-                $sum: { $ifNull: ["$profit.totalCost", 0] },
+                $sum: valueOrProfit(
+                  "$expenses",
+                  "$normalizedExpenses",
+                  "$normalizedProfitExpenses"
+                ),
               },
               totalProfit: {
-                $sum: { $ifNull: ["$profit.amount", 0] },
+                $sum: valueOrProfit(
+                  "$amount",
+                  "$normalizedAmount",
+                  "$normalizedProfitAmount"
+                ),
               },
             },
           },

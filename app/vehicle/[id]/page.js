@@ -144,7 +144,7 @@ export default function Vehicle({ params }) {
                   className="input"
                 />
                  {!eDate && (
-                        <span className="md:hidden  pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+                        <span className="md:hidden  pointer-events-none absolute right-10 top-1/2 -translate-y-1/2 text-sm text-gray-400">
                           Select  Date
                         </span>
                       )}
