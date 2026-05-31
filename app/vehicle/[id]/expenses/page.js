@@ -10,8 +10,12 @@ import {
   Filter,
   Loader2,
   Plus,
+  Edit3,
+  Trash2,
 } from "lucide-react";
 import { useParams } from "next/navigation";
+import toast from "react-hot-toast";
+import ConfirmToast from "@/app/components/ConfirmToast";
 import Navbar from "@/app/_components/Navbar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 export default function ExpensesPage() {
@@ -32,6 +36,19 @@ export default function ExpensesPage() {
   const expensesRef = useRef([]);
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
+  const [editExpenseId, setEditExpenseId] = useState(null);
+  const [editExpenseData, setEditExpenseData] = useState({
+    title: "",
+    Amount: "",
+    totalExpense: "",
+    date: "",
+  });
+  const [editMaintenanceId, setEditMaintenanceId] = useState(null);
+  const [editMaintenanceData, setEditMaintenanceData] = useState({
+    description: "",
+    amount: "",
+    date: "",
+  });
 
   const limit = 10;
 
@@ -120,6 +137,168 @@ export default function ExpensesPage() {
     },
     [latestOnly, limit, id, period, customStartDate, customEndDate]
   );
+
+  const openExpenseEdit = (expense) => {
+    setEditExpenseId(expense._id);
+    setEditExpenseData({
+      title: expense.title || "",
+      Amount: expense.Amount || "",
+      totalExpense: expense.totalExpense || "",
+      date: expense.date?.slice(0, 10) || expense.date || "",
+    });
+  };
+
+  const cancelExpenseEdit = () => {
+    setEditExpenseId(null);
+    setEditExpenseData({
+      title: "",
+      Amount: "",
+      totalExpense: "",
+      date: "",
+    });
+  };
+
+  const saveExpenseEdit = async () => {
+    if (!editExpenseId) return;
+
+    const { title, Amount, totalExpense, date } = editExpenseData;
+    if (!title || !Amount || !date) {
+      toast.error("Please fill title, amount and date before saving.");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/expense", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          _id: editExpenseId,
+          vehicleId: id,
+          title,
+          Amount,
+          totalExpense,
+          date,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update expense.");
+      }
+
+      toast.success("Expense updated successfully.");
+      cancelExpenseEdit();
+      fetchExpenses(true);
+      fetchTotalExpenses();
+    } catch (error) {
+      console.error("Expense update error:", error);
+      toast.error(error.message || "Unable to update expense.");
+    }
+  };
+
+  const deleteExpense = async (_id) => {
+    const confirmed = await ConfirmToast({ msg: "Delete this expense record?" });
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch("/api/expense", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ _id }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to delete expense.");
+      }
+
+      toast.success("Expense deleted successfully.");
+      fetchExpenses(true);
+      fetchTotalExpenses();
+    } catch (error) {
+      console.error("Expense delete error:", error);
+      toast.error(error.message || "Unable to delete expense.");
+    }
+  };
+
+  const openMaintenanceEdit = (record) => {
+    setEditMaintenanceId(record._id);
+    setEditMaintenanceData({
+      description: record.description || "",
+      amount: record.amount || "",
+      date: record.date?.slice(0, 10) || record.date || "",
+    });
+  };
+
+  const cancelMaintenanceEdit = () => {
+    setEditMaintenanceId(null);
+    setEditMaintenanceData({
+      description: "",
+      amount: "",
+      date: "",
+    });
+  };
+
+  const saveMaintenanceEdit = async () => {
+    if (!editMaintenanceId) return;
+
+    const { description, amount, date } = editMaintenanceData;
+    if (!description || !amount || !date) {
+      toast.error("Please fill description, amount and date before saving.");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/maintaince", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          _id: editMaintenanceId,
+          description,
+          amount,
+          date,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update maintenance record.");
+      }
+
+      toast.success("Maintenance record updated successfully.");
+      cancelMaintenanceEdit();
+      fetchMaintenanceRecords();
+      fetchTotalExpenses();
+    } catch (error) {
+      console.error("Maintenance update error:", error);
+      toast.error(error.message || "Unable to update maintenance record.");
+    }
+  };
+
+  const deleteMaintenance = async (_id) => {
+    const confirmed = await ConfirmToast({ msg: "Delete this maintenance record?" });
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch("/api/maintaince", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ _id }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to delete maintenance record.");
+      }
+
+      toast.success("Maintenance record deleted successfully.");
+      fetchMaintenanceRecords();
+      fetchTotalExpenses();
+    } catch (error) {
+      console.error("Maintenance delete error:", error);
+      toast.error(error.message || "Unable to delete maintenance record.");
+    }
+  };
 
   const fetchMaintenanceRecords = useCallback(async () => {
     try {
@@ -462,57 +641,139 @@ export default function ExpensesPage() {
                   </CardTitle>
                 </CardHeader>
 
-                <CardContent className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-green-100 rounded-lg">
-                      <IndianRupee size={16} className="text-green-600" />
+                {editExpenseId === expense._id ? (
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">Title</label>
+                      <input
+                        type="text"
+                        value={editExpenseData.title}
+                        onChange={(e) => setEditExpenseData((prev) => ({ ...prev, title: e.target.value }))}
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                      />
                     </div>
-                    <span className="text-lg sm:text-xl font-bold text-gray-900">
-                      {parseFloat(expense.Amount || 0).toLocaleString("en-IN")}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <Calendar size={14} />
-                    <span>
-                      {new Date(expense.date).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between w-full">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">Amount</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={editExpenseData.Amount}
+                        onChange={(e) => setEditExpenseData((prev) => ({ ...prev, Amount: e.target.value }))}
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">Total Expense</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={editExpenseData.totalExpense}
+                        onChange={(e) => setEditExpenseData((prev) => ({ ...prev, totalExpense: e.target.value }))}
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">Date</label>
+                      <input
+                        type="date"
+                        value={editExpenseData.date}
+                        onChange={(e) => setEditExpenseData((prev) => ({ ...prev, date: e.target.value }))}
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                      />
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={cancelExpenseEdit}
+                        className="rounded-full border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={saveExpenseEdit}
+                        className="rounded-full bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </CardContent>
+                ) : (
+                  <CardContent className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <div className="p-1.5 bg-orange-100 rounded-lg">
-                        <IndianRupee size={16} className="text-orange-600" />
+                      <div className="p-1.5 bg-green-100 rounded-lg">
+                        <IndianRupee size={16} className="text-green-600" />
                       </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs text-gray-500 font-medium">Total Expense</span>
-                        <span className="text-sm font-semibold text-gray-900">
-                          ₹{parseFloat(expense.totalExpense || 0).toLocaleString("en-IN")}
-                        </span>
-                      </div>
+                      <span className="text-lg sm:text-xl font-bold text-gray-900">
+                        {parseFloat(expense.Amount || 0).toLocaleString("en-IN")}
+                      </span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-right">
-                      <div className="p-1.5 bg-blue-100 rounded-lg">
-                        <IndianRupee size={16} className="text-blue-600" />
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <Calendar size={14} />
+                      <span>
+                        {new Date(expense.date).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between w-full gap-3">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 bg-orange-100 rounded-lg">
+                            <IndianRupee size={16} className="text-orange-600" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-xs text-gray-500 font-medium">Total Expense</span>
+                            <span className="text-sm font-semibold text-gray-900">
+                              ₹{parseFloat(expense.totalExpense || 0).toLocaleString("en-IN")}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-right">
+                          <div className="p-1.5 bg-blue-100 rounded-lg">
+                            <IndianRupee size={16} className="text-blue-600" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-xs text-gray-500 font-medium">Net Profit</span>
+                            <span className={`text-sm font-semibold ${
+                              (parseFloat(expense.Amount || 0) - parseFloat(expense.totalExpense || 0)) >= 0
+                                ? "text-green-600"
+                                : "text-red-600"
+                            }`}>
+                              ₹{(parseFloat(expense.Amount || 0) - parseFloat(expense.totalExpense || 0)).toLocaleString("en-IN")}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs text-gray-500 font-medium">Net Profit</span>
-                        <span className={`text-sm font-semibold ${
-                          (parseFloat(expense.Amount || 0) - parseFloat(expense.totalExpense || 0)) >= 0
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}>
-                          ₹{(parseFloat(expense.Amount || 0) - parseFloat(expense.totalExpense || 0)).toLocaleString("en-IN")}
-                        </span>
+
+                      <div className="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => openExpenseEdit(expense)}
+                          className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100 transition"
+                          title="Edit Expense"
+                        >
+                          <Edit3 size={16} />
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => deleteExpense(expense._id)}
+                          className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100 transition"
+                          title="Delete Expense"
+                        >
+                          <Trash2 size={16} />
+                          Delete
+                        </button>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
+                  </CardContent>
+                )}
               </Card>
             ))}
 
@@ -599,38 +860,108 @@ export default function ExpensesPage() {
                     </div>
                   </CardHeader>
 
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 bg-purple-100 rounded-lg">
-                        <IndianRupee size={16} className="text-purple-600" />
+                  {editMaintenanceId === record._id ? (
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">Description</label>
+                        <input
+                          value={editMaintenanceData.description}
+                          onChange={(e) => setEditMaintenanceData((prev) => ({ ...prev, description: e.target.value }))}
+                          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                        />
                       </div>
-                      <span className="text-lg sm:text-xl font-bold text-gray-900">
-                        ₹{parseFloat(record.amount || 0).toLocaleString("en-IN")}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      <Calendar size={14} />
-                      <span>
-                        {new Date(record.date).toLocaleDateString("en-IN", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </span>
-                    </div>
-
-                    <div className="text-sm text-gray-500">
-                      <div>
-                        <span className="font-medium text-gray-700">Created:</span>{" "}
-                        {new Date(record.createdAt).toLocaleDateString("en-IN", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">Amount</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={editMaintenanceData.amount}
+                          onChange={(e) => setEditMaintenanceData((prev) => ({ ...prev, amount: e.target.value }))}
+                          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                        />
                       </div>
-                    </div>
-                  </CardContent>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">Date</label>
+                        <input
+                          type="date"
+                          value={editMaintenanceData.date}
+                          onChange={(e) => setEditMaintenanceData((prev) => ({ ...prev, date: e.target.value }))}
+                          className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                        />
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={cancelMaintenanceEdit}
+                          className="rounded-full border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={saveMaintenanceEdit}
+                          className="rounded-full bg-purple-600 px-3 py-2 text-sm font-medium text-white hover:bg-purple-700 transition"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </CardContent>
+                  ) : (
+                    <>
+                      <CardContent className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 bg-purple-100 rounded-lg">
+                            <IndianRupee size={16} className="text-purple-600" />
+                          </div>
+                          <span className="text-lg sm:text-xl font-bold text-gray-900">
+                            ₹{parseFloat(record.amount || 0).toLocaleString("en-IN")}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <Calendar size={14} />
+                          <span>
+                            {new Date(record.date).toLocaleDateString("en-IN", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })}
+                          </span>
+                        </div>
+
+                        <div className="text-sm text-gray-500">
+                          <div>
+                            <span className="font-medium text-gray-700">Created:</span>{" "}
+                            {new Date(record.createdAt).toLocaleDateString("en-IN", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })}
+                          </div>
+                        </div>
+                      </CardContent>
+                      <div className="flex justify-end gap-2 p-4 pt-0">
+                        <button
+                          type="button"
+                          onClick={() => openMaintenanceEdit(record)}
+                          className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100 transition"
+                          title="Edit Maintenance"
+                        >
+                          <Edit3 size={16} />
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => deleteMaintenance(record._id)}
+                          className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100 transition"
+                          title="Delete Maintenance"
+                        >
+                          <Trash2 size={16} />
+                          Delete
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </Card>
               ))}
 

@@ -19,9 +19,26 @@ export default function Maintaince() {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState("");
+  const [records, setRecords] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  const fetchRecords = async () => {
+    if (!id) return;
+    try {
+      const response = await fetch(`/api/maintaince?vehicleId=${id}`, {
+        cache: "no-store",
+        credentials: "include",
+      });
+      const data = await response.json();
+      if (data.status === "200") {
+        setRecords(data.records || []);
+      }
+    } catch (err) {
+      console.error("Error fetching maintenance records:", err);
+    }
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();

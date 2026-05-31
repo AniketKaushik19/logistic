@@ -1,6 +1,7 @@
 import clientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
+import { ObjectId } from "mongodb";
 
 function buildDateFilter(period, startDate, endDate) {
   const now = new Date();
@@ -96,6 +97,82 @@ export async function GET(req) {
       { error: "Failed to fetch expenses" },
       { status: 500 }
     );
+  }
+}
+
+/* ================= PUT: UPDATE EXPENSE ================= */
+export async function PUT(req) {
+  const auth = await requireAuth(req);
+  if (!auth.authenticated) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const body = await req.json();
+    const { _id, title, Amount, totalExpense, date } = body;
+
+    if (!_id) {
+      return NextResponse.json({ error: "_id is required" }, { status: 400 });
+    }
+
+    const client = await clientPromise;
+    const db = client.db("logisticdb");
+    const collection = db.collection("expenses");
+
+    const updateData = {};
+    if (title !== undefined) updateData.title = title;
+    if (Amount !== undefined) updateData.Amount = Amount;
+    if (totalExpense !== undefined) updateData.totalExpense = totalExpense;
+    if (date !== undefined) updateData.date = date;
+
+    if (Object.keys(updateData).length === 0) {
+      return NextResponse.json({ error: "No fields to update" }, { status: 400 });
+    }
+
+    const result = await collection.updateOne(
+      { _id: new ObjectId(_id) },
+      { $set: updateData }
+    );
+
+    if (result.matchedCount === 0) {
+      return NextResponse.json({ error: "Expense not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, message: "Expense updated successfully" });
+  } catch (error) {
+    console.error("Expense update error:", error);
+    return NextResponse.json({ error: "Failed to update expense" }, { status: 500 });
+  }
+}
+
+/* ================= DELETE: REMOVE EXPENSE ================= */
+export async function DELETE(req) {
+  const auth = await requireAuth(req);
+  if (!auth.authenticated) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const body = await req.json();
+    const { _id } = body;
+
+    if (!_id) {
+      return NextResponse.json({ error: "_id is required" }, { status: 400 });
+    }
+
+    const client = await clientPromise;
+    const db = client.db("logisticdb");
+    const collection = db.collection("expenses");
+
+    const result = await collection.deleteOne({ _id: new ObjectId(_id) });
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ error: "Expense not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, message: "Expense deleted successfully" });
+  } catch (error) {
+    console.error("Expense delete error:", error);
+    return NextResponse.json({ error: "Failed to delete expense" }, { status: 500 });
   }
 }
 
