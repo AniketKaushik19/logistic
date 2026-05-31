@@ -177,7 +177,7 @@ export default function ExpensesPage() {
       <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-indigo-50 ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 mt-12">
           {/* Header */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="space-y-4">
             <div className="space-y-1">
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-linear-to-br from-blue-600 to-indigo-600 bg-clip-text text-transparent mt-7">
                 Expenses Dashboard
@@ -209,10 +209,9 @@ export default function ExpensesPage() {
                   </div>
                 </DialogContent>
               </Dialog>
-
               <Dialog>
                 <DialogTrigger asChild>
-                  <button className="inline-flex items-center gap-2 bg-linear-to-r from-red-500 to-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-red-600 hover:to-blue-600 transition-all">
+                  <button className="inline-flex items-center gap-2 bg-linear-to-r from-red-400 to-red-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-red-600 hover:to-blue-600 transition-all">
                     <Plus size={18} className="text-white" />
                     Maintaince
                   </button>
@@ -230,27 +229,11 @@ export default function ExpensesPage() {
                   </div>
                 </DialogContent>
               </Dialog>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="inline-flex items-center gap-2 bg-linear-to-r from-red-500 to-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-red-600 hover:to-blue-600 transition-all">
-                    <Plus size={18} className="text-white" />
-                    Balance
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden bg-white">
-                  <DialogHeader>
-                    <DialogTitle>Balance</DialogTitle>
-                  </DialogHeader>
-                  <div className="h-[75vh] overflow-hidden rounded-xl border border-slate-200">
-                    <iframe
-                      src={`/vehicle/${id}/balance`}
-                      title={`Maintaince ${id}`}
-                      className="w-full h-full"
-                    />
-                  </div>
-                </DialogContent>
-              </Dialog>
             </div>
+          </div>
+
+          {/* Stats Cards Grid */}
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {/* Total lorry hire Card */}
             <Card className="bg-linear-to-br from-green-500 to-blue-600 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
               <CardContent className="p-4 sm:p-6">

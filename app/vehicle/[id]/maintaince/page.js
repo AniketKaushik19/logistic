@@ -23,25 +23,6 @@ export default function Maintaince() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  const fetchRecords = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({ vehicleId: id });
-      const response = await fetch(`/api/maintaince?${params}`, {
-        cache: "no-store",
-        credentials: "include",
-      });
-      const data = await response.json();
-      
-    } catch (err) {
-      console.error("Error fetching maintenance records:", err);
-    } 
-  }, [id]);
-
-  useEffect(() => {
-    if (id) fetchRecords();
-  }, [id, fetchRecords]);
-
   const handleSubmit = async (event) => {
     event.preventDefault();
     setSubmitting(true);
@@ -135,13 +116,21 @@ export default function Maintaince() {
 
                   <div>
                     <label className="mb-2 block text-sm font-medium text-slate-700">Date</label>
-                    <Input
-                      type="date"
-                      value={date}
-                      placeholder="Select maintenance date"
-                      onChange={(event) => setDate(event.target.value)}
-                      className="w-full"
-                    />
+                    <div className="relative">
+                  <input
+                    name="consignmentDate"
+                    type="date"
+                    placeholder="Select maintenance date"
+                    value={date}
+                    onChange={(event) => setDate(event.target.value)}
+                    className="input"
+                  />
+                  {!date && (
+                    <span className="md:hidden pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                      Maintaince date
+                    </span>
+                  )}
+                </div>
                   </div>
 
                   <div className="flex justify-end">

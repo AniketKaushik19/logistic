@@ -140,11 +140,11 @@ export default function Vehicle({ params }) {
                   type="date"
                   value={eDate}
                   placeholder="Select the date"
-                  onChange={(e) => setEDate(e.target.value)}
-                  className="p-3 border-2 border-green-300 rounded-lg focus:border-green-500 focus:outline-none transition-colors placeholder-green-400 text-green-700"
+                  onChange={(e) => setEDate(e.target.value)}     
+                  className="input"
                 />
                  {!eDate && (
-                        <span className="md:hidden pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+                        <span className="md:hidden  pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
                           Select  Date
                         </span>
                       )}
