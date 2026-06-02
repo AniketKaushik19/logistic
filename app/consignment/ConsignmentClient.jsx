@@ -206,10 +206,11 @@ export default function Page() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error);
 
-      const cn = data?.data?.cn || form.cn;
+      const cn = data?.cn || data?.data?.cn || form.cn;
+      const printData = { ...form, cn };
 
       if (!onlySave) {
-        await printPDF(cn, { ...form, cn });
+        await printPDF(cn, printData);
         toast.success("Saved & PDF printed");
       } else {
         toast.success("Saved successfully");
