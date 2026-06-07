@@ -42,7 +42,7 @@ const ConfirmToast = ({ msg }) => {
         </div>
       ),
       {
-        duration: Infinity,
+        duration: 3000,
         position: "top-center",
       }
     );
