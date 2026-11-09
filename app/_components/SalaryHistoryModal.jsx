@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import toast from "react-hot-toast";
 import { generateSalaryPDF } from "@/utils/generateSalaryPDF";
@@ -90,16 +89,13 @@ export default function SalaryHistoryModal({ driver }) {
     );
   };
   return (
-    <DialogContent className="sm:max-w-[780px] bg-white p-5">
-      <h3 className="text-lg font-semibold mb-4">
-        Salary History – {driver.name}
-      </h3>
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       {/* ===== FILTER BAR ===== */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 mb-4">
         <Button
           variant="secondary"
           size="sm"
-          className="flex items-center gap-2 hover:cursor-pointer"
+          className="flex w-full items-center gap-2 hover:cursor-pointer"
           onClick={() =>
             generateSalaryHistoryPDF({
               driver,
@@ -115,7 +111,7 @@ export default function SalaryHistoryModal({ driver }) {
         <select
           value={year}
           onChange={(e) => setYear(e.target.value)}
-          className="border rounded px-2 py-1"
+          className="w-full min-w-0 border rounded px-2 py-1"
         >
           <option value="all">All Years</option>
           {years.map((y) => (
@@ -128,7 +124,7 @@ export default function SalaryHistoryModal({ driver }) {
         <select
           value={month}
           onChange={(e) => setMonth(e.target.value)}
-          className="border rounded px-2 py-1"
+          className="w-full min-w-0 border rounded px-2 py-1"
         >
           <option value="all">All Months</option>
           {months.map((m) => (
@@ -138,13 +134,13 @@ export default function SalaryHistoryModal({ driver }) {
           ))}
         </select>
 
-        <div className="relative">
+        <div className="relative min-w-0">
           <input
             type="date"
             value={fromDate}
             placeholder="From date"
             onChange={(e) => setFromDate(e.target.value)}
-            className="border rounded px-2 py-1"
+            className="w-full min-w-0 border rounded px-2 py-1"
           />
           {!fromDate && (
             <span className="md:hidden pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
@@ -153,13 +149,13 @@ export default function SalaryHistoryModal({ driver }) {
           )}
         </div>
 
-        <div className="relative">
+        <div className="relative min-w-0">
           <input
             type="date"
             value={toDate}
             placeholder="To date"
             onChange={(e) => setToDate(e.target.value)}
-            className="border rounded px-2 py-1"
+            className="w-full min-w-0 border rounded px-2 py-1"
           />
           {!toDate && (
             <span className="md:hidden pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
@@ -171,11 +167,11 @@ export default function SalaryHistoryModal({ driver }) {
 
       {/* ===== CONTENT ===== */}
       {loading ? (
-        <div>Loading...</div>
+        <div className="min-h-0 flex-1 overflow-y-auto">Loading...</div>
       ) : filteredHistory.length === 0 ? (
-        <p className="text-sm text-slate-500">No salary history found</p>
+        <p className="min-h-0 flex-1 overflow-y-auto text-sm text-slate-500">No salary history found</p>
       ) : (
-        <div className="space-y-3 max-h-[500px] overflow-y-auto">
+        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto">
           {filteredHistory.map((item, idx) => {
             const isAdvanceGiven = item.transactionType === "ADVANCE_GIVEN";
             const isSalaryPaid = item.transactionType === "SALARY_PAID";
@@ -287,6 +283,6 @@ export default function SalaryHistoryModal({ driver }) {
           })}
         </div>
       )}
-    </DialogContent>
+    </div>
   );
 }

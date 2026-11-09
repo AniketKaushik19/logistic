@@ -26,19 +26,32 @@ export default function SalaryActions({
   // For PAY_SALARY
   const [salaryAmount, setSalaryAmount] = useState(salary?.salary || "");
   const [bonus, setBonus] = useState(salary?.bonus || "");
+  const [settleAdvance, setSettleAdvance] = useState(false);
 
   const pendingAdvance = salary?.pendingAdvance || 0;
+  const advanceToSettle = settleAdvance
+    ? Math.min(pendingAdvance, Number(salaryAmount) || 0)
+    : 0;
+  const amountToPay =
+    (Number(salaryAmount) || 0) +
+    (Number(bonus) || 0) -
+    advanceToSettle;
+
   const submit = async () => {
         setLoading(true);
 
     if (action === "GIVE_ADVANCE") {
       if (!advanceAmount || Number(advanceAmount) <= 0) {
         toast.error("Enter valid advance amount");
+        setLoading(false);
         return;
       }
     } else {
-      if (!salaryAmount || Number(salaryAmount) <= 0) {
-        toast.error("Enter valid salary amount");
+      const salaryValue = Number(salaryAmount) || 0;
+      const bonusValue = Number(bonus) || 0;
+      if (salaryValue < 0 || bonusValue < 0 || salaryValue + bonusValue <= 0) {
+        toast.error("Enter a salary or bonus amount greater than zero");
+        setLoading(false);
         return;
       }
     }
@@ -55,6 +68,7 @@ export default function SalaryActions({
     } else {
       payload.salary = Number(salaryAmount) || 0;
       payload.bonus = Number(bonus) || 0;
+      payload.settleAdvance = settleAdvance;
     }
 
     const res = await fetch("/api/driver/salary", {
@@ -85,6 +99,7 @@ export default function SalaryActions({
 
   setAdvanceAmount("");
   setBonus("");
+  setSettleAdvance(false);
   setAction("PAY_SALARY");
 
     onUpdated?.();
@@ -165,28 +180,37 @@ export default function SalaryActions({
                 ⚠️ PENDING ADVANCE FROM BEFORE
               </p>
               <p className="text-lg font-bold text-amber-700 mt-1">
-                ₹{pendingAdvance.toLocaleString()} - Deduct from salary
+                ₹{pendingAdvance.toLocaleString()} pending
               </p>
               <p className="text-xs text-amber-700 mt-2">
-                This advance will be automatically deducted from the salary you enter below.
+                Select the option below if you want to settle this advance from this payout.
               </p>
+              <label className="flex items-center gap-2 mt-3 text-sm font-medium text-slate-800">
+                <input
+                  type="checkbox"
+                  checked={settleAdvance}
+                  onChange={(e) => setSettleAdvance(e.target.checked)}
+                  className="size-4"
+                />
+                Settle advance from this salary payout
+              </label>
             </div>
           )}
 
           <div>
             <label className="text-sm font-medium text-slate-700 mb-1 block">
-              Salary Amount (Base Monthly Salary)
+              Salary Amount (optional)
             </label>
             <input
               type="number"
               value={salaryAmount}
               onChange={(e) => setSalaryAmount(e.target.value)}
               className="w-full border-2 border-blue-300 rounded p-2 text-lg font-semibold"
-              placeholder="e.g., 20000"
+              placeholder="Leave blank to pay bonus only"
               min={0}
             />
             <p className="text-xs text-slate-500 mt-1">
-              Enter the full monthly salary for this driver
+              Leave blank if you are paying only a bonus
             </p>
           </div>
 
@@ -218,8 +242,8 @@ export default function SalaryActions({
                 </div>
                 <div className="border-t pt-2">
                   <div className="flex justify-between items-center text-red-600">
-                    <span>- Advance (Already Paid):</span>
-                    <span className="font-bold">₹{pendingAdvance.toLocaleString()}</span>
+                    <span>- Advance Settled:</span>
+                    <span className="font-bold">₹{advanceToSettle.toLocaleString()}</span>
                   </div>
                 </div>
                 {Number(bonus || 0) > 0 && (
@@ -231,9 +255,7 @@ export default function SalaryActions({
                 <div className="border-t-2 border-green-300 pt-2 mt-2">
                   <div className="flex justify-between items-center bg-green-100 p-2 rounded font-bold text-lg">
                     <span>💰 ACTUALLY PAY DRIVER:</span>
-                    <span className="text-green-700">₹{(
-                      Number(salaryAmount || 0) - pendingAdvance + Number(bonus || 0)
-                    ).toLocaleString()}</span>
+                    <span className="text-green-700">₹{amountToPay.toLocaleString()}</span>
                   </div>
                 </div>
               </div>

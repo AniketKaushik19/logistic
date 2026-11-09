@@ -191,6 +191,7 @@ export async function POST(req) {
     salary = 0,
     advance = 0,
     bonus = 0,
+    settleAdvance = false,
   } = await req.json();
 
   if (
@@ -203,6 +204,23 @@ export async function POST(req) {
       { error: "Invalid data" },
       { status: 400 }
     );
+  }
+
+  if (action === "PAY_SALARY") {
+    const salaryAmount = Number(salary);
+    const bonusAmount = Number(bonus);
+    if (
+      !Number.isFinite(salaryAmount) ||
+      !Number.isFinite(bonusAmount) ||
+      salaryAmount < 0 ||
+      bonusAmount < 0 ||
+      salaryAmount + bonusAmount <= 0
+    ) {
+      return NextResponse.json(
+        { error: "Enter a salary or bonus amount greater than zero" },
+        { status: 400 }
+      );
+    }
   }
 
   const client = await clientPromise;
@@ -337,10 +355,9 @@ export async function POST(req) {
 
     const salaryAmount = Number(salary);
     const bonusAmount = Number(bonus);
-    const advanceSettled = Math.min(
-      pendingAdvance,
-      salaryAmount
-    );
+    const advanceSettled = settleAdvance === true
+      ? Math.min(pendingAdvance, salaryAmount)
+      : 0;
     const remainingPendingAdvance =
       pendingAdvance - advanceSettled;
 
