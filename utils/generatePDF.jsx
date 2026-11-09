@@ -62,23 +62,24 @@ export async function generatePDF(cn, payload) {
 
       doc.text(`CONSIGNMENT NOTE No.: ${payload.cn || cn || ""}`, pageWidth - 15, 30, { align: "right" });
       doc.text("PAN No.: CKTPK5713K", pageWidth - 15, 35, { align: "right" });
-      doc.text(`Date: ${payload.consignmentDate || ""}`, pageWidth - 15, 40, { align: "right" });
-      doc.text(label, pageWidth - 15, 45, { align: "right" });
+      doc.text("GST No.: 09CKTPK5713K1ZI", pageWidth - 15, 40, { align: "right" });
+      doc.text(`Date: ${payload.consignmentDate || ""}`, pageWidth - 15, 45, { align: "right" });
+      doc.text(label, pageWidth - 15, 50, { align: "right" });
 
       /* OPTIONS */
       doc.setFont("helvetica", "bold");
-      doc.text("AT OWNER'S RISK", 15, 52);
+      doc.text("AT OWNER'S RISK", 15, 57);
 
       doc.setFont("helvetica", "normal");
-      doc.text("DOOR DELIVERY", pageWidth - 80, 52);
-      checkbox(doc, pageWidth - 45, 49, payload.doorDelivery === "YES");
-      doc.text("YES", pageWidth - 38, 52);
-      checkbox(doc, pageWidth - 25, 49, payload.doorDelivery === "NO");
-      doc.text("NO", pageWidth - 18, 52);
+      doc.text("DOOR DELIVERY", pageWidth - 80, 57);
+      checkbox(doc, pageWidth - 45, 54, payload.doorDelivery === "YES");
+      doc.text("YES", pageWidth - 38, 57);
+      checkbox(doc, pageWidth - 25, 54, payload.doorDelivery === "NO");
+      doc.text("NO", pageWidth - 18, 57);
 
         /* CONSIGNOR / TAX */
       autoTable(doc, {
-                startY: 58,
+                startY: 63,
         theme: "grid",
         styles: { fontSize: 9, fontStyle: "bold" },
         body: [[

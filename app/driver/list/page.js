@@ -112,7 +112,7 @@ export default function DriverListPage() {
 
       {/* ===== History Modal ===== */}
       <Dialog open={!!historyDriver} onOpenChange={() => setHistoryDriver(null)}>
-         <DialogContent className="flex h-[80dvh] max-h-[80dvh] flex-col overflow-hidden bg-white p-4 sm:max-w-[700px] sm:p-5">
+         <DialogContent className="flex h-[90dvh] max-h-[90dvh] flex-col overflow-hidden bg-white p-4 sm:max-w-[700px] sm:p-5">
           <DialogHeader>
             <DialogTitle>
               Salary History – {historyDriver?.name}
